@@ -8,41 +8,42 @@ package LS30Command;
 use strict;
 
 my $commands = { };
+my $command_bykey = { };
 
 my @wonky_hex_codes = ('0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?');
 
 my $single_commands = [
-	[ 'Date/Time', 'dt', ],
-	[ 'Switch  1', 's6', ],
-	[ 'Switch  2', 's7', ],
-	[ 'Switch  3', 's4', ],
-	[ 'Switch  4', 's5', ],
-	[ 'Switch  5', 's8', ],
-	[ 'Switch  6', 's9', ],
-	[ 'Switch  7', 's:', ],
-	[ 'Switch  8', 's;', ],
-	[ 'Switch  9', 's>', ],
-	[ 'Switch 10', 's?', ],
-	[ 'Switch 11', 's<', ],
-	[ 'Switch 12', 's=', ],
-	[ 'Switch 13', 's0', ],
-	[ 'Switch 14', 's1', ],
-	[ 'Switch 15', 's2', ],
-	[ 'Switch 16', 's3', ],
+	[ 'Date/Time', 'dt', \&resp_date ],
+	[ 'Switch  1', 's6', \&resp_hex1 ],
+	[ 'Switch  2', 's7', \&resp_hex1 ],
+	[ 'Switch  3', 's4', \&resp_hex1 ],
+	[ 'Switch  4', 's5', \&resp_hex1 ],
+	[ 'Switch  5', 's8', \&resp_hex1 ],
+	[ 'Switch  6', 's9', \&resp_hex1 ],
+	[ 'Switch  7', 's:', \&resp_hex1 ],
+	[ 'Switch  8', 's;', \&resp_hex1 ],
+	[ 'Switch  9', 's>', \&resp_hex1 ],
+	[ 'Switch 10', 's?', \&resp_hex1 ],
+	[ 'Switch 11', 's<', \&resp_hex1 ],
+	[ 'Switch 12', 's=', \&resp_hex1 ],
+	[ 'Switch 13', 's0', \&resp_hex1 ],
+	[ 'Switch 14', 's1', \&resp_hex1 ],
+	[ 'Switch 15', 's2', \&resp_hex1 ],
+	[ 'Switch 16', 's3', \&resp_hex1 ],
 	[ 'Auto Answer Ring Count', 'a0' ],
 	[ 'Sensor Supervise Time', 'a2' ],
-	[ 'Modem Ring Count', 'a3' ],
+	[ 'Modem Ring Count', 'a3', \&resp_hex2 ],
 	[ 'RF Jamming Warning', 'c0' ],
 	[ 'Switch 16 Control', 'c8' ],
 	[ 'RS-232 Control', 'c9' ],
 	[ 'Remote Siren Type', 'd1' ],
-	[ 'GSM Phone 1', 'g0' ],
-	[ 'GSM Phone 2', 'g1' ],
+	[ 'GSM Phone 1', 'g0', \&resp_telno ],
+	[ 'GSM Phone 2', 'g1', \&resp_telno ],
 	[ 'GSM ID', 'g2' ],
 	[ 'GSM PIN No', 'g3' ],
-	[ 'GSM Phone 3', 'g4' ],
-	[ 'GSM Phone 4', 'g5' ],
-	[ 'GSM Phone 5', 'g6' ],
+	[ 'GSM Phone 3', 'g4', \&resp_telno ],
+	[ 'GSM Phone 4', 'g5', \&resp_telno ],
+	[ 'GSM Phone 5', 'g6', \&resp_telno ],
 	[ 'Exit Delay', 'l0' ],
 	[ 'Entry Delay', 'l1' ],
 	[ 'Remote Siren Time', 'l2' ],
@@ -65,58 +66,65 @@ my $single_commands = [
 	[ 'X-10 House Code', 'n7' ],
 	[ 'Inactivity Function', 'o0' ],
 	[ 'ROM Version', 'vn' ],
-	[ 'Telephone Common 1', 't0' ],
-	[ 'Telephone Common 2', 't1' ],
-	[ 'Telephone Common 3', 't2' ],
-	[ 'Telephone Common 4', 't3' ],
-	[ 'Telephone Panic', 't4' ],
-	[ 'Telephone Burglar', 't5' ],
-	[ 'Telephone Fire', 't6' ],
-	[ 'Telephone Medical', 't7' ],
-	[ 'Telephone Special', 't8' ],
-	[ 'Telephone Latchkey/Power', 't9' ],
-	[ 'Telephone Pager', 't:' ],
-	[ 'Telephone Data', 't;' ],
+	[ 'Telephone Common 1', 't0', \&resp_telno ],
+	[ 'Telephone Common 2', 't1', \&resp_telno ],
+	[ 'Telephone Common 3', 't2', \&resp_telno ],
+	[ 'Telephone Common 4', 't3', \&resp_telno ],
+	[ 'Telephone Panic', 't4', \&resp_telno ],
+	[ 'Telephone Burglar', 't5', \&resp_telno ],
+	[ 'Telephone Fire', 't6', \&resp_telno ],
+	[ 'Telephone Medical', 't7', \&resp_telno ],
+	[ 'Telephone Special', 't8', \&resp_telno ],
+	[ 'Telephone Latchkey/Power', 't9', \&resp_telno ],
+	[ 'Telephone Pager', 't:', \&resp_telno ],
+	[ 'Telephone Data', 't;', \&resp_telno ],
 	# CMS1
-	[ 'CMS 1 Telephone No', 't<' ],
+	[ 'CMS 1 Telephone No', 't<', \&resp_telno ],
 	[ 'CMS 1 User Account No', 't=' ],
 	[ 'CMS 1 Mode Change Report', 'n3' ],
 	[ 'CMS 1 Auto Link Check Period', 'n5' ],
 	[ 'CMS 1 Two-way Audio', 'c3' ],
 	[ 'CMS 1 DTMF Data Length', 'c5' ],
 	[ 'CMS Report', 'c7' ],
-	[ 'CMS 1 GSM No', 'tp' ],
+	[ 'CMS 1 GSM No', 'tp', \&resp_telno ],
 	[ 'Ethernet (IP) Report', 'c1' ],
 	[ 'GPRS Report', 'c:' ],
 	[ 'IP Report Format', 'ml' ],
 	# CMS2
-	[ 'CMS 2 Telephone No', 't>' ],
+	[ 'CMS 2 Telephone No', 't>', \&resp_telno ],
 	[ 'CMS 2 User Account No', 't?' ],
 	[ 'CMS 2 Mode Change Report', 'n4' ],
 	[ 'CMS 2 Auto Link Check Period', 'n6' ],
 	[ 'CMS 2 Two-way Audio', 'c4' ],
 	[ 'CMS 2 DTMF Data Length', 'c6' ],
-	[ 'CMS 2 GSM No', 'tq' ],
+	[ 'CMS 2 GSM No', 'tq', \&resp_telno ],
 ];
 
 my $spec_commands = [
-	[ 'Device Status', { key => 'b3', array2 => { min => 0, max => 4 }, } ],
-	[ 'Event', {
+	{ title => 'Device Count',
+		key => 'b3',
+		array2 => {
+			min => 0,
+			max => 4
+		},
+	},
+	{ title => 'Event',
 		key => 'ev',
 		arg1 => {
 			'length' => 3,
 			encoding => 'wonkyhex',
 			arg_key => 'event_id',
 		},
-	} ],
-	[ 'Inner Siren Time', {
+	},
+	{ title => 'Inner Siren Time',
 		key => 'l4',
 		arg1 => {
 			'length' => 2,
 			encoding => 'wonkyhex',
 			arg_key => 'siren_time',
 		},
-	} ],
+		resp_func => \&resp_hex2,
+	},
 ];
 
 my $other_commands = [
@@ -158,13 +166,21 @@ my $passwords = [
 ];
 
 sub addCommand {
-	my ($title, $hr) = @_;
+	my ($hr) = @_;
+
+	my $title = $hr->{title};
+	my $key = $hr->{key};
 
 	if (exists $commands->{$title}) {
 		warn "Command re-added: $title\n";
 	}
 
+	if (exists $command_bykey->{$key}) {
+		warn "Command key re-added: $title, $key\n";
+	}
+
 	$commands->{$title} = $hr;
+	$command_bykey->{$key} = $hr;
 }
 
 
@@ -173,12 +189,22 @@ sub addCommands {
 	# Add all the simple commands
 
 	foreach my $lr (@$single_commands) {
-		addCommand($lr->[0], { key => $lr->[1] });
+		my $hr = {
+			title => $lr->[0],
+			key => $lr->[1],
+		};
+
+		if ($lr->[2]) {
+			# Parsing reference
+			$hr->{resp_func} = $lr->[2];
+		}
+
+		addCommand($hr);
 	}
 
-	foreach my $lr (@$spec_commands) {
+	foreach my $hr (@$spec_commands) {
 		# These commands are specified via full hashref
-		addCommand($lr->[0], $lr->[1]);
+		addCommand($hr);
 	}
 }
 
@@ -190,6 +216,16 @@ sub getCommand {
 	my ($title) = @_;
 
 	return $commands->{$title};
+}
+
+sub getCommandByKey {
+	my ($key) = @_;
+
+	if (! %$command_bykey) {
+		addCommands();
+	}
+
+	return $command_bykey->{$key};
 }
 
 sub queryString {
@@ -271,5 +307,100 @@ sub _append {
 	return $cmd;
 }
 
+sub parseResponse {
+	my ($response) = @_;
+
+	if ($response !~ /^!(.+)&$/) {
+		# Doesn't look like a response
+		return undef;
+	}
+
+	my $meat = $1;
+
+	my $key = substr($meat, 0, 2);
+
+	my $hr = getCommandByKey($key);
+	if (!defined $hr) {
+		print "Unparseable response: $response ($meat, $key)\n";
+		print Data::Dumper::Dumper($command_bykey);
+		return undef;
+	}
+
+	my $return = {
+		title => $hr->{title},
+		key => $hr->{key},
+	};
+
+	if ($hr->{resp_func}) {
+		my $func = $hr->{resp_func};
+		my $value = &$func(substr($meat, 2));
+		$return->{value} = $value;
+	} else {
+		$return->{value} = substr($meat, 2);
+	}
+
+	return $return;
+}
+
+# ---------------------------------------------------------------------------
+# Response date: yymmddhhmm
+# Turn it into yy-mm-dd hh:mm
+# ---------------------------------------------------------------------------
+
+sub resp_date {
+	my ($string) = @_;
+
+	if ($string =~ m/^(\d\d)(\d\d)(\d\d)(\d)(\d\d)(\d\d)$/) {
+		my $dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']->[$4];
+		return "$1-$2-$3 $5:$6 $dow";
+	}
+
+	return undef;
+}
+
+# ---------------------------------------------------------------------------
+# Turn n hex digits into decimal
+# ---------------------------------------------------------------------------
+
+sub hexn {
+	my ($string, $n) = @_;
+
+	return hex(substr($string, 0, $n));
+}
+
+# ---------------------------------------------------------------------------
+# Turn 1 hex digit into decimal
+# ---------------------------------------------------------------------------
+
+sub resp_hex1 {
+	my ($string) = @_;
+
+	return hexn($string, 1);
+}
+
+# ---------------------------------------------------------------------------
+# Turn 2 hex digits into decimal
+# ---------------------------------------------------------------------------
+
+sub resp_hex2 {
+	my ($string) = @_;
+
+	return hexn($string, 2);
+}
+
+# ---------------------------------------------------------------------------
+# Parse a telephone number
+# ---------------------------------------------------------------------------
+
+sub resp_telno {
+	my ($string) = @_;
+
+	if ($string eq 'no') {
+		# Can mean no number, or permission denied
+		return '';
+	}
+
+	return $string;
+}
 
 1;
