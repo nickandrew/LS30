@@ -31,7 +31,7 @@ my $single_commands = [
 	[ 'Switch 15', 's2', \&resp_hex1 ],
 	[ 'Switch 16', 's3', \&resp_hex1 ],
 	[ 'Auto Answer Ring Count', 'a0' ],
-	[ 'Sensor Supervise Time', 'a2' ],
+	[ 'Sensor Supervise Time', 'a2', \&resp_hex2 ],
 	[ 'Modem Ring Count', 'a3', \&resp_hex2 ],
 	[ 'RF Jamming Warning', 'c0' ],
 	[ 'Switch 16 Control', 'c8' ],
@@ -44,10 +44,10 @@ my $single_commands = [
 	[ 'GSM Phone 3', 'g4', \&resp_telno ],
 	[ 'GSM Phone 4', 'g5', \&resp_telno ],
 	[ 'GSM Phone 5', 'g6', \&resp_telno ],
-	[ 'Exit Delay', 'l0' ],
-	[ 'Entry Delay', 'l1' ],
-	[ 'Remote Siren Time', 'l2' ],
-	[ 'Relay Action Time', 'l3' ],
+	[ 'Exit Delay', 'l0', \&resp_hex2 ],
+	[ 'Entry Delay', 'l1', \&resp_hex2 ],
+	[ 'Remote Siren Time', 'l2', \&resp_interval2 ],
+	[ 'Relay Action Time', 'l3', \&resp_delay, ],
 	# [ 'Inner Siren Time', 'l4' ],
 	[ 'Door Bell', 'm0' ],
 	[ 'Dial Tone Check', 'm1' ],
@@ -108,6 +108,13 @@ my $spec_commands = [
 			max => 4
 		},
 	},
+	{ title => 'Partial Arm',
+		key => 'n8',
+		array2 => {
+			min => 90,
+			max => 99
+		},
+	},
 	{ title => 'Event',
 		key => 'ev',
 		arg1 => {
@@ -125,10 +132,60 @@ my $spec_commands = [
 		},
 		resp_func => \&resp_hex2,
 	},
+	{ title => 'Password',
+		# Note 1-char key
+		key => 'p',
+		array2 => {
+			min => 1,
+			max => 10,
+			encoding => 'wonkykex',
+		},
+	},
 ];
 
 my $other_commands = [
 	# [ 'Partial Arm', 'n8', 90, 99 ],
+	{ title => 'Send Message',
+		key => 'f0',
+		type => 'command',
+		# Arg is 1 string, various length
+		# Response is same as command
+	},
+	{ title => 'Read Event',
+		key => 'ev',
+		type => 'event',
+		# Arg is 3-digit event code in wonky hex
+		# Response is '!ev' followed by data until '&'
+	},
+	{ title => 'Voice Playback',
+		key => 'vp',
+		type => 'command',
+		# Arg is 0 .. ?
+	},
+	{ title => 'Get Burglar Sensor Status',
+		key => 'kb',
+		type => 'query',
+		# Arg is 2-digit device number
+		# Response is very long hex string
+	},
+	{ title => 'Get Controller Status',
+		key => 'kc',
+		type => 'query',
+		# Arg is 2-digit device number
+		# Response is very long hex string
+	},
+	{ title => 'Get Fire Sensor Status',
+		key => 'kf',
+		type => 'query',
+		# Arg is 2-digit device number
+		# Response is very long hex string
+	},
+	{ title => 'Get Medical Sensor Status',
+		key => 'km',
+		type => 'query',
+		# Arg is 2-digit device number
+		# Response is very long hex string
+	},
 	# [ 'Send message', 'f0' ],
 	# [ 'RS-232 Control', 'c9' ],
 	# [ 'Start Device Test', 'lt15' ],
@@ -140,10 +197,8 @@ my $other_commands = [
 	#    2 = fire sensor
 	#    3 = medical button
 	#    4 = special sensor
-	# kc?00  kc?01 kc?02 ... get status of specified controller
-	# kb?00  ... get status of specified burglar sensor (or ks)
-	# kf?00  ... get status of specified fire sensor
-	# km?00  ... get status of specified medical button
+	# h?000 ... query switches daily schedule
+	# h?500 ... query switches Friday schedule
 ];
 
 # Scheduling switches:
@@ -322,7 +377,6 @@ sub parseResponse {
 	my $hr = getCommandByKey($key);
 	if (!defined $hr) {
 		print "Unparseable response: $response ($meat, $key)\n";
-		print Data::Dumper::Dumper($command_bykey);
 		return undef;
 	}
 
@@ -401,6 +455,38 @@ sub resp_telno {
 	}
 
 	return $string;
+}
+
+# ---------------------------------------------------------------------------
+# Parse a delay time which may be in seconds or minutes
+# ---------------------------------------------------------------------------
+
+sub resp_delay {
+	my ($string) = @_;
+
+	my $value = hex($string);
+
+	if ($value > 128) {
+		return sprintf("%d minutes", $value - 128);
+	}
+
+	return sprintf("%d seconds", $value);
+}
+
+# ---------------------------------------------------------------------------
+# Parse a 2nd type of interval
+# ---------------------------------------------------------------------------
+
+sub resp_interval2 {
+	my ($string) = @_;
+
+	my $value = hex($string);
+
+	if ($value > 64) {
+		return sprintf("%d minutes", $value - 64);
+	}
+
+	return sprintf("%d seconds", $value);
 }
 
 1;
