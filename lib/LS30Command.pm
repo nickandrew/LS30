@@ -498,4 +498,53 @@ sub resp_interval2 {
 	return sprintf("%d seconds", $value);
 }
 
+# ---------------------------------------------------------------------------
+# Parse device config hex string: Returned from k[bcmfe] and ib commands
+# Return a hashref.
+# ---------------------------------------------------------------------------
+
+sub parseDeviceConfig {
+	my ($string) = @_;
+
+	# e.g. "<4100000"
+	$string =~ tr/:;<=>?/abcdef/;
+	my $hr = { };
+
+	if ($string !~ /^(..)(..)(....)$/) {
+		die "Looking for an 8-char string, not $string";
+	}
+
+	my ($xes1, $xes2, $xsw) = ($1, $2, $3);
+	my $es1 = hex($xes1);
+	my $es2 = hex($xes2);
+	my $sw = hex($xsw);
+
+	$hr->{string} = $string;
+
+	$hr->{bypass} = ($es1 & 0x80) ? 1 : 0;
+	$hr->{delay} = ($es1 & 0x40) ? 1 : 0;
+	$hr->{hrs_24} = ($es1 & 0x20) ? 1 : 0;
+	$hr->{home_guard} = ($es1 & 0x10) ? 1 : 0;
+	$hr->{pre_warning} = ($es1 & 0x08) ? 1 : 0;
+	$hr->{siren_alarm} = ($es1 & 0x04) ? 1 : 0;
+	$hr->{bell} = ($es1 & 0x02) ? 1 : 0;
+	$hr->{latchkey_or_inactivity} = ($es1 & 0x01) ? 1 : 0;
+
+	$hr->{es2_reserved_1} = ($es2 & 0x80) ? 1 : 0;
+	$hr->{es2_reserved_2} = ($es2 & 0x40) ? 1 : 0;
+	$hr->{es2_two_way} = ($es2 & 0x20) ? 1 : 0;
+	$hr->{es2_supervisory} = ($es2 & 0x10) ? 1 : 0;
+	$hr->{es2_rf_voice} = ($es2 & 0x08) ? 1 : 0;
+	$hr->{es2_reserved_3} = $es2 & 0x07;
+
+	foreach my $switch (1 .. 15) {
+		my $test = 1 << (16 - $switch);
+		if ($sw & $test) {
+			$hr->{"switch_$switch"} = 1;
+		}
+	}
+
+	return $hr;
+}
+
 1;
