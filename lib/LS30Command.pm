@@ -141,6 +141,15 @@ my $spec_commands = [
 			encoding => 'wonkykex',
 		},
 	},
+	{ title => 'Switch/Operation Scene',
+		# Note 1-char key
+		key => 'u',
+		array2 => {
+			min => 0,
+			max => 15,
+			encoding => 'wonkykex',
+		},
+	},
 ];
 
 my $other_commands = [
