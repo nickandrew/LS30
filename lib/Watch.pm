@@ -46,9 +46,7 @@ sub new {
 		$self->{devices} = $devices;
 	}
 
-	$ls30c->setHandler('CONTACTID', $self, \&contactid);
-	$ls30c->setHandler('MINPIC', $self, \&minpic);
-	$ls30c->setHandler('Response', $self, \&response);
+	$ls30c->setHandler($self);
 
 	return $self;
 }
@@ -151,7 +149,7 @@ sub readReady {
 	}
 }
 
-sub contactid {
+sub handleCONTACTID {
 	my ($self, $line) = @_;
 
 	$line =~ m/^(....)(..)(.)(...)(..)(...)(.)/;
@@ -200,7 +198,7 @@ sub contactid {
 	}
 }
 
-sub minpic {
+sub handleMINPIC {
 	my ($self, $minpic) = @_;
 
 	$minpic =~ m/^(......)(......)(....)(..)(..)(..)/;
@@ -268,7 +266,7 @@ sub minpic {
 	}
 }
 
-sub response {
+sub handleResponse {
 	my ($self, $line) = @_;
 
 	my $resp_hr = LS30Command::parseResponse($line);
@@ -280,6 +278,18 @@ sub response {
 
 	my $s = sprintf("Response: %s (%s)", $resp_hr->{title}, $resp_hr->{value});
 	LS30::Log::timePrint($s);
+}
+
+sub handleAT {
+	my ($self, $line) = @_;
+
+	LS30::Log::timePrint("Ignoring AT: $line");
+}
+
+sub handleGSM {
+	my ($self, $line) = @_;
+
+	LS30::Log::timePrint("Ignoring GSM: $line");
 }
 
 1;

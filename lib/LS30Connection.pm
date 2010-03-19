@@ -52,7 +52,7 @@ sub new {
 		server_address => $server_address,
 		last_response => undef,
 		pending => '',
-		handler => { },
+		handler => undef,
 	};
 
 	bless $self, $class;
@@ -164,9 +164,9 @@ Keep a reference to the object which will process all our emitted events.
 =cut
 
 sub setHandler {
-	my ($self, $handler, $arg, $func) = @_;
+	my ($self, $object) = @_;
 
-	$self->{handler}->{$handler} = [ $arg, $func ];
+	$self->{handler} = $object;
 }
 
 
@@ -240,7 +240,7 @@ sub getResponse {
 
 Receive at most one buffer of data from the server. This may consist of
 multiple lines, or partial lines. All completed lines are processed
-through emit functions. A trailing partial line is left in our 'pending'
+through handlers. A trailing partial line is left in our 'pending'
 string for later processing.
 
 Return values:
@@ -353,19 +353,19 @@ sub processLine {
 
 	if ($line =~ /^MINPIC=([0-9a-f]+)$/) {
 		my $minpic = $1;
-		$self->emitMINPIC($minpic);
+		$self->runHandler('MINPIC', $minpic);
 		return;
 	}
 
 	if ($line =~ /^XINPIC=([0-9a-f]+)$/) {
 		my $minpic = $1;
-		$self->emitMINPIC($minpic);
+		$self->runHandler('MINPIC', $minpic);
 		return;
 	}
 
 	if ($line =~ /^\(([0-9a-f]+)\)$/) {
 		my $contact_id = $1;
-		$self->emitCONTACTID($contact_id);
+		$self->runHandler('CONTACTID', $contact_id);
 		return;
 	}
 
@@ -376,19 +376,19 @@ sub processLine {
 
 	if ($line =~ /^(!.+&)$/) {
 		my $response = $1;
-		$self->emitResponse($response);
+		$self->runHandler('Response', $response);
 		return;
 	}
 
 	if ($line =~ /^(AT.+)/) {
 		# Ignore AT command
-		$self->emitAny($line, 'AT', "Ignoring AT");
+		$self->runHandler('AT', $line);
 		return;
 	}
 
 	if ($line =~ /^(GSM=.+)/) {
 		# Ignore GSM command
-		$self->emitAny($line, 'GSM', "Ignoring GSM");
+		$self->runHandler('GSM', $line);
 		return;
 	}
 
@@ -443,92 +443,41 @@ sub processLine {
 
 # ---------------------------------------------------------------------------
 
-=item emitMINPIC($string)
+=item runHandler($type, @args)
 
-Run specified handler function for MINPIC or print it.
+Run the handler function appropriate to the specified type $type.
+Further arguments depend on the value of $type.
 
 =cut
 
-sub emitMINPIC {
-	my ($self, $string) = @_;
+sub runHandler {
+	my $self = shift;
+	my $type = shift;
 
-	my $func_lr = $self->{handler}->{'MINPIC'};
-	if ($func_lr) {
-		my ($arg, $func) = @$func_lr;
-		&$func($arg, $string);
-	} else {
-		LS30::Log::timePrint("MINPIC: $string");
+	my $object = $self->{handler};
+
+	if (! defined $object) {
+		LS30::Log::timePrint("Cannot run handler for $type");
+		return;
 	}
-}
 
-
-# ---------------------------------------------------------------------------
-
-=item emitCONTACTID($string)
-
-Run specified handler function for a Contact ID line or print it.
-
-=cut
-
-sub emitCONTACTID {
-	my ($self, $string) = @_;
-
-	my $func_lr = $self->{handler}->{'CONTACTID'};
-	if ($func_lr) {
-		my ($arg, $func) = @$func_lr;
-		&$func($arg, $string);
-	} else {
-		LS30::Log::timePrint("Contact ID: $string");
+	if ($type eq 'MINPIC') {
+		$object->handleMINPIC(@_);
 	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item emitResponse($string)
-
-Remember this response string.
-Run specified handler function for a response or print it.
-
-=cut
-
-sub emitResponse {
-	my ($self, $string) = @_;
-
-	$self->{last_response} = $string;
-
-	my $func_lr = $self->{handler}->{'Response'};
-	if ($func_lr) {
-		my ($arg, $func) = @$func_lr;
-		&$func($arg, $string);
-	} else {
-		LS30::Log::timePrint("Response: $string");
+	elsif ($type eq 'CONTACTID') {
+		$object->handleCONTACTID(@_);
 	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item emitAny($string, $type, $message)
-
-Remember this string, keyed by 'type'.
-
-Run a handler specified by $type. If no handler is defined then print
-a log message, prefixed by $message.
-
-=cut
-
-sub emitAny {
-	my ($self, $string, $type, $message) = @_;
-
-	$self->{'last'}->{$type} = $string;
-
-	my $func_lr = $self->{handler}->{$type};
-	if ($func_lr) {
-		my ($arg, $func) = @$func_lr;
-		&$func($arg, $string);
-	} else {
-		LS30::Log::timePrint("${message}: $string");
+	elsif ($type eq 'Response') {
+		$object->handleResponse(@_);
+	}
+	elsif ($type eq 'AT') {
+		$object->handleAT(@_);
+	}
+	elsif ($type eq 'GSM') {
+		$object->handleGSM(@_);
+	}
+	else {
+		LS30::Log::timePrint("No handler function defined for $type");
 	}
 }
 
