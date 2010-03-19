@@ -45,9 +45,9 @@ sub new {
 		$devices = LS30::DeviceSet->new();
 	}
 
-	$ls30c->setHandler('CONTACTID', \&contactid);
-	$ls30c->setHandler('MINPIC', \&minpic);
-	$ls30c->setHandler('Response', \&response);
+	$ls30c->setHandler('CONTACTID', $self, \&contactid);
+	$ls30c->setHandler('MINPIC', $self, \&minpic);
+	$ls30c->setHandler('Response', $self, \&response);
 
 	return $self;
 }
@@ -151,7 +151,7 @@ sub readReady {
 }
 
 sub contactid {
-	my ($line) = @_;
+	my ($self, $line) = @_;
 
 	$line =~ m/^(....)(..)(.)(...)(..)(...)(.)/;
 	my ($acct, $mt, $q, $xyz, $gg, $ccc, $s) = ($1, $2, $3, $4, $5, $6, $7);
@@ -200,7 +200,7 @@ sub contactid {
 }
 
 sub minpic {
-	my ($minpic) = @_;
+	my ($self, $minpic) = @_;
 
 	$minpic =~ m/^(......)(......)(....)(..)(..)(..)/;
 	my ($type, $device_id, $junk2, $signal, $junk3, $junk4) = ($1, $2, $3, $4, $5, $6, $7);
@@ -268,7 +268,7 @@ sub minpic {
 }
 
 sub response {
-	my ($line) = @_;
+	my ($self, $line) = @_;
 
 	my $resp_hr = LS30Command::parseResponse($line);
 

@@ -164,9 +164,9 @@ Keep a reference to the object which will process all our emitted events.
 =cut
 
 sub setHandler {
-	my ($self, $handler, $ref) = @_;
+	my ($self, $handler, $arg, $func) = @_;
 
-	$self->{handler}->{$handler} = $ref;
+	$self->{handler}->{$handler} = [ $arg, $func ];
 }
 
 
@@ -452,9 +452,10 @@ Run specified handler function for MINPIC or print it.
 sub emitMINPIC {
 	my ($self, $string) = @_;
 
-	my $func = $self->{handler}->{'MINPIC'};
-	if ($func) {
-		&$func($string);
+	my $func_lr = $self->{handler}->{'MINPIC'};
+	if ($func_lr) {
+		my ($arg, $func) = @$func_lr;
+		&$func($arg, $string);
 	} else {
 		LS30::Log::timePrint("MINPIC: $string");
 	}
@@ -472,9 +473,10 @@ Run specified handler function for a Contact ID line or print it.
 sub emitCONTACTID {
 	my ($self, $string) = @_;
 
-	my $func = $self->{handler}->{'CONTACTID'};
-	if ($func) {
-		&$func($string);
+	my $func_lr = $self->{handler}->{'CONTACTID'};
+	if ($func_lr) {
+		my ($arg, $func) = @$func_lr;
+		&$func($arg, $string);
 	} else {
 		LS30::Log::timePrint("Contact ID: $string");
 	}
@@ -495,9 +497,10 @@ sub emitResponse {
 
 	$self->{last_response} = $string;
 
-	my $func = $self->{handler}->{'Response'};
-	if ($func) {
-		&$func($string);
+	my $func_lr = $self->{handler}->{'Response'};
+	if ($func_lr) {
+		my ($arg, $func) = @$func_lr;
+		&$func($arg, $string);
 	} else {
 		LS30::Log::timePrint("Response: $string");
 	}
@@ -520,9 +523,10 @@ sub emitAny {
 
 	$self->{'last'}->{$type} = $string;
 
-	my $func = $self->{handler}->{$type};
-	if ($func) {
-		&$func($string);
+	my $func_lr = $self->{handler}->{$type};
+	if ($func_lr) {
+		my ($arg, $func) = @$func_lr;
+		&$func($arg, $string);
 	} else {
 		LS30::Log::timePrint("${message}: $string");
 	}
