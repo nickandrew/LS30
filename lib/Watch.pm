@@ -43,6 +43,7 @@ sub new {
 
 	if (! $devices) {
 		$devices = LS30::DeviceSet->new();
+		$self->{devices} = $devices;
 	}
 
 	$ls30c->setHandler('CONTACTID', $self, \&contactid);
@@ -206,7 +207,7 @@ sub minpic {
 	my ($type, $device_id, $junk2, $signal, $junk3, $junk4) = ($1, $2, $3, $4, $5, $6, $7);
 
 	my $unknown = '';
-	my $device_ref = $devices->findDeviceByCode($device_id);
+	my $device_ref = $self->{devices}->findDeviceByCode($device_id);
 	my $device_name;
 
 	if (! $device_ref) {
