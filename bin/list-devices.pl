@@ -46,8 +46,8 @@ foreach my $type (sort (keys %$types)) {
 			last;
 		}
 
-		if ($response =~ /!k.(..)(......)(....)(..)(..)(..)(.+)/) {
-			my ($junk1, $dev_id, $junk2, $junk3, $z, $c) = ($1, $2, $3, $4, $5, $6);
+		if ($response =~ /!k.(..)(......)(....)(..)(..)(..)(........)(.+)/) {
+			my ($junk1, $dev_id, $junk2, $junk3, $z, $c, $config, $rest) = ($1, $2, $3, $4, $5, $6, $7, $8);
 
 			$s .= sprintf("%s %s-%s ID is %s\n",
 				$type,
@@ -56,7 +56,12 @@ foreach my $type (sort (keys %$types)) {
 				$dev_id,
 			);
 
-			$s2 .= join(' ', $1, $2, $3, $4, $5, $6, $7) . "\n";
+			my $hr = LS30Command::parseDeviceConfig($config);
+			if ($hr) {
+				$s .= Data::Dumper::Dumper($hr);
+			}
+
+			$s2 .= join(' ', $1, $2, $3, $4, $5, $6, $7, $8) . "\n";
 		}
 	}
 }
