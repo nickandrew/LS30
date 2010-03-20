@@ -179,7 +179,7 @@ If the maximum wait time is longer than 60 seconds, it is set to 60.
 Next, select() is called. All sockets available for read are detected.
 The specified function is called like this:
 
-	&$func($arg, $self, $socket);
+    $object->handleRead($self, $socket);
 
 =cut
 
@@ -212,8 +212,8 @@ sub eventLoop {
 					next;
 				}
 
-				my ($socket, $func, $arg) = @$handle;
-				&$func($arg, $self, $socket);
+				my ($socket, $object) = @$handle;
+				$object->handleRead($self, $socket);
 			}
 		}
 	}

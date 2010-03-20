@@ -129,6 +129,58 @@ sub socket {
 
 # ---------------------------------------------------------------------------
 
+=item handleRead($selector, $socket)
+
+Attempt to read data from our socket. Call disconnect_event() if there is
+an error or EOF. Otherwise, process all data received.
+
+=cut
+
+sub handleRead {
+	my ($self, $selector, $socket) = @_;
+
+	my $buffer;
+	my $n = $socket->recv($buffer, 256);
+
+	if (!defined $n) {
+		# Error
+		$self->disconnect_event($selector, $socket);
+	}
+	else {
+		$n = length($buffer);
+		if ($n == 0) {
+			# EOF
+			$self->disconnect_event($selector, $socket);
+		}
+		else {
+			$self->addBuffer($buffer);
+		}
+	}
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item disconnect_event($selector, $socket)
+
+There was an Error or EOF on our socket connection. Remove us from the
+specified selector, close our socket (disconnect) and run the Disconnect
+event handler.
+
+=cut
+
+sub disconnect_event {
+	my ($self, $selector, $socket) = @_;
+
+	$selector->removeSelect($socket);
+	$self->Disconnect();
+
+	$self->runHandler('Disconnect');
+}
+
+
+# ---------------------------------------------------------------------------
+
 =item sendCommand($string)
 
 Send a command and return the response to the command.
@@ -475,6 +527,9 @@ sub runHandler {
 	}
 	elsif ($type eq 'GSM') {
 		$object->handleGSM(@_);
+	}
+	elsif ($type eq 'Disconnect') {
+		$object->handleDisconnect(@_);
 	}
 	else {
 		LS30::Log::timePrint("No handler function defined for $type");

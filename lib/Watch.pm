@@ -63,7 +63,7 @@ sub addSelector {
 	$selector->addTimer($timer2);
 
 	my $ls30c = $self->{ls30c};
-	$selector->addSelect( [$ls30c->socket(), \&readReady, $self] );
+	$selector->addSelect( [$ls30c->socket(), $ls30c] );
 }
 
 sub timer_time {
@@ -115,38 +115,11 @@ sub disc_timer_event {
 	}
 }
 
-sub disconnect_event {
+sub handleDisconnect {
 	my ($self) = @_;
-
-	my $ls30c = $self->{ls30c};
-	my $socket = $ls30c->socket();
-	$self->{'select'}->removeSelect($socket);
-	$ls30c->Disconnect();
 
 	$self->{timer2}->[4] = 4;
 	$self->{timer2}->[2] = time() + 4;
-}
-
-sub readReady {
-	my ($self, $selector, $socket) = @_;
-
-	my $buffer;
-	my $n = $socket->recv($buffer, 256);
-
-	if (!defined $n) {
-		# Error
-		$self->disconnect_event();
-	}
-	else {
-		$n = length($buffer);
-		if ($n == 0) {
-			# EOF
-			$self->disconnect_event();
-		}
-		else {
-			$self->{ls30c}->addBuffer($buffer);
-		}
-	}
 }
 
 sub handleCONTACTID {
