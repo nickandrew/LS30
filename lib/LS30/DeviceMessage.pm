@@ -31,27 +31,7 @@ use strict;
 
 use Carp qw(confess);
 
-my $device_type_map = {
-	'50' => 'PIR',
-	'70' => 'Siren',
-	'10' => 'Remote Control',
-	'19' => 'Keypad',
-	'20' => 'Smoke Detector',
-	'40' => 'Door Switch',
-};
-
-my $event_code_map = {
-	'0a10' => 'Away mode',
-	'0a13' => 'Check Status',
-	'0a14' => 'Disarm mode',
-	'0a18' => 'Home mode',
-	'0a20' => 'Test',
-	'0a40' => 'Open',
-	'0a48' => 'Close',
-	'0a50' => 'Tamper',
-	'0a58' => 'Trigger',
-	'0a60' => 'Panic',
-};
+use LS30::Type qw();
 
 
 # ---------------------------------------------------------------------------
@@ -99,14 +79,14 @@ sub _parseString {
 	my $unknown = '';
 
 	my $signal_int = hex($signal) - 32;
-	my $type_name = $event_code_map->{$type};
+	my $type_name = LS30::Type::getString('Event Code', $type);
 
 	if (! $type_name) {
 		$type_name = 'Unknown';
 		$unknown .= " UnknownType($type)";
 	}
 
-	my $dev_type_name = $device_type_map->{$dev_type} || 'Unknown';
+	my $dev_type_name = LS30::Type::getString('Device Specific Type', $dev_type) || 'Unknown';
 
 	if ($unk1 !~ /^(0000|0010|0030|0130)$/) {
 		$unknown .= " unk1($unk1)";
