@@ -8,6 +8,7 @@
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 
+use LS30::Commander qw();
 use LS30Command qw();
 use LS30Connection qw();
 
@@ -20,6 +21,8 @@ my $ls30c = LS30Connection->new($opt_h);
 $ls30c->Connect();
 
 LS30Command::addCommands();
+
+my $ls30cmdr = LS30::Commander->new($ls30c);
 
 my @responses;
 
@@ -39,14 +42,14 @@ foreach my $type (sort (keys %$types)) {
 
 	foreach my $device_number qw(00 01 02 03 04 05 06 07 08 09) {
 		my $cmd = sprintf("!k%s?%2s&", $code, $device_number);
-		my $response = $ls30c->sendCommand($cmd);
+		my $response = $ls30cmdr->sendCommand($cmd);
 
 		if ($response =~ /^!k.000/) {
 			# No device, stop looking
 			last;
 		}
 
-		if ($response =~ /!k.(..)(......)(....)(..)(..)(..)(........)(.+)/) {
+		if ($response =~ /!k.(..)(......)(....)(..)(..)(..)(........)(.+)&/) {
 			my ($junk1, $dev_id, $junk2, $junk3, $z, $c, $config, $rest) = ($1, $2, $3, $4, $5, $6, $7, $8);
 
 			$s .= sprintf("%s %s-%s ID is %s\n",
