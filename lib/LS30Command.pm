@@ -7,6 +7,8 @@ package LS30Command;
 
 use strict;
 
+use LS30::Type qw();
+
 my $commands = { };
 my $command_bykey = { };
 
@@ -208,7 +210,19 @@ my $other_commands = [
 	#    4 = special sensor
 	# h?000 ... query switches daily schedule
 	# h?500 ... query switches Friday schedule
+	# { 'length' => 1, type => 'Schedule Day of Week', key => 'schedule_day' },
 ];
+
+my $single_char_responses = {
+	'h' => {
+		title => 'Operation Schedule',
+		args => [
+			{ 'length' => 4, func => \&resp_decimal_time, key => 'start_time' },
+			{ 'length' => 1, type => 'Schedule Zone', key => 'zone' },
+			{ 'length' => 1, type => 'Operation Code', key => 'op_code' },
+		],
+	},
+};
 
 # Scheduling switches:
 #   h?000
@@ -381,9 +395,17 @@ sub parseResponse {
 
 	my $meat = $1;
 
+	my $skey = substr($meat, 0, 1);
+
+	# Test if it's a single character response
+	my $hr = $single_char_responses->{$skey};
+	if ($hr) {
+		return _parseFormat(substr($meat, 1), $hr);
+	}
+
 	my $key = substr($meat, 0, 2);
 
-	my $hr = getCommandByKey($key);
+	$hr = getCommandByKey($key);
 	if (!defined $hr) {
 		print "Unparseable response: $response ($meat, $key)\n";
 		return undef;
@@ -499,6 +521,20 @@ sub resp_interval2 {
 }
 
 # ---------------------------------------------------------------------------
+# Turn dddd into dd:dd
+# ---------------------------------------------------------------------------
+
+sub resp_decimal_time {
+	my ($string) = @_;
+
+	if ($string !~ /^(\d\d)(\d\d)$/) {
+		return undef;
+	}
+
+	return "$1:$2";
+}
+
+# ---------------------------------------------------------------------------
 # Parse device config hex string: Returned from k[bcmfe] and ib commands
 # Return a hashref.
 # ---------------------------------------------------------------------------
@@ -545,6 +581,58 @@ sub parseDeviceConfig {
 	}
 
 	return $hr;
+}
+
+# ---------------------------------------------------------------------------
+# Parse a response according to specified format
+# ---------------------------------------------------------------------------
+
+sub _parseFormat {
+	my ($string, $hr) = @_;
+
+	my $return = {
+		string => $string,
+		title => $hr->{title},
+	};
+
+	if ($hr->{args}) {
+		foreach my $hr2 (@{$hr->{args}}) {
+			$string = _parseArg($string, $return, $hr2);
+		}
+	}
+
+	return $return;
+}
+
+# ---------------------------------------------------------------------------
+# Parse a single argument from an input string.
+# Return the modified input string.
+# ---------------------------------------------------------------------------
+
+sub _parseArg {
+	my ($string, $return, $arg_hr) = @_;
+
+	my $length = $arg_hr->{'length'};
+
+	if (! $length) {
+		die "Need to specify length";
+	}
+
+	my $input = substr($string, 0, $length);
+	my $rest = substr($string, $length);
+	my $key = $arg_hr->{key};
+
+	if ($arg_hr->{func}) {
+		my $func_ref = $arg_hr->{func};
+		$return->{$key} = &$func_ref($input);
+	}
+	elsif ($arg_hr->{type}) {
+		my $type = $arg_hr->{type};
+		my $value = LS30::Type::getString($type, $input);
+		$return->{$key} = $value;
+	}
+
+	return $rest;
 }
 
 1;
