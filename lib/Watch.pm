@@ -16,6 +16,7 @@ use LS30::DeviceSet qw();
 use LS30::Log qw();
 use LS30Command qw();
 use LS30Connection qw();
+use LS30::Decoder qw();
 
 # Temporarily this is a class variable as the responder functions don't
 # take a $self parameter.
@@ -46,7 +47,9 @@ sub new {
 		$self->{devices} = $devices;
 	}
 
-	$ls30c->setHandler($self);
+	my $decoder = LS30::Decoder->new($self);
+
+	$ls30c->setHandler($decoder);
 
 	return $self;
 }
@@ -115,128 +118,43 @@ sub disc_timer_event {
 	}
 }
 
-sub handleDisconnect {
-	my ($self) = @_;
+sub handleDeviceMessage {
+	my ($self, $devmsg_obj) = @_;
 
-	$self->{timer2}->[4] = 4;
-	$self->{timer2}->[2] = time() + 4;
-}
+	my $string = $devmsg_obj->getString();
+	my $event_name = $devmsg_obj->getEventName();
+	my $dev_type_name = $devmsg_obj->getDeviceType();
+	my $device_id = $devmsg_obj->getDeviceID();
+	my $signal = $devmsg_obj->getSignalStrength();
+	my $unknown = $devmsg_obj->getUnknown();
 
-sub handleCONTACTID {
-	my ($self, $line) = @_;
+	my $ls30c = $self->{ls30c};
 
-	$line =~ m/^(....)(..)(.)(...)(..)(...)(.)/;
-	my ($acct, $mt, $q, $xyz, $gg, $ccc, $s) = ($1, $2, $3, $4, $5, $6, $7);
-
-	my $unknown = '';
-	my $describe = '';
-
-	if ($acct ne '1688') {
-		$unknown .= " acct($acct)";
-	}
-
-	if ($mt eq '18') {
-		$describe .= "Preferred";
-	}
-	elsif ($mt eq '98') {
-		$describe .= "Optional";
-	}
-	else {
-		$unknown .= " mt($mt)";
-	}
-
-	if ($q eq '1') {
-		$describe .= " New Event/Opening";
-	} elsif ($q eq '3') {
-		$describe .= " New Restore/Closing";
-	} elsif ($q eq '6') {
-		$describe .= " Status report";
-	} else {
-		$unknown .= " q($q)";
-	}
-
-	my $event_description = ContactID::EventCode::eventDescription($xyz) || "Unknown code $xyz";
-
-	$describe .= " $event_description";
-
-	$describe .= " group $gg";
-
-	$describe .= " zone $ccc";
-
-
-	if ($unknown) {
-		LS30::Log::timePrint("$line $describe Unknown $unknown");
-	} else {
-		LS30::Log::timePrint("$line $describe");
-	}
-}
-
-sub handleMINPIC {
-	my ($self, $minpic) = @_;
-
-	$minpic =~ m/^(......)(......)(....)(..)(..)(..)/;
-	my ($type, $device_id, $junk2, $signal, $junk3, $junk4) = ($1, $2, $3, $4, $5, $6, $7);
-
-	my $unknown = '';
 	my $device_ref = $self->{devices}->findDeviceByCode($device_id);
 	my $device_name;
 
 	if (! $device_ref) {
-		$unknown .= " NoDevice($device_id)";
 		$device_name = 'Unknown';
 	} else {
 		$device_name = $device_ref->{'zone'} . ' ' . $device_ref->{'name'};
 	}
 
-	my $signal_int = hex($signal) - 32;
+	my $concat = join(' ', $string, $event_name, $dev_type_name, "$device_id $device_name", "signal $signal", ($unknown ? $unknown : ''));
+	LS30::Log::timePrint($concat);
+}
 
-	if ($type =~ /^0a2(019|050|070)/) {
-		LS30::Log::timePrint("$minpic Test $device_name (signal $signal_int)");
-	}
-	elsif ($type =~ /^0a5019/) {
-		LS30::Log::timePrint("$minpic Tamper alert $device_name (signal $signal_int)");
-	}
-	elsif ($type =~ /^0a5/) {
-		LS30::Log::timePrint("$minpic Triggered $device_name (signal $signal_int)");
-	}
-	elsif ($type =~ /^0a1010/) {
-		LS30::Log::timePrint("$minpic Away mode $device_name (signal $signal_int)");
-	}
-	elsif ($type =~ /^0a1410/) {
-		LS30::Log::timePrint("$minpic Disarm mode $device_name (signal $signal_int)");
-	}
-	elsif ($type =~ /^0a1810/) {
-		LS30::Log::timePrint("$minpic Home mode $device_name (signal $signal_int)");
-	}
-	elsif ($type =~ /^0a40/) {
-		$unknown .= " UnknownType($type) Open (signal $signal_int)";
-	}
-	elsif ($type =~ /^0a48/) {
-		$unknown .= " UnknownType($type) Close (signal $signal_int)";
-	}
-	elsif ($type =~ /^0a60/) {
-		LS30::Log::timePrint("$minpic Panic $device_name (signal $signal_int)");
-	}
-	else {
-		$unknown .= " UnknownType($type)";
-	}
+sub handleEventMessage {
+	my ($self, $evmsg_obj) = @_;
 
-	if ($junk2 !~ /^(0000|0010|0030|0130)$/) {
-		$unknown .= " junk2($junk2)";
-	}
+	my $text = $evmsg_obj->asText();
+	LS30::Log::timePrint($text);
+}
 
-	my $junk3_value = hex($junk3);
-	if ($junk3_value < 94 || $junk3_value > 101) {
-		$unknown .= " junk3($junk3_value)";
-	}
+sub handleDisconnect {
+	my ($self) = @_;
 
-	if ($junk4 !~ /^73$/) {
-		$unknown .= " junk4($junk4)";
-	}
-
-	if ($unknown) {
-		LS30::Log::timePrint("$minpic Unknown $unknown");
-	}
+	$self->{timer2}->[4] = 4;
+	$self->{timer2}->[2] = time() + 4;
 }
 
 sub handleResponse {
@@ -251,6 +169,25 @@ sub handleResponse {
 
 	my $s = sprintf("Response: %s (%s)", $resp_hr->{title}, $resp_hr->{value});
 	LS30::Log::timePrint($s);
+}
+
+sub handleResponseMessage {
+	my ($self, $response_obj) = @_;
+
+	if (! $response_obj) {
+		LS30::Log::timePrint("Received unexpected response");
+		return;
+	}
+
+	if ($response_obj->{error}) {
+		my $s = sprintf("Response: ", $response_obj->{error});
+		LS30::Log::timePrint($s);
+	} else {
+		my $s = sprintf("Response: %s (%s)", $response_obj->{title}, $response_obj->{value});
+		LS30::Log::timePrint($s);
+	}
+
+	print Data::Dumper::Dumper($response_obj);
 }
 
 sub handleAT {
