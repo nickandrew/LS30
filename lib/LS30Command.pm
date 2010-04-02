@@ -14,42 +14,42 @@ my $command_bykey = { };
 
 my @wonky_hex_codes = ('0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?');
 
-my $single_commands = [
-	[ 'Date/Time', 'dt', \&resp_date ],
-	[ 'Switch  1', 's6', \&resp_hex1 ],
-	[ 'Switch  2', 's7', \&resp_hex1 ],
-	[ 'Switch  3', 's4', \&resp_hex1 ],
-	[ 'Switch  4', 's5', \&resp_hex1 ],
-	[ 'Switch  5', 's8', \&resp_hex1 ],
-	[ 'Switch  6', 's9', \&resp_hex1 ],
-	[ 'Switch  7', 's:', \&resp_hex1 ],
-	[ 'Switch  8', 's;', \&resp_hex1 ],
-	[ 'Switch  9', 's>', \&resp_hex1 ],
-	[ 'Switch 10', 's?', \&resp_hex1 ],
-	[ 'Switch 11', 's<', \&resp_hex1 ],
-	[ 'Switch 12', 's=', \&resp_hex1 ],
-	[ 'Switch 13', 's0', \&resp_hex1 ],
-	[ 'Switch 14', 's1', \&resp_hex1 ],
-	[ 'Switch 15', 's2', \&resp_hex1 ],
-	[ 'Switch 16', 's3', \&resp_hex1 ],
+my $simple_commands = [
+	[ 'Date/Time', 'dt', 11, \&resp_date ],
+	[ 'Switch  1', 's6', 1, \&resp_hex1 ],
+	[ 'Switch  2', 's7', 1, \&resp_hex1 ],
+	[ 'Switch  3', 's4', 1, \&resp_hex1 ],
+	[ 'Switch  4', 's5', 1, \&resp_hex1 ],
+	[ 'Switch  5', 's8', 1, \&resp_hex1 ],
+	[ 'Switch  6', 's9', 1, \&resp_hex1 ],
+	[ 'Switch  7', 's:', 1, \&resp_hex1 ],
+	[ 'Switch  8', 's;', 1, \&resp_hex1 ],
+	[ 'Switch  9', 's>', 1, \&resp_hex1 ],
+	[ 'Switch 10', 's?', 1, \&resp_hex1 ],
+	[ 'Switch 11', 's<', 1, \&resp_hex1 ],
+	[ 'Switch 12', 's=', 1, \&resp_hex1 ],
+	[ 'Switch 13', 's0', 1, \&resp_hex1 ],
+	[ 'Switch 14', 's1', 1, \&resp_hex1 ],
+	[ 'Switch 15', 's2', 1, \&resp_hex1 ],
+	[ 'Switch 16', 's3', 1, \&resp_hex1 ],
 	[ 'Auto Answer Ring Count', 'a0' ],
-	[ 'Sensor Supervise Time', 'a2', \&resp_hex2 ],
-	[ 'Modem Ring Count', 'a3', \&resp_hex2 ],
+	[ 'Sensor Supervise Time', 'a2', 2, \&resp_hex2 ],
+	[ 'Modem Ring Count', 'a3', 2, \&resp_hex2 ],
 	[ 'RF Jamming Warning', 'c0' ],
 	[ 'Switch 16 Control', 'c8' ],
 	[ 'RS-232 Control', 'c9' ],
 	[ 'Remote Siren Type', 'd1' ],
-	[ 'GSM Phone 1', 'g0', \&resp_telno ],
-	[ 'GSM Phone 2', 'g1', \&resp_telno ],
+	[ 'GSM Phone 1', 'g0', 99, \&resp_telno ],
+	[ 'GSM Phone 2', 'g1', 99, \&resp_telno ],
 	[ 'GSM ID', 'g2' ],
 	[ 'GSM PIN No', 'g3' ],
-	[ 'GSM Phone 3', 'g4', \&resp_telno ],
-	[ 'GSM Phone 4', 'g5', \&resp_telno ],
-	[ 'GSM Phone 5', 'g6', \&resp_telno ],
-	[ 'Exit Delay', 'l0', \&resp_hex2 ],
-	[ 'Entry Delay', 'l1', \&resp_hex2 ],
-	[ 'Remote Siren Time', 'l2', \&resp_interval2 ],
-	[ 'Relay Action Time', 'l3', \&resp_delay, ],
+	[ 'GSM Phone 3', 'g4', 99, \&resp_telno ],
+	[ 'GSM Phone 4', 'g5', 99, \&resp_telno ],
+	[ 'GSM Phone 5', 'g6', 99, \&resp_telno ],
+	[ 'Exit Delay', 'l0', 2, \&resp_hex2 ],
+	[ 'Entry Delay', 'l1', 2, \&resp_hex2 ],
+	[ 'Remote Siren Time', 'l2', 2, \&resp_interval2 ],
+	[ 'Relay Action Time', 'l3', 2, \&resp_delay, ],
 	# [ 'Inner Siren Time', 'l4' ],
 	[ 'Door Bell', 'm0' ],
 	[ 'Dial Tone Check', 'm1' ],
@@ -62,52 +62,66 @@ my $single_commands = [
 	[ 'Cease Dialing Mode', 'm9' ],
 	[ 'Alarm Warning Dong', 'mj' ],
 	[ 'Switch Type', 'mk' ],
-	[ 'Operation Mode', 'n0', ],
-	[ 'Inner Siren Enable', 'n1' ],
+	# [ 'Operation Mode', 'n0', ],
+	[ 'Inner Siren Enable', 'n1', 1, \&resp_hex1 ],
 	[ 'Dial Mode', 'n2' ],
 	[ 'X-10 House Code', 'n7' ],
 	[ 'Inactivity Function', 'o0' ],
 	[ 'ROM Version', 'vn' ],
-	[ 'Telephone Common 1', 't0', \&resp_telno ],
-	[ 'Telephone Common 2', 't1', \&resp_telno ],
-	[ 'Telephone Common 3', 't2', \&resp_telno ],
-	[ 'Telephone Common 4', 't3', \&resp_telno ],
-	[ 'Telephone Panic', 't4', \&resp_telno ],
-	[ 'Telephone Burglar', 't5', \&resp_telno ],
-	[ 'Telephone Fire', 't6', \&resp_telno ],
-	[ 'Telephone Medical', 't7', \&resp_telno ],
-	[ 'Telephone Special', 't8', \&resp_telno ],
-	[ 'Telephone Latchkey/Power', 't9', \&resp_telno ],
-	[ 'Telephone Pager', 't:', \&resp_telno ],
-	[ 'Telephone Data', 't;', \&resp_telno ],
+	[ 'Telephone Common 1', 't0', 99, \&resp_telno ],
+	[ 'Telephone Common 2', 't1', 99, \&resp_telno ],
+	[ 'Telephone Common 3', 't2', 99, \&resp_telno ],
+	[ 'Telephone Common 4', 't3', 99, \&resp_telno ],
+	[ 'Telephone Panic', 't4', 99, \&resp_telno ],
+	[ 'Telephone Burglar', 't5', 99, \&resp_telno ],
+	[ 'Telephone Fire', 't6', 99, \&resp_telno ],
+	[ 'Telephone Medical', 't7', 99, \&resp_telno ],
+	[ 'Telephone Special', 't8', 99, \&resp_telno ],
+	[ 'Telephone Latchkey/Power', 't9', 99, \&resp_telno ],
+	[ 'Telephone Pager', 't:', 99, \&resp_telno ],
+	[ 'Telephone Data', 't;', 99, \&resp_telno ],
 	# CMS1
-	[ 'CMS 1 Telephone No', 't<', \&resp_telno ],
+	[ 'CMS 1 Telephone No', 't<', 99, \&resp_telno ],
 	[ 'CMS 1 User Account No', 't=' ],
 	[ 'CMS 1 Mode Change Report', 'n3' ],
 	[ 'CMS 1 Auto Link Check Period', 'n5' ],
 	[ 'CMS 1 Two-way Audio', 'c3' ],
 	[ 'CMS 1 DTMF Data Length', 'c5' ],
 	[ 'CMS Report', 'c7' ],
-	[ 'CMS 1 GSM No', 'tp', \&resp_telno ],
+	[ 'CMS 1 GSM No', 'tp', 99, \&resp_telno ],
 	[ 'Ethernet (IP) Report', 'c1' ],
 	[ 'GPRS Report', 'c:' ],
 	[ 'IP Report Format', 'ml' ],
 	# CMS2
-	[ 'CMS 2 Telephone No', 't>', \&resp_telno ],
+	[ 'CMS 2 Telephone No', 't>', 99, \&resp_telno ],
 	[ 'CMS 2 User Account No', 't?' ],
 	[ 'CMS 2 Mode Change Report', 'n4' ],
 	[ 'CMS 2 Auto Link Check Period', 'n6' ],
 	[ 'CMS 2 Two-way Audio', 'c4' ],
 	[ 'CMS 2 DTMF Data Length', 'c6' ],
-	[ 'CMS 2 GSM No', 'tq', \&resp_telno ],
+	[ 'CMS 2 GSM No', 'tq', 99, \&resp_telno ],
 ];
 
 my $spec_commands = [
+	{ title => 'Operation Mode',
+		key => 'n0',
+		response => [
+			{ 'length' => 1, type => 'Arm Mode', key => 'value' },
+		],
+	},
 	{ title => 'Device Count',
 		key => 'b3',
 		array2 => {
 			min => 0,
 			max => 4
+		},
+	},
+	{ title => 'Query Operation Schedule',
+		key => 'hq',
+		arg1 => {
+			'length' => 3,
+			encoding => 'wonkyhex',
+			arg_key => 'schedule_no',
 		},
 	},
 	{ title => 'Partial Arm',
@@ -127,12 +141,9 @@ my $spec_commands = [
 	},
 	{ title => 'Inner Siren Time',
 		key => 'l4',
-		arg1 => {
-			'length' => 2,
-			encoding => 'wonkyhex',
-			arg_key => 'siren_time',
-		},
-		resp_func => \&resp_hex2,
+		args => [
+			{ 'length' => 2, func => \&resp_hex2, key => 'value' },
+		],
 	},
 	{ title => 'Password',
 		# Note 1-char key
@@ -266,15 +277,16 @@ sub addCommands {
 
 	# Add all the simple commands
 
-	foreach my $lr (@$single_commands) {
+	foreach my $lr (@$simple_commands) {
 		my $hr = {
 			title => $lr->[0],
 			key => $lr->[1],
 		};
 
-		if ($lr->[2]) {
-			# Parsing reference
-			$hr->{resp_func} = $lr->[2];
+		if ($lr->[2] && $lr->[3]) {
+			$hr->{args} = [
+				{ 'length' => $lr->[2], func => $lr->[3], key => 'value' },
+			];
 		}
 
 		addCommand($hr);
@@ -317,13 +329,7 @@ sub queryString {
 		$arg2 = '';
 	}
 
-	my $cmd;
-
-	if ($cmd_spec->{no_query}) {
-		$cmd = '!' . $cmd_spec->{key} . $arg1 . $arg2 . '&';
-	} else {
-		$cmd = '!' . $cmd_spec->{key} . $arg1 . '?' . $arg2 . '&';
-	}
+	my $cmd = '!' . $cmd_spec->{key} . $arg1 . '?' . $arg2 . '&';
 
 	return $cmd;
 }
@@ -385,6 +391,110 @@ sub _append {
 	return $cmd;
 }
 
+sub queryCommand {
+	my ($args) = @_;
+
+	if (!defined $args || ref($args) ne 'HASH') {
+		die "queryCommand: args must be a hashref";
+	}
+
+	my $title = $args->{title};
+
+	if (! $title) {
+		die "queryCommand: args requires a title";
+	}
+
+	my $cmd_spec = getCommand($title);
+	if (! $cmd_spec) {
+		# Unknown title
+		return undef;
+	}
+
+	my $cmd = '!';
+
+	$cmd .= $cmd_spec->{key};
+	$cmd .= '?';
+
+	if ($cmd_spec->{query_args}) {
+		my $lr = $cmd_spec->{query_args};
+
+		foreach my $hr2 (@$lr) {
+			if ($hr2->{key}) {
+				my $input = $args->{$hr2->{key}};
+				my $value;
+				if ($hr2->{func}) {
+					my $func = $hr2->{func};
+					$value = &$func($input, 'encode');
+				}
+				elsif ($hr2->{type}) {
+					my $type = $hr2->{type};
+					$value = LS30::Type::getCode($type, $input);
+				}
+
+				if (defined $value) {
+					$cmd .= $value;
+				}
+			}
+		}
+	}
+
+	$cmd .= '&';
+
+	return $cmd;
+}
+
+sub setCommand {
+	my ( $args) = @_;
+
+	if (!defined $args || ref($args) ne 'HASH') {
+		die "setCommand: args must be a hashref";
+	}
+
+	my $title = $args->{title};
+
+	if (! $title) {
+		die "setCommand: args requires a title";
+	}
+
+	my $cmd_spec = getCommand($title);
+	if (! $cmd_spec) {
+		# Unknown title
+		return undef;
+	}
+
+	my $cmd = '!';
+
+	$cmd .= $cmd_spec->{key};
+	$cmd .= 's';
+
+	if ($cmd_spec->{args}) {
+		my $lr = $cmd_spec->{args};
+
+		foreach my $hr2 (@$lr) {
+			if ($hr2->{key}) {
+				my $input = $args->{$hr2->{key}};
+				my $value;
+				if ($hr2->{func}) {
+					my $func = $hr2->{func};
+					$value = &$func($input, 'encode');
+				}
+				elsif ($hr2->{type}) {
+					my $type = $hr2->{type};
+					$value = LS30::Type::getCode($type, $input);
+				}
+
+				if (defined $value) {
+					$cmd .= $value;
+				}
+			}
+		}
+	}
+
+	$cmd .= '&';
+
+	return $cmd;
+}
+
 sub parseResponse {
 	my ($response) = @_;
 
@@ -395,34 +505,37 @@ sub parseResponse {
 
 	my $meat = $1;
 
+	my $return = {
+		string => $response,
+	};
+
 	my $skey = substr($meat, 0, 1);
 
 	# Test if it's a single character response
 	my $hr = $single_char_responses->{$skey};
 	if ($hr) {
-		return _parseFormat(substr($meat, 1), $hr);
+		return _parseFormat(substr($meat, 1), $hr, $return);
 	}
 
 	my $key = substr($meat, 0, 2);
 
 	$hr = getCommandByKey($key);
-	if (!defined $hr) {
-		print "Unparseable response: $response ($meat, $key)\n";
-		return undef;
+	if ($hr) {
+		if (substr($meat, 2, 1) eq 's') {
+			# It's a response to a set command
+			$return->{action} = 'set';
+			$meat = substr($meat, 3);
+		} else {
+			# It's a response to a query command
+			$return->{action} = 'query';
+			$meat = substr($meat, 2);
+		}
+
+		return _parseFormat($meat, $hr, $return);
 	}
 
-	my $return = {
-		title => $hr->{title},
-		key => $hr->{key},
-	};
-
-	if ($hr->{resp_func}) {
-		my $func = $hr->{resp_func};
-		my $value = &$func(substr($meat, 2));
-		$return->{value} = $value;
-	} else {
-		$return->{value} = substr($meat, 2);
-	}
+	$return->{error} = "Unparseable response";
+	$return->{key} = $key;
 
 	return $return;
 }
@@ -450,7 +563,9 @@ sub resp_date {
 sub hexn {
 	my ($string, $n) = @_;
 
-	return hex(substr($string, 0, $n));
+	my $hex = substr($string, 0, $n);
+	$hex =~ tr/:;<=>?/abcdef/;
+	return hex($hex);
 }
 
 # ---------------------------------------------------------------------------
@@ -464,11 +579,17 @@ sub resp_hex1 {
 }
 
 # ---------------------------------------------------------------------------
-# Turn 2 hex digits into decimal
+# Turn 2 hex digits into decimal, or vice-versa
 # ---------------------------------------------------------------------------
 
 sub resp_hex2 {
-	my ($string) = @_;
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		my $hex = sprintf("%02x", $string);
+		$hex =~ tr/abcdef/:;<=>?/;
+		return $hex;
+	}
 
 	return hexn($string, 2);
 }
@@ -509,7 +630,33 @@ sub resp_delay {
 # ---------------------------------------------------------------------------
 
 sub resp_interval2 {
-	my ($string) = @_;
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		my $duration;
+
+		if ($string =~ /^(\d+) minutes/) {
+			$duration = $1 * 60;
+		}
+		elsif ($string =~ /^(\d+) seconds/) {
+			$duration = $1;
+		}
+		elsif ($string =~ /^(\d+)$/) {
+			$duration = $1;
+		}
+
+		my $value;
+
+		if ($duration < 60) {
+			$value = $duration;
+		} else {
+			$value = 64 + int($duration / 60);
+		}
+
+		my $hex = sprintf("%02x", $value);
+		$hex =~ tr/abcdef/:;<=>?/;
+		return $hex;
+	}
 
 	my $value = hex($string);
 
@@ -588,15 +735,15 @@ sub parseDeviceConfig {
 # ---------------------------------------------------------------------------
 
 sub _parseFormat {
-	my ($string, $hr) = @_;
+	my ($string, $hr, $return) = @_;
 
-	my $return = {
-		string => $string,
-		title => $hr->{title},
-	};
+	$return->{title} = $hr->{title};
 
-	if ($hr->{args}) {
-		foreach my $hr2 (@{$hr->{args}}) {
+	# Use responses if defined, otherwise use argument definition
+	my $response_hr = $hr->{response} || $hr->{args};
+
+	if ($response_hr) {
+		foreach my $hr2 (@$response_hr) {
 			$string = _parseArg($string, $return, $hr2);
 		}
 	}
@@ -624,7 +771,7 @@ sub _parseArg {
 
 	if ($arg_hr->{func}) {
 		my $func_ref = $arg_hr->{func};
-		$return->{$key} = &$func_ref($input);
+		$return->{$key} = &$func_ref($input, 'decode');
 	}
 	elsif ($arg_hr->{type}) {
 		my $type = $arg_hr->{type};
