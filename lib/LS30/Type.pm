@@ -226,4 +226,26 @@ sub getString {
 	return $reverse_table->{$table}->{$code};
 }
 
+
+# ---------------------------------------------------------------------------
+
+=item listStrings($table)
+
+Return a sorted list of the strings associated with the specified table.
+
+Return the empty list if the table does not exist.
+
+=cut
+
+sub listStrings {
+	my ($table) = @_;
+
+	my $hr = $type_table->{$table};
+	if (! $hr) {
+		return undef;
+	}
+
+	return sort(keys %$hr);
+}
+
 1;
