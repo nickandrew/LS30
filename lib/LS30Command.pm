@@ -38,7 +38,6 @@ my $simple_commands = [
 	[ 'RF Jamming Warning', 'c0' ],
 	[ 'Switch 16 Control', 'c8' ],
 	[ 'RS-232 Control', 'c9' ],
-	[ 'Remote Siren Type', 'd1' ],
 	[ 'GSM Phone 1', 'g0', 99, \&resp_telno ],
 	[ 'GSM Phone 2', 'g1', 99, \&resp_telno ],
 	[ 'GSM ID', 'g2' ],
@@ -54,16 +53,15 @@ my $simple_commands = [
 	[ 'Door Bell', 'm0' ],
 	[ 'Dial Tone Check', 'm1' ],
 	[ 'Telephone Line Cut Detection', 'm2' ],
-	[ 'Mode Change Chirp', 'm3' ],
+	[ 'Mode Change Chirp', 'm3', 1, \&resp_boolean ],
 	[ 'Emergency Button Assignment', 'm4' ],
 	[ 'Entry delay beep', 'm5' ],
-	[ 'Tamper Siren in Disarm', 'm7' ],
+	[ 'Tamper Siren in Disarm', 'm7', 1, \&resp_boolean ],
 	[ 'Telephone Ringer', 'm8' ],
 	[ 'Cease Dialing Mode', 'm9' ],
 	[ 'Alarm Warning Dong', 'mj' ],
 	[ 'Switch Type', 'mk' ],
-	# [ 'Operation Mode', 'n0', ],
-	[ 'Inner Siren Enable', 'n1', 1, \&resp_hex1 ],
+	[ 'Inner Siren Enable', 'n1', 1, \&resp_boolean ],
 	[ 'Dial Mode', 'n2' ],
 	[ 'X-10 House Code', 'n7' ],
 	[ 'Inactivity Function', 'o0' ],
@@ -105,7 +103,7 @@ my $simple_commands = [
 my $spec_commands = [
 	{ title => 'Operation Mode',
 		key => 'n0',
-		response => [
+		args => [
 			{ 'length' => 1, type => 'Arm Mode', key => 'value' },
 		],
 	},
@@ -115,6 +113,13 @@ my $spec_commands = [
 			min => 0,
 			max => 4
 		},
+	},
+	{ title => 'Remote Siren Type',
+		key => 'd1',
+		args => [
+			{ 'length' => 1, type => 'Siren Type', key => 'value' },
+			{ 'length' => 2, func => \&resp_hex2, key => 'Siren ID' },
+		],
 	},
 	{ title => 'Query Operation Schedule',
 		key => 'hq',
@@ -576,6 +581,36 @@ sub resp_hex1 {
 	my ($string) = @_;
 
 	return hexn($string, 1);
+}
+
+# ---------------------------------------------------------------------------
+# Translate a boolean value
+# ---------------------------------------------------------------------------
+
+sub resp_boolean {
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		if ($string =~ /^(on|true|yes)$/i) {
+			return 1;
+		}
+		elsif ($string =~ /^(off|false|no)$/i) {
+			return 0;
+		}
+		elsif ($string =~ /^\d+$/) {
+			if ($string > 0) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+		else {
+			warn "Invalid boolean string: $string\n";
+			return 0;
+		}
+	}
+
+	return ($string eq '0' ? 0 : 1);
 }
 
 # ---------------------------------------------------------------------------
