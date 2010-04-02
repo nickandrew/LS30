@@ -36,9 +36,11 @@ foreach my $cmd (@ARGV) {
 foreach my $lr (@responses) {
 	my ($cmd, $response) = @$lr;
 
-	printf("%-40s | %s\n", $cmd, $response);
-	my $resp = LS30::ResponseMessage->new($response);
-	print Dumper($resp) if ($resp);
+	if ($response) {
+		printf("%-40s | %s\n", $cmd, $response);
+		my $resp = LS30::ResponseMessage->new($response);
+		print Dumper($resp) if ($resp);
+	}
 }
 
 exit(0);
