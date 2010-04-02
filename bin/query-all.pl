@@ -55,7 +55,11 @@ foreach my $title (LS30Command::listCommands()) {
 foreach my $title (sort (keys %$data)) {
 	my $response = $data->{$title};
 
-	printf("%-40s | %s\n", $title, $response);
+	if ($response) {
+		printf("%-40s | %s\n", $title, $response);
+		my $resp = LS30::ResponseMessage->new($response);
+		print Dumper($resp) if ($resp);
+	}
 }
 
 exit(0);
