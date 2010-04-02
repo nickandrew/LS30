@@ -183,7 +183,10 @@ sub handleResponseMessage {
 		my $s = sprintf("Response: ", $response_obj->{error});
 		LS30::Log::timePrint($s);
 	} else {
-		my $s = sprintf("Response: %s (%s)", $response_obj->{title}, $response_obj->{value});
+		my $value = $response_obj->{value};
+		$value = '' if (!defined $value);
+		my $title = $response_obj->{title} || 'Unknown';
+		my $s = sprintf("Response: %s (%s)", $title, $value);
 		LS30::Log::timePrint($s);
 	}
 
