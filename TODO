@@ -1,0 +1,69 @@
+TODO list for LS30
+
+The protocol isn't completely decoded yet. So there are several things which
+need to be done in this area:
+
+  - Understand unknown fields in the device message
+
+  - Decode the event list output
+
+  - Decode the device status output
+
+  - Add correct argument specification to known commands (in lib/LS30Command.pm)
+
+  - Add more known commands
+
+  - Find undocumented commands
+
+Low level selector classes need work:
+
+  - I added timers so that a monitoring daemon running an event loop (looping to
+  select for read on one or more connected sockets) can periodically escape from
+  the loop to do other work. At present these only print a silly message around
+  once every ten minutes. These need to be properly implemented and tested and
+  some useful function written.
+
+  - Automatic reconnect after disconnection. This should be done with exponential
+  backoff. If reconnection fails, there should be an option to raise an out of
+  band alert (i.e. sending an SMS)
+
+Monitoring daemons need work:
+
+  - Response to alerts (i.e. burglary while the LS30 is in Away mode) such as
+  sending an SMS
+
+  - Keeping a log of device triggers (good for analysis of activity within the
+  monitored areas), whether the LS30 is armed or not
+
+Implement a device model:
+
+  - I intend to implement a class which models the LS30 as well as all of its
+  registered and unregistered devices. Event messages from the LS30 will update
+  this model
+
+Update of persistent device list:
+
+  - There's a YAML file which lists registered devices. It should be possible to
+  update this file on the fly as more devices are registered or discovered, and
+  monitoring daemons should see the updated list automatically
+
+USB serial support:
+
+  - I didn't even plug in the USB controller; this will be a cheaper option
+  than ethernet for many folks and presumably offers the identical control
+  and monitoring capability
+
+Multiple LS30 monitoring:
+
+  - It should be possible to use a single daemon to monitor multiple LS30
+  systems, such as a CMS (Central Monitoring System) would do.
+
+Test scripts:
+
+  - Add a test script for each class
+
+Documentation:
+
+  - Add perldoc for each class and method
+
+  - Maintain a Wiki or other homepage for the package
