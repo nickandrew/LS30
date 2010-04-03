@@ -77,6 +77,19 @@ my $type_table = {
 		'Group 99' => '99',
 	},
 
+	# Used for 'n8' partial arm - no group 90?
+	'Group 91-99' => {
+		'Group 91' => '91',
+		'Group 92' => '92',
+		'Group 93' => '93',
+		'Group 94' => '94',
+		'Group 95' => '95',
+		'Group 96' => '96',
+		'Group 97' => '97',
+		'Group 98' => '98',
+		'Group 99' => '99',
+	},
+
 	# Query/Set Operation Schedule
 	'Schedule Zone' => {
 		'Main' => '0',
@@ -174,6 +187,26 @@ my $type_table = {
 	'Siren Type' => {
 		'Standard' => '0',
 		'HA Series' => '1',
+	},
+
+	# 'u' command
+	'Switch/Operation Scene' => {
+		'Switch Scene 1' => '0',
+		'Switch Scene 2' => '1',
+		'Switch Scene 3' => '2',
+		'Switch Scene 4' => '3',
+		'Switch Scene 5' => '4',
+		'Switch Scene 6' => '5',
+		'Switch Scene 7' => '6',
+		'Switch Secne 8' => '7',
+		'Operation Scene 1' => '8',
+		'Operation Scene 2' => '9',
+		'Operation Scene 3' => ':',
+		'Operation Scene 4' => ';',
+		'Operation Scene 5' => '<',
+		'Operation Scene 6' => '=',
+		'Operation Scene 7' => '>',
+		'Operation Secne 8' => '?',
 	},
 
 };
