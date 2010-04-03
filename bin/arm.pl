@@ -17,7 +17,7 @@ use vars qw($opt_h $opt_m);
 
 getopts('h:m:');
 
-my @mode_list = LS30::Type::listStrings("Arm Mode");
+my @mode_list = LS30::Type::listStrings('Arm Mode');
 
 if (! $opt_m) {
 	die "Must specify option -m; valid modes are: " . join(', ', @mode_list);
