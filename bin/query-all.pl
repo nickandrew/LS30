@@ -13,6 +13,9 @@ use strict;
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 
+use LS30::Commander qw();
+use LS30::ResponseMessage qw();
+use LS30::Type qw();
 use LS30Command qw();
 use LS30Connection qw();
 
@@ -26,6 +29,8 @@ $ls30c->Connect();
 
 LS30Command::addCommands();
 
+my $ls30cmdr = LS30::Commander->new($ls30c);
+
 my $data = { };
 
 foreach my $title (LS30Command::listCommands()) {
@@ -37,17 +42,15 @@ foreach my $title (LS30Command::listCommands()) {
 		next;
 	}
 
-	if ($cmd_spec->{array2}) {
-		my $min = $cmd_spec->{array2}->{min};
-		my $max = $cmd_spec->{array2}->{max};
-		foreach my $n ($min .. $max) {
-			my $query = LS30Command::queryString($cmd_spec, '', $n);
-			my $response = $ls30c->sendCommand($query);
-			$data->{"$title $n"} = $response;
-		}
+	my $cmd_ref = {
+		title => $title,
+	};
+
+	if ($cmd_spec->{query_args}) {
+		permuteArgs($cmd_spec->{query_args}, $cmd_ref, $title);
 	} else {
-		my $query = LS30Command::queryString($cmd_spec);
-		my $response = $ls30c->sendCommand($query);
+		my $query = LS30Command::queryCommand($cmd_ref);
+		my $response = $ls30cmdr->sendCommand($query);
 		$data->{$title} = $response;
 	}
 }
@@ -63,3 +66,34 @@ foreach my $title (sort (keys %$data)) {
 }
 
 exit(0);
+
+# ---------------------------------------------------------------------------
+# A query command takes arguments. It may take more than one. We assume that
+# all arguments are one of a finite set, and we iterate through all
+# permutations of their values.
+# This is a recursive function.
+# ---------------------------------------------------------------------------
+
+sub permuteArgs {
+	my ($query_args, $cmd_ref, $title) = @_;
+
+	if (! @$query_args) {
+		# Recursion has finished; issue command
+		my $cmd = LS30Command::queryCommand($cmd_ref);
+		my $resp = $ls30cmdr->sendCommand($cmd);
+		# Save response according to computed title
+		$data->{$title} = $resp;
+		return;
+	}
+
+	my @rest = @$query_args;
+	my $arg = shift @rest;
+
+	my @list = LS30::Type::listStrings($arg->{type});
+	my $key = $arg->{key};
+
+	foreach my $v (@list) {
+		$cmd_ref->{$key} = $v;
+		permuteArgs(\@rest, $cmd_ref, "$title $key=$v");
+	}
+}
