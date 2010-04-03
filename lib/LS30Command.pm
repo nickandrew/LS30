@@ -109,10 +109,9 @@ my $spec_commands = [
 	},
 	{ title => 'Device Count',
 		key => 'b3',
-		array2 => {
-			min => 0,
-			max => 4
-		},
+		query_args => [
+			{ 'length' => 1, type => 'Device Type', key => 'device_type' },
+		],
 	},
 	{ title => 'Remote Siren Type',
 		key => 'd1',
@@ -201,10 +200,9 @@ my $spec_commands = [
 	},
 	{ title => 'Partial Arm',
 		key => 'n8',
-		array2 => {
-			min => 90,
-			max => 99
-		},
+		query_args => [
+			{ 'length' => 2, type => 'Group 91-99', key => 'value' },
+		],
 	},
 	{ title => 'Event',
 		key => 'ev',
@@ -223,20 +221,17 @@ my $spec_commands = [
 	{ title => 'Password',
 		# Note 1-char key
 		key => 'p',
-		array2 => {
-			min => 1,
-			max => 10,
-			encoding => 'wonkykex',
-		},
+		query_args => [
+			{ 'length' => 1, type => 'Password', key => 'password_no' },
+		],
 	},
+
 	{ title => 'Switch/Operation Scene',
 		# Note 1-char key
 		key => 'u',
-		array2 => {
-			min => 0,
-			max => 15,
-			encoding => 'wonkykex',
-		},
+		query_args => [
+			{ 'length' => 1, type => 'Switch/Operation Scene', key => 'value' },
+		],
 	},
 ];
 
