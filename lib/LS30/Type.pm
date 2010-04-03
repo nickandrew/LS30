@@ -55,6 +55,15 @@ my $type_table = {
 		'Special Sensor' => '4',
 	},
 
+	# 2nd letter of 'k' commands: 'kb', 'kc', ...
+	'Device Code' => {
+		'Burglar Sensor' => 'b',
+		'Controller' => 'c',
+		'Fire Sensor' => 'f',
+		'Medical Button' => 'm',
+		'Extra Sensor' => 'e',
+	},
+
 	'Group' => {
 		'Group 90' => '90',
 		'Group 91' => '91',
