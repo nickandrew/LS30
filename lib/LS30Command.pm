@@ -201,7 +201,11 @@ my $spec_commands = [
 	{ title => 'Partial Arm',
 		key => 'n8',
 		query_args => [
-			{ 'length' => 2, type => 'Group 91-99', key => 'value' },
+			{ 'length' => 2, type => 'Group 91-99', key => 'group_number' },
+		],
+		response => [
+			{ 'length' => 2, type => 'Group 91-99', key => 'group_number' },
+			{ 'length' => 1, func => \&resp_boolean, key => 'value' },
 		],
 	},
 	{ title => 'Event',
