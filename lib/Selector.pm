@@ -192,29 +192,65 @@ sub eventLoop {
 		die "Unable to eventLoop(): No IO::Select object";
 	}
 
-	my $start = time();
-
 	while (1) {
-		my $how_long = $self->runTimers();
+		$self->pollServer(0);
+	}
+}
 
-		if (! $self->{sockets}) {
-			# No sockets, just wait a bit
-			sleep($how_long);
-			next;
-		}
 
-		my @read = $select->can_read($how_long);
+# ---------------------------------------------------------------------------
 
-		if (@read) {
-			foreach my $handle (@read) {
-				if (ref($handle) ne 'ARRAY') {
-					print STDERR "Read handle $handle is not an array!\n";
-					next;
-				}
+=item pollServer($timeout)
 
-				my ($socket, $object) = @$handle;
-				$object->handleRead($self, $socket);
+Poll sockets and timers once, with a maximum specified timeout.
+All timers are checked. Any expired timers have an event generated with a
+call to the event function. The times of non-expired timers are used to
+calculate a maximum wait time. If an overall timeout is specified, this is
+the maximum timeout.
+
+If all timers are expired then a maximum wait time of 1 second is chosen.
+
+If the maximum wait time is longer than 60 seconds, it is set to 60.
+
+Next, select() is called. All sockets available for read are detected.
+The specified function is called like this:
+
+    $object->handleRead($self, $socket);
+
+=cut
+
+sub pollServer {
+	my ($self, $timeout) = @_;
+
+	my $select = $self->{'select'};
+
+	if (! $select) {
+		die "Unable to pollServer(): No IO::Select object";
+	}
+
+	my $how_long = $self->runTimers();
+
+	if ($timeout && $timeout < $how_long) {
+		$how_long = $timeout;
+	}
+
+	if (! $self->{sockets}) {
+		# No sockets, just wait a bit
+		sleep($how_long);
+		return;
+	}
+
+	my @read = $select->can_read($how_long);
+
+	if (@read) {
+		foreach my $handle (@read) {
+			if (ref($handle) ne 'ARRAY') {
+				print STDERR "Read handle $handle is not an array!\n";
+				next;
 			}
+
+			my ($socket, $object) = @$handle;
+			$object->handleRead($self, $socket);
 		}
 	}
 }
