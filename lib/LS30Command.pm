@@ -240,7 +240,6 @@ my $spec_commands = [
 ];
 
 my $other_commands = [
-	# [ 'Partial Arm', 'n8', 90, 99 ],
 	{ title => 'Send Message',
 		key => 'f0',
 		type => 'command',
@@ -258,44 +257,10 @@ my $other_commands = [
 		type => 'command',
 		# Arg is 0 .. ?
 	},
-	{ title => 'Get Burglar Sensor Status',
-		key => 'kb',
-		type => 'query',
-		# Arg is 2-digit device number
-		# Response is very long hex string
-	},
-	{ title => 'Get Controller Status',
-		key => 'kc',
-		type => 'query',
-		# Arg is 2-digit device number
-		# Response is very long hex string
-	},
-	{ title => 'Get Fire Sensor Status',
-		key => 'kf',
-		type => 'query',
-		# Arg is 2-digit device number
-		# Response is very long hex string
-	},
-	{ title => 'Get Medical Sensor Status',
-		key => 'km',
-		type => 'query',
-		# Arg is 2-digit device number
-		# Response is very long hex string
-	},
-	# [ 'Send message', 'f0' ],
 	# [ 'RS-232 Control', 'c9' ],
 	# [ 'Start Device Test', 'lt15' ],
 	# [ 'Set password User2', 'ps1xxxx' ],
 	# Query password 1: 'p?1' ?
-	# b3?[0-4] ... get count of number of devices of specified type
-	#    0 = controller
-	#    1 = burglar sensor
-	#    2 = fire sensor
-	#    3 = medical button
-	#    4 = special sensor
-	# h?000 ... query switches daily schedule
-	# h?500 ... query switches Friday schedule
-	# { 'length' => 1, type => 'Schedule Day of Week', key => 'schedule_day' },
 ];
 
 my $single_char_responses = {
