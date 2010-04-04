@@ -190,11 +190,10 @@ my $spec_commands = [
 
 	{ title => 'Query Operation Schedule',
 		key => 'hq',
-		arg1 => {
-			'length' => 3,
-			encoding => 'wonkyhex',
-			arg_key => 'schedule_no',
-		},
+		no_query => 1,
+		query_args => [
+			{ 'length' => 3, func => \&resp_hex3, key => 'value' },
+		],
 	},
 	{ title => 'Partial Arm',
 		key => 'n8',
