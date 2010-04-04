@@ -34,7 +34,12 @@ $max = 511 if (!defined $max);
 my $cmd_spec = LS30Command::getCommand('Event');
 
 foreach my $n ($min .. $max) {
-	my $cmd = LS30Command::makeCommandString($cmd_spec, { event_id => $n });
+	my $cmd_hr = {
+		title => 'Event',
+		value => $n,
+	};
+
+	my $cmd = LS30Command::queryCommand($cmd_hr);
 
 	my $response = $ls30cmdr->sendCommand($cmd);
 	my $obj = LS30::EventMessage->new($response);
