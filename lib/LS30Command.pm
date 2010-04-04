@@ -47,7 +47,6 @@ my $simple_commands = [
 	[ 'Entry Delay', 'l1', 2, \&resp_hex2 ],
 	[ 'Remote Siren Time', 'l2', 2, \&resp_interval2 ],
 	[ 'Relay Action Time', 'l3', 2, \&resp_delay, ],
-	# [ 'Inner Siren Time', 'l4' ],
 	[ 'Door Bell', 'm0' ],
 	[ 'Dial Tone Check', 'm1' ],
 	[ 'Telephone Line Cut Detection', 'm2' ],
@@ -105,12 +104,14 @@ my $spec_commands = [
 			{ 'length' => 1, type => 'Arm Mode', key => 'value' },
 		],
 	},
+
 	{ title => 'Device Count',
 		key => 'b3',
 		query_args => [
 			{ 'length' => 1, type => 'Device Type', key => 'device_type' },
 		],
 	},
+
 	{ title => 'Remote Siren Type',
 		key => 'd1',
 		args => [
@@ -118,6 +119,7 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_hex2, key => 'Siren ID' },
 		],
 	},
+
 	{ title => 'Burglar Sensor Status',
 		key => 'kb',
 		response => [
@@ -195,6 +197,7 @@ my $spec_commands = [
 			{ 'length' => 3, func => \&resp_hex3, key => 'value' },
 		],
 	},
+
 	{ title => 'Partial Arm',
 		key => 'n8',
 		query_args => [
@@ -205,24 +208,22 @@ my $spec_commands = [
 			{ 'length' => 1, func => \&resp_boolean, key => 'value' },
 		],
 	},
+
 	{ title => 'Event',
 		key => 'ev',
 		no_query => 1,
 		query_args => [
 			{ 'length' => 3, func => \&resp_hex3, key => 'value' },
 		],
-		arg1 => {
-			'length' => 3,
-			encoding => 'wonkyhex',
-			arg_key => 'event_id',
-		},
 	},
+
 	{ title => 'Inner Siren Time',
 		key => 'l4',
 		args => [
 			{ 'length' => 2, func => \&resp_hex2, key => 'value' },
 		],
 	},
+
 	{ title => 'Password',
 		# Note 1-char key
 		key => 'p',
@@ -238,6 +239,7 @@ my $spec_commands = [
 			{ 'length' => 1, type => 'Switch/Operation Scene', key => 'value' },
 		],
 	},
+
 ];
 
 my $other_commands = [
@@ -247,21 +249,11 @@ my $other_commands = [
 		# Arg is 1 string, various length
 		# Response is same as command
 	},
-	{ title => 'Read Event',
-		key => 'ev',
-		type => 'event',
-		# Arg is 3-digit event code in wonky hex
-		# Response is '!ev' followed by data until '&'
-	},
 	{ title => 'Voice Playback',
 		key => 'vp',
 		type => 'command',
 		# Arg is 0 .. ?
 	},
-	# [ 'RS-232 Control', 'c9' ],
-	# [ 'Start Device Test', 'lt15' ],
-	# [ 'Set password User2', 'ps1xxxx' ],
-	# Query password 1: 'p?1' ?
 ];
 
 my $single_char_responses = {
@@ -275,8 +267,6 @@ my $single_char_responses = {
 	},
 };
 
-# Scheduling switches:
-#   h?000
 
 sub addCommand {
 	my ($hr) = @_;
