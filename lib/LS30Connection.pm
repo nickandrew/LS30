@@ -183,9 +183,7 @@ sub disconnect_event {
 
 =item sendCommand($string)
 
-Send a command and return the response to the command.
-
-Return undef on timeout or other error.
+Send a command to the connected socket.
 
 =cut
 
@@ -200,10 +198,6 @@ sub sendCommand {
 
 	$socket->send($string);
 	LS30::Log::timePrint("Sent: $string");
-
-	my $response = $self->getResponse(60);
-
-	return $response;
 }
 
 
