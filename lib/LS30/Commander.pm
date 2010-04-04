@@ -23,6 +23,7 @@ package LS30::Commander;
 use strict;
 
 use LS30::Log qw();
+use Selector qw();
 
 # ---------------------------------------------------------------------------
 
@@ -41,6 +42,7 @@ sub new {
 
 	my $self = {
 		ls30c => $ls30c,
+		selector => Selector->new(),
 	};
 
 	if (defined $timeout && $timeout > 0) {
@@ -52,6 +54,8 @@ sub new {
 	bless $self, $class;
 
 	$ls30c->setHandler($self);
+
+	$self->{selector}->addSelect( [$ls30c->socket(), $ls30c] );
 
 	return $self;
 }
@@ -90,7 +94,7 @@ sub sendCommand {
 	my $end_time = time() + $how_long;
 
 	while ($how_long > 0) {
-		$ls30c->pollServer($how_long);
+		$self->{selector}->pollServer($how_long);
 
 		my $response = $self->getResponse();
 
