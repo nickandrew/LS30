@@ -208,6 +208,10 @@ my $spec_commands = [
 	},
 	{ title => 'Event',
 		key => 'ev',
+		no_query => 1,
+		query_args => [
+			{ 'length' => 3, func => \&resp_hex3, key => 'value' },
+		],
 		arg1 => {
 			'length' => 3,
 			encoding => 'wonkyhex',
@@ -418,7 +422,10 @@ sub queryCommand {
 	my $cmd = '!';
 
 	$cmd .= $cmd_spec->{key};
-	$cmd .= '?';
+
+	if (! $cmd_spec->{no_query}) {
+		$cmd .= '?';
+	}
 
 	if ($cmd_spec->{query_args}) {
 		my $lr = $cmd_spec->{query_args};
@@ -627,6 +634,22 @@ sub resp_hex2 {
 	}
 
 	return hexn($string, 2);
+}
+
+# ---------------------------------------------------------------------------
+# Turn 3 hex digits into decimal, or vice-versa
+# ---------------------------------------------------------------------------
+
+sub resp_hex3 {
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		my $hex = sprintf("%03x", $string);
+		$hex =~ tr/abcdef/:;<=>?/;
+		return $hex;
+	}
+
+	return hexn($string, 3);
 }
 
 # ---------------------------------------------------------------------------
