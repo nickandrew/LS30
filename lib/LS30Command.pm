@@ -339,22 +339,6 @@ sub getCommandByKey {
 	return $command_bykey->{$key};
 }
 
-sub queryString {
-	my ($cmd_spec, $arg1, $arg2) = @_;
-
-	if (!defined $arg1) {
-		$arg1 = '';
-	}
-
-	if (!defined $arg2) {
-		$arg2 = '';
-	}
-
-	my $cmd = '!' . $cmd_spec->{key} . $arg1 . '?' . $arg2 . '&';
-
-	return $cmd;
-}
-
 sub makeCommandString {
 	my ($cmd_spec, $hr) = @_;
 
