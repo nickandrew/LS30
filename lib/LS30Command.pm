@@ -12,8 +12,6 @@ use LS30::Type qw();
 my $commands = { };
 my $command_bykey = { };
 
-my @wonky_hex_codes = ('0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?');
-
 my $simple_commands = [
 	[ 'Date/Time', 'dt', 11, \&resp_date ],
 	[ 'Switch  1', 's6', 1, \&resp_hex1 ],
@@ -276,22 +274,6 @@ my $single_char_responses = {
 
 # Scheduling switches:
 #   h?000
-
-# Query: '!p?' . $x . '&'
-
-my $passwords = [
-	'Master' => '0',
-	'USER2' => '1',
-	'USER3' => '2',
-	'USER4' => '3',
-	'USER5' => '4',
-	'USER6' => '5',
-	'USER7' => '6',
-	'USER8' => '7',
-	'USER9(L)' => '8',
-	'USER10(L)' => '9',
-	'Duress' => ':',
-];
 
 sub addCommand {
 	my ($hr) = @_;
