@@ -7,11 +7,13 @@
 #
 #   Options:
 #     -h host:port          Specify LS30 server host:port
+#     -s filename           Save queries and responses to YAML file
 
 use strict;
 
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
+use YAML qw();
 
 use LS30::Commander qw();
 use LS30::ResponseMessage qw();
@@ -19,9 +21,9 @@ use LS30::Type qw();
 use LS30Command qw();
 use LS30Connection qw();
 
-use vars qw($opt_h);
+use vars qw($opt_h $opt_s);
 
-getopts('h:');
+getopts('h:s:');
 
 my $ls30c = LS30Connection->new($opt_h);
 
@@ -71,6 +73,10 @@ foreach my $hr (@data) {
 		my $resp = LS30::ResponseMessage->new($response);
 		print Dumper($resp) if ($resp);
 	}
+}
+
+if ($opt_s) {
+	YAML::DumpFile($opt_s, \@data);
 }
 
 exit(0);
