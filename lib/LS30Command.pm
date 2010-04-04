@@ -343,63 +343,6 @@ sub getCommandByKey {
 	return $command_bykey->{$key};
 }
 
-sub makeCommandString {
-	my ($cmd_spec, $hr) = @_;
-
-	my $cmd = '!' . $cmd_spec->{key};
-
-	if ($cmd_spec->{arg1}) {
-		$cmd .= _append($cmd_spec->{arg1}, $hr);
-	}
-
-	if ($cmd_spec->{arg2}) {
-		$cmd .= _append($cmd_spec->{arg2}, $hr);
-	}
-
-	if ($cmd_spec->{arg3}) {
-		$cmd .= _append($cmd_spec->{arg3}, $hr);
-	}
-
-	$cmd .= '&';
-
-	return $cmd;
-}
-
-sub _append {
-	my ($spec, $arg) = @_;
-
-	my $cmd = '';
-
-	if (defined $spec->{fixed}) {
-		$cmd .= $spec->{fixed};
-		return $cmd;
-	}
-
-	my $arg_key = $spec->{arg_key};
-	my $encoding = $spec->{encoding};
-	my $length = $spec->{length};
-
-	if ($arg_key) {
-		my $value = $arg->{$arg_key};
-		if (! $encoding) {
-			# Do nothing to it
-		}
-		elsif ($encoding eq 'wonkyhex') {
-			my $hex = sprintf("%0*x", $length, $value);
-			$hex =~ tr/abcdef/:;<->?/;
-			$value = $hex;
-		}
-		elsif ($encoding eq 'hex') {
-			my $hex = sprintf("%*x", $length, $value);
-			$value = $hex;
-		}
-
-		$cmd .= $value;
-	}
-
-	return $cmd;
-}
-
 sub queryCommand {
 	my ($args) = @_;
 
