@@ -31,7 +31,7 @@ LS30Command::addCommands();
 
 my $ls30cmdr = LS30::Commander->new($ls30c);
 
-my $data = { };
+my @data;
 
 foreach my $title (LS30Command::listCommands()) {
 
@@ -51,15 +51,23 @@ foreach my $title (LS30Command::listCommands()) {
 	} else {
 		my $query = LS30Command::queryCommand($cmd_ref);
 		my $response = $ls30cmdr->sendCommand($query);
-		$data->{$title} = $response;
+
+		my $hr = {
+			title => $title,
+			query => $query,
+			response => $response,
+		};
+
+		push(@data, $hr);
 	}
 }
 
-foreach my $title (sort (keys %$data)) {
-	my $response = $data->{$title};
+foreach my $hr (@data) {
+
+	my $response = $hr->{response};
 
 	if ($response) {
-		printf("%-40s | %s\n", $title, $response);
+		printf("%-40s | %s\n", $hr->{title}, $response);
 		my $resp = LS30::ResponseMessage->new($response);
 		print Dumper($resp) if ($resp);
 	}
@@ -81,8 +89,15 @@ sub permuteArgs {
 		# Recursion has finished; issue command
 		my $cmd = LS30Command::queryCommand($cmd_ref);
 		my $resp = $ls30cmdr->sendCommand($cmd);
-		# Save response according to computed title
-		$data->{$title} = $resp;
+
+		# Save response
+		my $hr = {
+			title => $title,
+			query => $cmd,
+			response => $resp,
+		};
+
+		push(@data, $hr);
 		return;
 	}
 
