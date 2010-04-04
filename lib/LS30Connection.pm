@@ -24,7 +24,6 @@ use strict;
 
 use Data::Dumper qw(Dumper);
 use Date::Format qw(time2str);
-use IO::Select;
 use IO::Socket::INET;
 
 use LS30::Log qw();
@@ -50,7 +49,6 @@ sub new {
 
 	my $self = {
 		server_address => $server_address,
-		last_response => undef,
 		pending => '',
 		handler => undef,
 	};
@@ -213,128 +211,6 @@ sub setHandler {
 	my ($self, $object) = @_;
 
 	$self->{handler} = $object;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item eventLoop()
-
-Loop forever reading and processing data from our socket. Only return on
-Error or EOF on the server socket.
-
-=cut
-
-sub eventLoop {
-	my ($self) = @_;
-
-	while (1) {
-		my $rc = $self->pollServer(8);
-
-		if ($rc == -2) {
-			LS30::Log::timePrint("Error on server socket");
-			return undef;
-		}
-
-		if ($rc == -1) {
-			LS30::Log::timePrint("EOF on server socket");
-			return undef;
-		}
-	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item getResponse($timeout)
-
-Wait up to $timeout seconds to receive a response to a command which has
-already been issued. Return the response if possible, otherwise undef.
-
-=cut
-
-sub getResponse {
-	my ($self, $timeout) = @_;
-
-	$timeout ||= 60;
-	my $now = time();
-	my $time_limit = $now + $timeout;
-	my $poll_time = ($timeout < 2) ? $timeout : 2;
-
-	do {
-		my $rc = $self->pollServer(2);
-		if ($rc < 0) {
-			# TODO process error conditions
-			return undef;
-		}
-
-		my $response = $self->lastResponse();
-		if ($response) {
-			$self->clearResponse();
-			return $response;
-		}
-	} while (time() < $time_limit);
-
-	LS30::Log::timePrint("No response received within $timeout seconds");
-	return undef;
-}
-
-
-# ------------------------------------------------------------------------
-
-=item pollServer($timeout)
-
-Receive at most one buffer of data from the server. This may consist of
-multiple lines, or partial lines. All completed lines are processed
-through handlers. A trailing partial line is left in our 'pending'
-string for later processing.
-
-Return values:
-
-  -2   Error on server socket
-  -1   EOF on server socket
-   0   Timeout - no data received
-   1   Data received and processed.
-
-=cut
-
-sub pollServer {
-	my ($self, $timeout) = @_;
-
-	my $socket = $self->{socket};
-
-	if (! $socket) {
-		die "Unable to getResponse(): Not connected";
-	}
-
-	my $select = IO::Select->new();
-	$select->add($socket);
-
-	my @read = $select->can_read($timeout || 2);
-
-	if (@read) {
-		foreach my $handle (@read) {
-			if ($handle == $socket) {
-				my $buffer;
-				my $n = $socket->recv($buffer, 256);
-
-				if (!defined $n) {
-					LS30::Log::timePrint("Error on server socket");
-					return -2;
-				}
-
-				if (length($buffer) == 0) {
-					LS30::Log::timePrint("EOF on server socket");
-					return -1;
-				}
-
-				$self->addBuffer($buffer);
-				return 1;
-			}
-		}
-	}
-
-	return 0;
 }
 
 
@@ -528,37 +404,6 @@ sub runHandler {
 	else {
 		LS30::Log::timePrint("No handler function defined for $type");
 	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item lastResponse()
-
-Return the last response line we received from our server.
-
-=cut
-
-sub lastResponse {
-	my ($self) = @_;
-
-	return $self->{last_response};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item clearResponse()
-
-Clear our record of last response. Used when returning it, to avoid
-returning the same response twice.
-
-=cut
-
-sub clearResponse {
-	my ($self) = @_;
-
-	$self->{last_response} = undef;
 }
 
 1;
