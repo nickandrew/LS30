@@ -409,22 +409,35 @@ sub setCommand {
 	my $cmd = '!';
 
 	$cmd .= $cmd_spec->{key};
-	$cmd .= 's';
+
+	if (! $cmd_spec->{no_set}) {
+		$cmd .= 's';
+	}
 
 	if ($cmd_spec->{args}) {
 		my $lr = $cmd_spec->{args};
 
 		foreach my $hr2 (@$lr) {
-			if ($hr2->{key}) {
-				my $input = $args->{$hr2->{key}};
+			my $key = $hr2->{key};
+
+			if ($key) {
+				my $input = $args->{$key};
+
 				my $value;
 				if ($hr2->{func}) {
 					my $func = $hr2->{func};
 					$value = &$func($input, 'encode');
 				}
 				elsif ($hr2->{type}) {
-					my $type = $hr2->{type};
-					$value = LS30::Type::getCode($type, $input);
+					if (!defined $input) {
+						warn "Needed set command key $key is missing";
+					} else {
+						my $type = $hr2->{type};
+						$value = LS30::Type::getCode($type, $input);
+						if (!defined $value) {
+							warn "Incorrect value $input for Table $type, string $input";
+						}
+					}
 				}
 
 				if (defined $value) {
