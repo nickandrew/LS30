@@ -228,6 +228,11 @@ exist.
 sub getCode {
 	my ($table, $string) = @_;
 
+	if (!defined $string) {
+		warn "Cannot lookup undefined string in table $table";
+		return undef;
+	}
+
 	my $hr = $type_table->{$table};
 	if (! $hr) {
 		confess "No such LS30::Type ($table)";
