@@ -675,7 +675,20 @@ sub resp_interval2 {
 # ---------------------------------------------------------------------------
 
 sub resp_decimal_time {
-	my ($string) = @_;
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		if (! $string) {
+			return '????';
+		}
+		elsif ($string =~ /^(\d\d):(\d\d)$/) {
+			return "$1$2";
+		}
+		else {
+			warn "Incorrect decimal_time $string";
+			return '????';
+		}
+	}
 
 	if ($string !~ /^(\d\d)(\d\d)$/) {
 		return undef;
