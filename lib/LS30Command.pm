@@ -7,6 +7,8 @@ package LS30Command;
 
 use strict;
 
+use Carp qw(carp);
+
 use LS30::Type qw();
 
 my $commands = { };
