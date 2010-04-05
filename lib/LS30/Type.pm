@@ -104,8 +104,9 @@ my $type_table = {
 		'Zone 99' => '9',
 	},
 
-	# Used in Operation Schedule
+	# Used in Query/Set Operation Schedule
 	'Operation Code' => {
+		'Ignore' => '?',
 		'Disarm' => '1',
 		'Home' => '2',
 		'Away' => '3',

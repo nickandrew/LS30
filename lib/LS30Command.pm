@@ -200,6 +200,19 @@ my $spec_commands = [
 		],
 	},
 
+	{ title => 'Set Operation Schedule',
+		key => 'hr',
+		no_query => 1,
+		no_set => 1,
+		args => [
+			{ 'length' => 1, type => 'Schedule Day of Week', key => 'day_of_week' },
+			{ 'length' => 2, func => \&resp_hex2, key => 'id' },
+			{ 'length' => 4, func => \&resp_decimal_time, key => 'start_time' },
+			{ 'length' => 1, type => 'Schedule Zone', key => 'zone' },
+			{ 'length' => 1, type => 'Operation Code', key => 'op_code' },
+		],
+	},
+
 	{ title => 'Partial Arm',
 		key => 'n8',
 		query_args => [
