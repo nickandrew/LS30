@@ -573,6 +573,11 @@ sub resp_hex2 {
 	my ($string, $op) = @_;
 
 	if ($op && $op eq 'encode') {
+		if (!defined $string) {
+			carp "Missing string in resp_hex2";
+			return undef;
+		}
+
 		my $hex = sprintf("%02x", $string);
 		$hex =~ tr/abcdef/:;<=>?/;
 		return $hex;
