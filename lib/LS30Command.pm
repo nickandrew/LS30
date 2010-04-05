@@ -196,7 +196,8 @@ my $spec_commands = [
 		key => 'hq',
 		no_query => 1,
 		query_args => [
-			{ 'length' => 3, func => \&resp_hex3, key => 'value' },
+			{ 'length' => 1, type => 'Schedule Day of Week', key => 'day_of_week' },
+			{ 'length' => 2, func => \&resp_hex2, key => 'id' },
 		],
 	},
 
