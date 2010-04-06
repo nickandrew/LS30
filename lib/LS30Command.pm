@@ -348,6 +348,31 @@ sub getCommandByKey {
 	return $command_bykey->{$key};
 }
 
+sub _password {
+	my ($cmd_spec, $args) = @_;
+
+	# Add an optional password if supplied in the arguments or if
+	# supplied in an environment variable.
+	my $password = $args->{password};
+	if (!defined $password) {
+		$password = $ENV{LS30_PASSWORD};
+	}
+
+	# Only append a password if the command spec allows it.
+	# Some commands presumably cannot take a password, e.g.
+	# those which take variable length strings as arguments.
+
+	if (defined $password && ! $cmd_spec->{no_password}) {
+		$password = sprintf("%-8.8s", $password . '????????');
+	}
+
+	if (!defined $password) {
+		$password = '';
+	}
+
+	return $password;
+}
+
 sub queryCommand {
 	my ($args) = @_;
 
@@ -397,6 +422,9 @@ sub queryCommand {
 			}
 		}
 	}
+
+	# Add an optional password
+	$cmd .= _password($cmd_spec, $args);
 
 	$cmd .= '&';
 
@@ -462,6 +490,9 @@ sub setCommand {
 			}
 		}
 	}
+
+	# Add an optional password
+	$cmd .= _password($cmd_spec, $args);
 
 	$cmd .= '&';
 
