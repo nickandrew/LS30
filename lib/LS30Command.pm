@@ -887,7 +887,10 @@ sub _parseArg {
 	}
 
 	my $input = substr($string, 0, $length);
-	my $rest = substr($string, $length);
+	my $rest;
+	if (length($string) >= $length) {
+		$rest = substr($string, $length);
+	}
 	my $key = $arg_hr->{key};
 
 	if ($arg_hr->{func}) {
