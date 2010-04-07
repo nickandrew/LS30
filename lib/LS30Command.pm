@@ -246,6 +246,10 @@ my $spec_commands = [
 		query_args => [
 			{ 'length' => 1, type => 'Password', key => 'password_no' },
 		],
+		args => [
+			{ 'length' => 1, type => 'Password', key => 'password_no' },
+			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
+		],
 	},
 
 	{ title => 'Switch/Operation Scene',
@@ -279,6 +283,13 @@ my $single_char_responses = {
 			{ 'length' => 4, func => \&resp_decimal_time, key => 'start_time' },
 			{ 'length' => 1, type => 'Schedule Zone', key => 'zone' },
 			{ 'length' => 1, type => 'Operation Code', key => 'op_code' },
+		],
+	},
+
+	'p' => {
+		title => 'Password',
+		args => [
+			{ 'length' => 8, func => \&resp_password, key => 'current_password' },
 		],
 	},
 };
@@ -765,6 +776,28 @@ sub resp_decimal_time {
 
 sub resp_string {
 	my ($string) = @_;
+
+	return $string;
+}
+
+# ---------------------------------------------------------------------------
+# Password parsing
+# ---------------------------------------------------------------------------
+
+sub resp_password {
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		# No change or padding required
+		return $string;
+	}
+
+	if ($string eq 'no') {
+		return '';
+	}
+
+	# Remove padding
+	$string =~ s/\?+$//;
 
 	return $string;
 }
