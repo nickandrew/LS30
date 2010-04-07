@@ -404,15 +404,25 @@ sub queryCommand {
 		my $lr = $cmd_spec->{query_args};
 
 		foreach my $hr2 (@$lr) {
-			if ($hr2->{key}) {
-				my $input = $args->{$hr2->{key}};
+			my $key = $hr2->{key};
+			my $type = $hr2->{type};
+			if ($key) {
+				if (!exists $args->{$key}) {
+					my $s = sprintf("Args for %s is missing key %s (%s)",
+						$title,
+						$key,
+						($type ? "code table $type" : "function"),
+					);
+					warn $s;
+				}
+
+				my $input = $args->{$key};
 				my $value;
 				if ($hr2->{func}) {
 					my $func = $hr2->{func};
 					$value = &$func($input, 'encode');
 				}
-				elsif ($hr2->{type}) {
-					my $type = $hr2->{type};
+				elsif ($type) {
 					$value = LS30::Type::getCode($type, $input);
 				}
 
