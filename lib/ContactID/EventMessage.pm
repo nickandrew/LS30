@@ -128,6 +128,24 @@ sub getUnknown {
 	return $self->{unknown};
 }
 
+sub getDescription {
+	my ($self) = @_;
+
+	return $self->{event_description};
+}
+
+sub getGroup {
+	my ($self) = @_;
+
+	return $self->{group};
+}
+
+sub getZone {
+	my ($self) = @_;
+
+	return $self->{zone};
+}
+
 sub asText {
 	my ($self) = @_;
 
