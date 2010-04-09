@@ -116,6 +116,15 @@ sub _parseString {
 	}
 }
 
+
+# ---------------------------------------------------------------------------
+
+=item getString()
+
+Return the unparsed message string.
+
+=cut
+
 sub getString {
 	my ($self) = @_;
 
@@ -128,11 +137,29 @@ sub getUnknown {
 	return $self->{unknown};
 }
 
+
+# ---------------------------------------------------------------------------
+
+=item getDescription()
+
+Return the description part of the message.
+
+=cut
+
 sub getDescription {
 	my ($self) = @_;
 
 	return $self->{event_description};
 }
+
+
+# ---------------------------------------------------------------------------
+
+=item getGroup()
+
+Return the group number.
+
+=cut
 
 sub getGroup {
 	my ($self) = @_;
@@ -140,11 +167,29 @@ sub getGroup {
 	return $self->{group};
 }
 
+
+# ---------------------------------------------------------------------------
+
+=item getZone()
+
+Return the zone number.
+
+=cut
+
 sub getZone {
 	my ($self) = @_;
 
 	return $self->{zone};
 }
+
+
+# ---------------------------------------------------------------------------
+
+=item asText()
+
+Return a text representation of this message.
+
+=cut
 
 sub asText {
 	my ($self) = @_;
