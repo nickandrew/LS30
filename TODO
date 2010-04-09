@@ -67,3 +67,7 @@ Documentation:
   - Add perldoc for each class and method
 
   - Maintain a Wiki or other homepage for the package
+
+Backup and restore:
+
+  - Write a script to restore operation schedules
