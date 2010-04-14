@@ -81,8 +81,8 @@ sub new {
 
 =item addSelect($lr)
 
-Add an array to the IO::Select object. The array is expected to have 3
-elements: [ socket_ref, function_ref, object_ref ]
+Add an array to the IO::Select object. The array is expected to have 2
+elements: [ socket_ref, object_ref ]
 
 =cut
 
@@ -98,9 +98,9 @@ sub addSelect {
 
 =item removeSelect($lr)
 
-Remove the specified array from the IO::Select object. The array is expected
-to have 3
-elements: [ socket_ref, function_ref, object_ref ]
+Remove the specified socket from the IO::Select object.
+The argument can be either a socket reference, or an array reference with
+2 elements: [ socket_ref, object_ref ].
 
 =cut
 
