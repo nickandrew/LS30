@@ -34,7 +34,7 @@ use LS30::Log qw();
 
 # ---------------------------------------------------------------------------
 
-=item new($peer_addr)
+=item new($peer_addr, $handler)
 
 Connect to the server (identified as host:port) and return the newly
 instantiated AlarmDaemon::ServerSocket object. If unable to connect,
@@ -43,10 +43,11 @@ return undef.
 =cut
 
 sub new {
-	my ($class, $peer_addr) = @_;
+	my ($class, $peer_addr, $handler) = @_;
 
 	my $self = {
 		peer_addr => $peer_addr,
+		handler => $handler,
 		watchdog_interval => 600,
 		eol_state => 1,
 	};
@@ -233,6 +234,37 @@ sub doRead {
 	}
 
 	return $self->filterInput($buffer);
+}
+
+
+# ------------------------------------------------------------------------
+
+=item handleRead()
+
+Read data from the socket. Postprocess it, and call our handler's
+serverRead() function with the result.
+
+=cut
+
+sub handleRead {
+	my ($self) = @_;
+
+	my $buffer;
+	$self->{last_rcvd_time} = time();
+
+	my $n = $self->{socket}->recv($buffer, 128);
+	if (!defined $n) {
+		return;
+	}
+
+	if (length($buffer) == 0) {
+		return;
+	}
+
+	my ($l, $data) = $self->filterInput($buffer);
+	if ($l > 0) {
+		$self->{handler}->serverRead($data);
+	}
 }
 
 
