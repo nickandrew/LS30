@@ -24,17 +24,18 @@ use strict;
 
 # ---------------------------------------------------------------------------
 
-=item new($socket)
+=item new($socket, $handler)
 
 Return a new instance of AlarmDaemon::ClientSocket for the specified socket.
 
 =cut
 
 sub new {
-	my ($class, $socket) = @_;
+	my ($class, $socket, $handler) = @_;
 
 	my $self = {
 		socket => $socket,
+		handler => $handler,
 	};
 
 	bless $self, $class;
@@ -153,6 +154,38 @@ sub doRead {
 	}
 
 	return ($l, $buffer);
+}
+
+
+# ------------------------------------------------------------------------
+
+=item handleRead()
+
+Read data from the socket. Pass it to our handler object.
+
+=cut
+
+sub handleRead {
+	my ($self, $selector, $socket) = @_;
+
+	my $buffer;
+	my $handler = $self->{handler};
+
+	my $n = $self->{socket}->recv($buffer, 128);
+	if (!defined $n) {
+		$handler->handleError($self);
+	}
+
+	my $l = length($buffer);
+
+	if ($l == 0) {
+		# Other end closed connection
+		$handler->removeClient($self);
+		$self->disconnect();
+		return;
+	}
+
+	$handler->clientRead($buffer);
 }
 
 1;
