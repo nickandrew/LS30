@@ -26,9 +26,7 @@ package AlarmDaemon::ServerSocket;
 
 use strict;
 
-use IO::Socket::INET qw();
-use Socket qw();
-
+use AlarmDaemon::SocketFactory qw();
 use LS30::Log qw();
 
 
@@ -66,7 +64,7 @@ sub new {
 
 =item socket()
 
-Return the IO::Socket::INET connection.
+Return the Socket connection.
 
 =cut
 
@@ -90,10 +88,9 @@ time to detect quicker if the server has gone away.
 sub connect {
 	my ($self) = @_;
 
-	my $socket = IO::Socket::INET->new(
+	my $socket = AlarmDaemon::SocketFactory->new(
 		PeerAddr => $self->{peer_addr},
 		Proto => 'tcp',
-		Type => IO::Socket::SOCK_STREAM(),
 	);
 
 	if ($socket) {
@@ -204,36 +201,6 @@ Called when the watchdog timer expires. Currently do nothing.
 sub watchdogEvent {
 	my ($self) = @_;
 
-}
-
-
-# ------------------------------------------------------------------------
-
-=item doRead()
-
-Read data from the socket. Postprocess it, and return the number of
-cooked characters read, and the data in a buffer.
-Upon socket error, return undef. Upon EOF, return -1.
-Otherwise, the number of characters returned can be >= 0.
-
-=cut
-
-sub doRead {
-	my ($self) = @_;
-
-	my $buffer;
-	$self->{last_rcvd_time} = time();
-
-	my $n = $self->{socket}->recv($buffer, 128);
-	if (!defined $n) {
-		return (undef, undef);
-	}
-
-	if (length($buffer) == 0) {
-		return -1;
-	}
-
-	return $self->filterInput($buffer);
 }
 
 

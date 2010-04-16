@@ -71,7 +71,7 @@ sub send {
 	my ($self, $buffer) = @_;
 
 	if ($self->{socket}) {
-		$self->{socket}->send($buffer);
+		$self->{socket}->send($buffer, 0);
 	}
 }
 
@@ -121,39 +121,6 @@ sub watchdogEvent {
 	my ($self) = @_;
 
 	return undef;
-}
-
-
-# ------------------------------------------------------------------------
-
-=item ($length, $buffer) = doRead()
-
-Read data from the socket. Return the number of characters read,
-and the data in a buffer.
-
-Upon socket error, return undef. Upon EOF, return -1.
-Otherwise, the number of characters returned can be > 0.
-
-=cut
-
-sub doRead {
-	my ($self) = @_;
-
-	my $buffer;
-	$self->{last_rcvd_time} = time();
-
-	my $n = $self->{socket}->recv($buffer, 128);
-	if (!defined $n) {
-		return (undef, undef);
-	}
-
-	my $l = length($buffer);
-
-	if ($l == 0) {
-		return -1;
-	}
-
-	return ($l, $buffer);
 }
 
 

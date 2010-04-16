@@ -245,12 +245,18 @@ sub pollServer {
 	if (@read) {
 		foreach my $handle (@read) {
 			if (ref($handle) ne 'ARRAY') {
-				print STDERR "Read handle $handle is not an array!\n";
+				warn "Read handle $handle is not an array!\n";
 				next;
 			}
 
 			my ($socket, $object) = @$handle;
-			$object->handleRead($self, $socket);
+
+			if (! $object) {
+				warn "Unable to call handleRead() on undefined object\n";
+			} else {
+				$object->handleRead($self, $socket);
+			}
+
 		}
 	}
 }
