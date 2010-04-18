@@ -24,8 +24,8 @@ use strict;
 
 use Data::Dumper qw(Dumper);
 use Date::Format qw(time2str);
-use IO::Socket::INET;
 
+use AlarmDaemon::SocketFactory qw();
 use LS30::Log qw();
 
 # ---------------------------------------------------------------------------
@@ -76,10 +76,9 @@ sub Connect {
 		die "No server address";
 	}
 
-	my $conn = IO::Socket::INET->new(
+	my $conn = AlarmDaemon::SocketFactory->new(
 		PeerAddr => $self->{server_address},
 		Proto => "tcp",
-		Type => SOCK_STREAM,
 	);
 
 	if (! $conn) {
