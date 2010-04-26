@@ -206,7 +206,7 @@ sub watchdogEvent {
 
 # ------------------------------------------------------------------------
 
-=item handleRead()
+=item handleRead($selector)
 
 Read data from the socket. Postprocess it, and call our handler's
 serverRead() function with the result.
@@ -214,7 +214,7 @@ serverRead() function with the result.
 =cut
 
 sub handleRead {
-	my ($self) = @_;
+	my ($self, $selector) = @_;
 
 	my $buffer;
 	$self->{last_rcvd_time} = time();
