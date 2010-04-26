@@ -1,0 +1,217 @@
+#!/usr/bin/perl -w
+#   vim:sw=4:ts=4:
+#   Copyright (C) 2010, Nick Andrew <nick@nick-andrew.net>
+#   Licensed under the terms of the GNU General Public License, Version 3
+
+=head1 NAME
+
+Timer - An object which will trigger at some time
+
+=head1 DESCRIPTION
+
+A Selector object can have one or more Timer objects which are
+used to trigger events at certain times. Each Timer keeps a
+single time_t value which is the earliest time the event should
+trigger. The event can trigger at any time on or after this
+value.
+
+=head1 METHODS
+
+=over
+
+=cut
+
+package Timer;
+
+use strict;
+
+
+# ---------------------------------------------------------------------------
+
+=item new(%args)
+
+Instantiate a new Timer object. Arguments are:
+
+   arg_ref            A reference. arg_ref will be passed as the first
+                      argument to the event trigger function. arg_ref is
+					  opaque to this class.
+
+   func_ref           Reference to optional event trigger function.
+
+   next_time          time_t value of the earliest time this Timer can
+                      trigger. 'undef' means never trigger.
+
+=cut
+
+sub new {
+	my ($class, %args) = @_;
+
+	my $self = {
+		arg_ref => undef,    # args to pass upon trigger
+		func_ref => undef,   # func to call to trigger
+		next_time => undef,  # time of next trigger (undef means never)
+	};
+
+	bless $self, $class;
+
+	foreach my $k qw(arg_ref func_ref next_time) {
+		if (exists $args{$k}) {
+			$self->{$k} = $args{$k};
+		}
+	}
+
+	return $self;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item watchdogTime($selector)
+
+Return a time_t value of the desired triggering time. 'undef' means never.
+A value in the past is acceptable.
+
+=cut
+
+sub watchdogTime {
+	my ($self, $selector) = @_;
+
+	my $next_time = $self->{next_time};
+	return $next_time;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item getNextTime()
+
+Return the current value of next_time.
+
+=cut
+
+sub getNextTime {
+	my ($self) = @_;
+
+	return $self->{next_time};
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item setNextTime($time_t)
+
+Set next_time to $time_t.
+
+=cut
+
+sub setNextTime {
+	my ($self, $t) = @_;
+
+	$self->{next_time} = $t;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item setDelay($interval)
+
+Set next_time to the current time plus $interval.
+
+=cut
+
+sub setDelay {
+	my ($self, $interval) = @_;
+
+	$self->{next_time} = time() + $interval;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item getArgs()
+
+Return the current value of arg_ref.
+
+=cut
+
+sub getArgs {
+	my ($self) = @_;
+
+	return $self->{arg_ref};
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item setArgs($arg_ref)
+
+Set arg_ref.
+
+=cut
+
+sub setArgs {
+	my ($self, $arg_ref) = @_;
+
+	$self->{arg_ref} = $arg_ref;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item setFunction($func_ref)
+
+Set func_ref.
+
+=cut
+
+sub setFunction {
+	my ($self, $func_ref) = @_;
+
+	$self->{func_ref} = $func_ref;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item stop()
+
+Set next_time to undef. This will stop the timer triggering.
+
+=cut
+
+sub stop {
+	my ($self) = @_;
+
+	$self->{next_time} = undef;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item watchdogEvent($selector)
+
+Called upon the triggering of this timer.
+
+First, stop the timer so it will not trigger again (until next_time is
+set to some time_t value).
+
+If func_ref is set, then call the function like this:
+
+   &$func_ref($ref, $selector);
+
+=cut
+
+sub watchdogEvent {
+	my ($self, $selector) = @_;
+
+	my $func_ref = $self->{func_ref};
+	my $ref = $self->{arg_ref};
+
+	$self->stop();
+
+	if ($func_ref) {
+		&$func_ref($ref, $selector);
+	}
+}
+
+1;
