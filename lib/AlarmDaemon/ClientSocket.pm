@@ -140,7 +140,11 @@ sub handleRead {
 
 	my $n = $self->{socket}->recv($buffer, 128);
 	if (!defined $n) {
-		$handler->handleError($self);
+		# Error on the socket
+		LS30::Log::timePrint("Client socket error");
+		$handler->removeClient($self);
+		$self->disconnect();
+		return;
 	}
 
 	my $l = length($buffer);
