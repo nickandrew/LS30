@@ -96,6 +96,30 @@ sub addSelect {
 
 # ---------------------------------------------------------------------------
 
+=item addObject($object)
+
+Add an object which will be selected on and/or timed.
+
+=cut
+
+sub addObject {
+	my ($self, $object) = @_;
+
+	if ($object->can('socket')) {
+		my $socket = $object->socket();
+		$self->{'select'}->add( [$socket, $object] );
+		$self->{'sockets'} ++;
+	}
+
+	# If the object is also a Timer, add it to the timers
+	if ($object->isa('Timer')) {
+		$self->addTimer($object);
+	}
+}
+
+
+# ---------------------------------------------------------------------------
+
 =item removeSelect($lr)
 
 Remove the specified socket from the IO::Select object.
