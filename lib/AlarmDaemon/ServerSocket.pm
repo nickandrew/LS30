@@ -47,7 +47,7 @@ sub new {
 		peer_addr => $peer_addr,
 		handler => $handler,
 		watchdog_interval => 600,
-		eol_state => 1,
+		pending => '',
 	};
 
 	bless $self, $class;
@@ -221,23 +221,22 @@ sub handleRead {
 
 	my $n = $self->{socket}->recv($buffer, 128);
 	if (!defined $n) {
+		# Error on the socket
 		return;
 	}
 
 	if (length($buffer) == 0) {
+		# EOF: Other end closed the connection
 		return;
 	}
 
-	my ($l, $data) = $self->filterInput($buffer);
-	if ($l > 0) {
-		$self->{handler}->serverRead($data);
-	}
+	$self->addBuffer($buffer);
 }
 
 
 # ---------------------------------------------------------------------------
 
-=item filterInput($buffer)
+=item addBuffer($buffer)
 
 Filter data received from the LS30 to clean up the protocol.
 
@@ -250,35 +249,59 @@ at times. Examples:
   Received: \nMINPIC=0a14101234560000846173\r\n\r\n\n(16881814000100
   Received: 2f)\r\n
 
-So: sequences of \r and \n are filtered to a single \r\n
-Otherwise, the buffer contents are emitted unchanged
-
-Return the number of characters emitted and the string.
+Add $buffer to our queue of data pending processing. Any complete lines
+(lines ending in CR or LF) are passed to processLine().
 
 =cut
 
-sub filterInput {
+sub addBuffer {
 	my ($self, $buffer) = @_;
 
-	LS30::Log::timePrint("Input: $buffer");
-	$buffer =~ s/[\r\n]+/\r\n/gs;
+	$self->{pending} .= $buffer;
+	my $pending = $self->{pending};
 
-	if ($self->{eol_state}) {
-		# We are at end of line already, so cut any leading \r\n from the buffer
-		$buffer =~ s/^\r\n//s;
-	}
+	while ($pending ne '') {
 
-	# If we finished with a \n, then we are at eol for next time through
-	if ($buffer ne '') {
-		if (substr($buffer, length($buffer) - 1, 1) eq "\n") {
-			$self->{eol_state} = 1;
+		if (substr($pending, 0, 1) eq "\r") {
+			# Skip leading \r
+			$pending = substr($pending, 1);
+			next;
+		}
+
+		if (substr($pending, 0, 1) eq "\n") {
+			# Skip leading \n
+			$pending = substr($pending, 1);
+			next;
+		}
+
+		if ($pending =~ /^([^\r\n]+)[\r\n]+(.*)/s) {
+			# Here's a full line to process
+			my $line = $1;
+			$pending = $2;
+			processLine($self, $line);
 		} else {
-			$self->{eol_state} = 0;
+			last;
 		}
 	}
 
-	return (length($buffer), $buffer);
+	$self->{pending} = $pending;
 }
+
+
+# ---------------------------------------------------------------------------
+
+=item processLine($line)
+
+Process one full line of received data. Run an appropriate handler.
+
+=cut
+
+sub processLine {
+	my ($self, $line) = @_;
+
+	$self->{handler}->serverRead($line . "\r\n");
+}
+
 
 =back
 
