@@ -114,7 +114,7 @@ sub disc_timer_event {
 	} else {
 		# Stop the timer
 		$ref->[2] = undef;
-		$self->{'select'}->addSelect( [$ls30c->socket(), \&readReady, $self] );
+		$self->{'select'}->addSelect( [$ls30c->socket(), $ls30c] );
 	}
 }
 
