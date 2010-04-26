@@ -30,14 +30,14 @@ You need the optional ethernet interface. Configure it on your network.
 It listens on port 1681 by default. Assume its IP address is A.B.C.D
 
 You should run the proxy daemon (bin/alarm-daemon.pl). This daemon
-will establish a connection to the LS30 and listen on a local port for
-connections from client code. Multiple client connections are possible
-at the same time. You will need this if you intend to control the LS30
-while monitoring it, or use two different monitors, etc.
+will establish a connection to the LS30 and listen on one or more local
+ports for connections from client code. Multiple client connections are
+possible at the same time. You will need this if you intend to control
+the LS30 while monitoring it, or use two different monitors, etc.
 
 Run the proxy daemon:
 
-	bin/alarm-daemon.pl -h A.B.C.D:1681 -l 1681
+	bin/alarm-daemon.pl -h A.B.C.D:1681 127.0.0.1:1681
 
 This establishes a connection to A.B.C.D port 1681 and listens on local
 port 1681. The LS30 sends regular event messages. Any event messages
