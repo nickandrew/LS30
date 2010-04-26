@@ -17,6 +17,7 @@ use LS30::Log qw();
 use LS30Command qw();
 use LS30Connection qw();
 use LS30::Decoder qw();
+use Timer qw();
 
 # Temporarily this is a class variable as the responder functions don't
 # take a $self parameter.
@@ -57,11 +58,25 @@ sub new {
 sub addSelector {
 	my ($self, $selector) = @_;
 
-	my $timer1 = [ \&timer_time, \&timer_event, undef, "timer1" ];
+	$self->{'select'} = $selector;
+
+	my $now = time();
+	my $dur = int(rand(5)) + 60;
+	my $arg1 = [ "timer1", $self, $dur ];
+	my $timer1 = Timer->new(
+		func_ref => \&timer_event,
+		arg_ref => $arg1,
+		next_time => $now + $dur,
+	);
+	LS30::Log::timePrint(sprintf("Hello! %s will trigger every %d seconds\n", $arg1->[0], $dur));
 	$self->{timer1} = $timer1;
 	$selector->addTimer($timer1);
 
-	my $timer2 = [ \&disc_timer_time, \&disc_timer_event, undef, $self, 0 ];
+	my $timer2 = Timer->new(
+		func_ref => \&disc_timer_event,
+		arg_ref => [ "timer2", $self, 0, 1 ],
+		next_time => undef,
+	);
 	$self->{timer2} = $timer2;
 	$selector->addTimer($timer2);
 
@@ -69,51 +84,35 @@ sub addSelector {
 	$selector->addSelect( [$ls30c->socket(), $ls30c] );
 }
 
-sub timer_time {
-	my ($ref) = @_;
-
-	if (! $ref->[2]) {
-		# This is our first run
-		my $now = time();
-		my $dur = int(rand(5)) + 600;
-		LS30::Log::timePrint(sprintf("Hello! %s first run, give me %d seconds\n", $ref->[3], $dur));
-		$ref->[2] = $now + $dur;
-	}
-
-	return $ref->[2];
-}
-
 sub timer_event {
-	my ($ref) = @_;
+	my ($ref, $selector) = @_;
 
-	my $now = time();
-	my $dur = int(rand(5)) + 600;
-	LS30::Log::timePrint(sprintf("Wow, we hit it! Waiting another %d seconds\n", $dur));
-	$ref->[2] = $now + $dur;
-}
-
-sub disc_timer_time {
-	my ($ref) = @_;
-
-	return $ref->[2];
+	LS30::Log::timePrint(sprintf("Timer %s triggered!", $ref->[0]));
+	$ref->[1]->{timer1}->setDelay($ref->[2]);
 }
 
 sub disc_timer_event {
-	my ($ref) = @_;
+	my ($ref, $selector) = @_;
 
-	my $self = $ref->[3];
+	LS30::Log::timePrint("Disconnected, retrying connect");
+	my $self = $ref->[1];
 	my $ls30c = $self->{ls30c};
+	my $timer = $self->{timer2};
 
 	if (! $ls30c->Connect()) {
 		# Backoff try later
-		if ($ref->[4] < 64) {
-			$ref->[4] *= 2;
+		if ($ref->[3] < 64) {
+			$ref->[3] *= 2;
 		}
 
-		$ref->[2] += $ref->[4];
+		$ref->[2] += $ref->[3];
+		LS30::Log::timePrint(sprintf("Connect failed, retry in %d sec", $ref->[3]));
+		$timer->setNextTime($ref->[2]);
 	} else {
+		LS30::Log::timePrint("Connected");
 		# Stop the timer
-		$ref->[2] = undef;
+		$timer->stop();
+		print "Self is $self\n";
 		$self->{'select'}->addSelect( [$ls30c->socket(), $ls30c] );
 	}
 }
@@ -153,8 +152,10 @@ sub handleEventMessage {
 sub handleDisconnect {
 	my ($self) = @_;
 
-	$self->{timer2}->[4] = 4;
-	$self->{timer2}->[2] = time() + 4;
+	$self->{timer2}->{arg_ref}->[3] = 4;
+	my $when = time() + 4;
+	$self->{timer2}->{arg_ref}->[2] = $when;
+	$self->{timer2}->setNextTime($when);
 }
 
 sub handleResponse {

@@ -120,20 +120,20 @@ sub removeSelect {
 =item addTimer($obj)
 
 Add the specified timer reference to our list of timers.
-The reference is an array containing [ \&timer_func, \&event_func, ... ]
+The reference is an object of class Timer or subclass.
 
 =cut
 
 sub addTimer {
-	my ($self, $lr) = @_;
+	my ($self, $obj) = @_;
 
-	push(@{$self->{'timers'}}, $lr);
+	push(@{$self->{'timers'}}, $obj);
 }
 
 
 # ---------------------------------------------------------------------------
 
-=item removeTimer($lr)
+=item removeTimer($obj)
 
 Remove the specified timer reference. Returns 1 if the reference was removed,
 zero if it was not in the list.
@@ -141,13 +141,13 @@ zero if it was not in the list.
 =cut
 
 sub removeTimer {
-	my ($self, $lr) = @_;
+	my ($self, $obj) = @_;
 
 	my @new_timers;
 	my $found = 0;
 
 	foreach my $r (@{$self->{'timers'}}) {
-		if ($r == $lr) {
+		if ($r == $obj) {
 			$found = 1;
 			next;
 		}
@@ -285,14 +285,12 @@ sub runTimers {
 	my $wait_til = $now;
 
 	foreach my $ref (@$timers) {
-		my $time_func = $ref->[0];
-		my $event_func = $ref->[1];
 
-		my $t = &$time_func($ref);
+		my $t = $ref->watchdogTime($self);
 
 		if (defined $t && $t <= $now) {
-			&$event_func($ref, $self);
-			$t = &$time_func($ref);
+			$ref->watchdogEvent($self);
+			$t = $ref->watchdogTime($self);
 		}
 
 		if (defined $t && $t > $wait_til) {
