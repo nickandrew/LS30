@@ -112,7 +112,6 @@ sub disc_timer_event {
 		LS30::Log::timePrint("Connected");
 		# Stop the timer
 		$timer->stop();
-		print "Self is $self\n";
 		$self->{'select'}->addSelect( [$ls30c->socket(), $ls30c] );
 	}
 }
