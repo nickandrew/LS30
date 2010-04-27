@@ -34,12 +34,16 @@ Instantiate a new Timer object. Arguments are:
 
    arg_ref            A reference. arg_ref will be passed as the first
                       argument to the event trigger function. arg_ref is
-					  opaque to this class.
+                      opaque to this class.
 
    func_ref           Reference to optional event trigger function.
 
    next_time          time_t value of the earliest time this Timer can
                       trigger. 'undef' means never trigger.
+
+   recurring          Setup a recurring event after this many seconds.
+                      Whenever this Timer is triggered, recurring is
+                      added to next_time.
 
 =cut
 
@@ -47,14 +51,15 @@ sub new {
 	my ($class, %args) = @_;
 
 	my $self = {
-		arg_ref => undef,    # args to pass upon trigger
+		arg_ref => undef,    # args to pass upon trigger event
 		func_ref => undef,   # func to call to trigger
 		next_time => undef,  # time of next trigger (undef means never)
+		recurring => undef,  # number of seconds to re-trigger
 	};
 
 	bless $self, $class;
 
-	foreach my $k qw(arg_ref func_ref next_time) {
+	foreach my $k qw(arg_ref func_ref next_time recurring) {
 		if (exists $args{$k}) {
 			$self->{$k} = $args{$k};
 		}
@@ -122,7 +127,13 @@ Set next_time to the current time plus $interval.
 sub setDelay {
 	my ($self, $interval) = @_;
 
-	$self->{next_time} = time() + $interval;
+	my $next_time = $self->{next_time};
+
+	if ($next_time) {
+		$self->{next_time} += $interval;
+	} else {
+		$self->{next_time} = time() + $interval;
+	}
 }
 
 
@@ -207,7 +218,11 @@ sub watchdogEvent {
 	my $func_ref = $self->{func_ref};
 	my $ref = $self->{arg_ref};
 
-	$self->stop();
+	if ($self->{recurring}) {
+		$self->setDelay($self->{recurring});
+	} else {
+		$self->stop();
+	}
 
 	if ($func_ref) {
 		&$func_ref($ref, $selector);

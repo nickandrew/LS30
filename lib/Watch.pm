@@ -61,12 +61,13 @@ sub addSelector {
 	$self->{'select'} = $selector;
 
 	my $now = time();
-	my $dur = int(rand(5)) + 60;
+	my $dur = 600;
 	my $arg1 = [ "timer1", $self, $dur ];
 	my $timer1 = Timer->new(
 		func_ref => \&timer_event,
 		arg_ref => $arg1,
 		next_time => $now + $dur,
+		recurring => $dur,
 	);
 	LS30::Log::timePrint(sprintf("Hello! %s will trigger every %d seconds\n", $arg1->[0], $dur));
 	$self->{timer1} = $timer1;
@@ -88,7 +89,6 @@ sub timer_event {
 	my ($ref, $selector) = @_;
 
 	LS30::Log::timePrint(sprintf("Timer %s triggered!", $ref->[0]));
-	$ref->[1]->{timer1}->setDelay($ref->[2]);
 }
 
 sub disc_timer_event {
