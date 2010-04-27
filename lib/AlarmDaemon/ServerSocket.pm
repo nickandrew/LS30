@@ -28,6 +28,9 @@ use strict;
 
 use AlarmDaemon::SocketFactory qw();
 use LS30::Log qw();
+use Timer qw();
+
+use base 'Timer';
 
 
 # ---------------------------------------------------------------------------
@@ -44,9 +47,10 @@ sub new {
 	my ($class, $peer_addr, $handler) = @_;
 
 	my $self = {
+		current_state => 'disconnected',
 		peer_addr => $peer_addr,
 		handler => $handler,
-		watchdog_interval => 600,
+		watchdog_interval => 320,
 		pending => '',
 	};
 
@@ -96,6 +100,7 @@ sub connect {
 	if ($socket) {
 		$self->{socket} = $socket;
 		$self->{last_rcvd_time} = time();
+		$self->{current_state} = 'connected';
 
 		# Setting SO_KEEPALIVE will eventually cause a client socket error if
 		# connection is broken
@@ -139,32 +144,36 @@ sub disconnect {
 	my ($self) = @_;
 
 	if ($self->{socket}) {
+		LS30::Log::timePrint("Disconnecting");
 		close($self->{socket});
 		undef $self->{socket};
+		$self->{current_state} = 'disconnected';
+		my $now = time();
+		$self->{retry_base} = $now;
+		$self->{retry_when} = $now + 2;
+		$self->{retry_interval} = 4;
 	}
 }
 
 
 # ---------------------------------------------------------------------------
 
-=item timeout()
+=item tryConnect($selector)
 
-Called when there is a watchdog timeout (i.e. no data received from the
-server within a configurable amount of time).
-
-Currently broken.
+Try to connect again. If successful, add ourselved back into the selector.
+Log success or failure.
 
 =cut
 
-sub timeout {
-	my ($self) = @_;
+sub tryConnect {
+	my ($self, $selector) = @_;
 
-	die "timeout() broken";
-
-	print "Timeout: $self\n";
-	$self->disconnect();
-	$self->connect();
-	print "Reconnected\n";
+	if ($self->connect()) {
+		$selector->addObject($self);
+		LS30::Log::timePrint("Reconnected");
+	} else {
+		LS30::Log::timePrint("Reconnect failed");
+	}
 }
 
 
@@ -175,12 +184,17 @@ sub timeout {
 Returns a time_t value representing at what time this object will detect
 a timeout, if no recent data has been received from the server.
 
-Currently broken.
-
 =cut
 
 sub watchdogTime {
 	my ($self) = @_;
+
+	my $current_state = $self->{current_state};
+
+	if ($current_state eq 'disconnected') {
+		my $when = $self->{retry_when};
+		return $when;
+	}
 
 	if ($self->{last_rcvd_time}) {
 		return $self->{last_rcvd_time} + $self->{watchdog_interval};
@@ -199,8 +213,26 @@ Called when the watchdog timer expires. Currently do nothing.
 =cut
 
 sub watchdogEvent {
-	my ($self) = @_;
+	my ($self, $selector) = @_;
 
+	my $current_state = $self->{current_state};
+
+	if ($current_state eq 'connected') {
+		# Disconnect and wait before reconnecting.
+		LS30::Log::timePrint("Timeout: disconnecting from server");
+		$selector->removeSelect($self->socket());
+		$self->disconnect();
+		return;
+	}
+
+	my $retry_interval = $self->{retry_interval};
+	if ($retry_interval < 64) {
+		$retry_interval *= 2;
+		$self->{retry_interval} = $retry_interval;
+	}
+	$self->{retry_when} += $retry_interval;
+
+	$self->tryConnect($selector);
 }
 
 
@@ -222,11 +254,15 @@ sub handleRead {
 	my $n = $self->{socket}->recv($buffer, 128);
 	if (!defined $n) {
 		# Error on the socket
+		$selector->removeSelect($self->socket());
+		$self->disconnect();
 		return;
 	}
 
 	if (length($buffer) == 0) {
 		# EOF: Other end closed the connection
+		$selector->removeSelect($self->socket());
+		$self->disconnect();
 		return;
 	}
 

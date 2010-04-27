@@ -69,7 +69,7 @@ sub addServer {
 	}
 
 	$self->{server} = $object;
-	$self->{selector}->addSelect([$object->socket(), $object]);
+	$self->{selector}->addObject($object);
 }
 
 sub addClient {
