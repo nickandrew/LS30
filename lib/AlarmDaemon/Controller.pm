@@ -62,12 +62,13 @@ sub addListener {
 sub addServer {
 	my ($self, $peer_addr) = @_;
 
-	my $object = AlarmDaemon::ServerSocket->new($peer_addr, $self);
+	my $object = AlarmDaemon::ServerSocket->new($peer_addr);
 	if (! $object) {
 		warn "Unable to instantiate an AlarmDaemon::ServerSocket to $peer_addr\n";
 		return;
 	}
 
+	$object->setHandler($self);
 	$self->{server} = $object;
 	$self->{selector}->addObject($object);
 }

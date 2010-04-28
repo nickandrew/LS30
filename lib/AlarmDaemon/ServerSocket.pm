@@ -35,7 +35,7 @@ use base 'Timer';
 
 # ---------------------------------------------------------------------------
 
-=item new($peer_addr, $handler)
+=item new($peer_addr)
 
 Connect to the server (identified as host:port) and return the newly
 instantiated AlarmDaemon::ServerSocket object. If unable to connect,
@@ -44,12 +44,12 @@ return undef.
 =cut
 
 sub new {
-	my ($class, $peer_addr, $handler) = @_;
+	my ($class, $peer_addr) = @_;
 
 	my $self = {
 		current_state => 'disconnected',
 		peer_addr => $peer_addr,
-		handler => $handler,
+		handler => undef,
 		watchdog_interval => 320,
 		pending => '',
 	};
@@ -174,6 +174,21 @@ sub tryConnect {
 	} else {
 		LS30::Log::timePrint("Reconnect failed");
 	}
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item setHandler($object)
+
+Keep a reference to the object which will process all our emitted events.
+
+=cut
+
+sub setHandler {
+	my ($self, $object) = @_;
+
+	$self->{handler} = $object;
 }
 
 
