@@ -39,7 +39,7 @@ sub new {
 	bless $self, $class;
 
 	my $ls30c = $self->{ls30c};
-	if (! $ls30c->Connect()) {
+	if (! $ls30c->connect()) {
 		die "Unable to connect to server socket";
 	}
 
@@ -99,7 +99,7 @@ sub disc_timer_event {
 	my $ls30c = $self->{ls30c};
 	my $timer = $self->{timer2};
 
-	if (! $ls30c->Connect()) {
+	if (! $ls30c->connect()) {
 		# Backoff try later
 		if ($ref->[3] < 64) {
 			$ref->[3] *= 2;

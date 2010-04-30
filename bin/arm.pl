@@ -42,7 +42,7 @@ my $hr = { title => 'Operation Mode', value => $mode };
 
 my $ls30c = LS30Connection->new($opt_h);
 
-$ls30c->Connect();
+$ls30c->connect();
 
 LS30Command::addCommands();
 

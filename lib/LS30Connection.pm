@@ -61,13 +61,13 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item Connect()
+=item connect()
 
 Connect to our server. Return 1 if a connection was made, else 0.
 
 =cut
 
-sub Connect {
+sub connect {
 	my ($self) = @_;
 
 	my $server_address = $self->{server_address};
@@ -93,13 +93,13 @@ sub Connect {
 
 # ---------------------------------------------------------------------------
 
-=item Disconnect()
+=item disconnect()
 
 Disconnect from our server and delete the socket.
 
 =cut
 
-sub Disconnect {
+sub disconnect {
 	my ($self) = @_;
 
 	if ($self->{socket}) {
@@ -170,7 +170,7 @@ sub disconnect_event {
 	my ($self, $selector, $socket) = @_;
 
 	$selector->removeSelect($socket);
-	$self->Disconnect();
+	$self->disconnect();
 
 	$self->runHandler('Disconnect');
 }
