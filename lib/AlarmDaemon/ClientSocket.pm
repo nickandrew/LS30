@@ -24,21 +24,24 @@ use strict;
 
 # ---------------------------------------------------------------------------
 
-=item new($socket, $handler)
+=item new($selector, $socket, $handler)
 
 Return a new instance of AlarmDaemon::ClientSocket for the specified socket.
 
 =cut
 
 sub new {
-	my ($class, $socket, $handler) = @_;
+	my ($class, $selector, $socket, $handler) = @_;
 
 	my $self = {
 		socket => $socket,
+		selector => $selector,
 		handler => $handler,
 	};
 
 	bless $self, $class;
+
+	$self->{selector}->addObject($self);
 
 	return $self;
 }
@@ -88,6 +91,7 @@ sub disconnect {
 	my ($self) = @_;
 
 	if ($self->{socket}) {
+		$self->{selector}->removeSelect($self->socket());
 		close($self->{socket});
 		undef $self->{socket};
 	}

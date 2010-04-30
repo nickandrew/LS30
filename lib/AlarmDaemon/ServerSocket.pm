@@ -35,7 +35,7 @@ use base 'Timer';
 
 # ---------------------------------------------------------------------------
 
-=item new($peer_addr)
+=item new($selector, $peer_addr)
 
 Connect to the server (identified as host:port) and return the newly
 instantiated AlarmDaemon::ServerSocket object. If unable to connect,
@@ -44,10 +44,11 @@ return undef.
 =cut
 
 sub new {
-	my ($class, $peer_addr) = @_;
+	my ($class, $selector, $peer_addr) = @_;
 
 	my $self = {
 		current_state => 'disconnected',
+		selector => $selector,
 		peer_addr => $peer_addr,
 		handler => undef,
 		watchdog_interval => 320,
@@ -108,6 +109,8 @@ sub connect {
 			warn "Unable to set keepalive\n";
 		};
 
+		$self->{selector}->addObject($self);
+
 		return 1;
 	}
 
@@ -145,6 +148,7 @@ sub disconnect {
 
 	if ($self->{socket}) {
 		LS30::Log::timePrint("Disconnecting");
+		$self->{selector}->removeSelect($self->socket());
 		close($self->{socket});
 		undef $self->{socket};
 		$self->{current_state} = 'disconnected';
@@ -158,7 +162,7 @@ sub disconnect {
 
 # ---------------------------------------------------------------------------
 
-=item tryConnect($selector)
+=item tryConnect()
 
 Try to connect again. If successful, add ourselved back into the selector.
 Log success or failure.
@@ -166,10 +170,9 @@ Log success or failure.
 =cut
 
 sub tryConnect {
-	my ($self, $selector) = @_;
+	my ($self) = @_;
 
 	if ($self->connect()) {
-		$selector->addObject($self);
 		LS30::Log::timePrint("Reconnected");
 	} else {
 		LS30::Log::timePrint("Reconnect failed");
@@ -235,7 +238,6 @@ sub watchdogEvent {
 	if ($current_state eq 'connected') {
 		# Disconnect and wait before reconnecting.
 		LS30::Log::timePrint("Timeout: disconnecting from server");
-		$selector->removeSelect($self->socket());
 		$self->disconnect();
 		return;
 	}
@@ -247,13 +249,13 @@ sub watchdogEvent {
 	}
 	$self->{retry_when} += $retry_interval;
 
-	$self->tryConnect($selector);
+	$self->tryConnect();
 }
 
 
 # ------------------------------------------------------------------------
 
-=item handleRead($selector)
+=item handleRead()
 
 Read data from the socket. Postprocess it, and call our handler's
 serverRead() function with the result.
@@ -261,7 +263,7 @@ serverRead() function with the result.
 =cut
 
 sub handleRead {
-	my ($self, $selector) = @_;
+	my ($self) = @_;
 
 	my $buffer;
 	$self->{last_rcvd_time} = time();
@@ -269,14 +271,12 @@ sub handleRead {
 	my $n = $self->{socket}->recv($buffer, 128);
 	if (!defined $n) {
 		# Error on the socket
-		$selector->removeSelect($self->socket());
 		$self->disconnect();
 		return;
 	}
 
 	if (length($buffer) == 0) {
 		# EOF: Other end closed the connection
-		$selector->removeSelect($self->socket());
 		$self->disconnect();
 		return;
 	}
