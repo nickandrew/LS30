@@ -23,6 +23,10 @@ package AlarmDaemon::ListenSocket;
 
 use strict;
 
+use AlarmDaemon::CommonSocket qw();
+
+use base qw(AlarmDaemon::CommonSocket);
+
 
 # ---------------------------------------------------------------------------
 
@@ -47,21 +51,6 @@ sub new {
 	bless $self, $class;
 
 	return $self;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item socket()
-
-Return the Socket connection.
-
-=cut
-
-sub socket {
-	my ($self) = @_;
-
-	return $self->{socket};
 }
 
 

@@ -26,11 +26,12 @@ package AlarmDaemon::ServerSocket;
 
 use strict;
 
+use AlarmDaemon::CommonSocket qw();
 use AlarmDaemon::SocketFactory qw();
 use LS30::Log qw();
 use Timer qw();
 
-use base 'Timer';
+use base qw(AlarmDaemon::CommonSocket Timer);
 
 
 # ---------------------------------------------------------------------------
@@ -62,21 +63,6 @@ sub new {
 	}
 
 	return $self;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item socket()
-
-Return the Socket connection.
-
-=cut
-
-sub socket {
-	my ($self) = @_;
-
-	return $self->{socket};
 }
 
 
@@ -115,23 +101,6 @@ sub connect {
 	}
 
 	return 0;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item send($buffer)
-
-Send the data to the socket.
-
-=cut
-
-sub send {
-	my ($self, $buffer) = @_;
-
-	if ($self->{socket}) {
-		$self->{socket}->send($buffer);
-	}
 }
 
 

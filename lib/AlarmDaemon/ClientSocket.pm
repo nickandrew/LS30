@@ -21,6 +21,10 @@ package AlarmDaemon::ClientSocket;
 
 use strict;
 
+use AlarmDaemon::CommonSocket qw();
+
+use base qw(AlarmDaemon::CommonSocket);
+
 
 # ---------------------------------------------------------------------------
 
@@ -44,38 +48,6 @@ sub new {
 	$self->{selector}->addObject($self);
 
 	return $self;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item socket()
-
-Return a reference to our socket connection.
-
-=cut
-
-sub socket {
-	my ($self) = @_;
-
-	return $self->{socket};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item send($buffer)
-
-If connected, send data to our socket connection.
-
-=cut
-
-sub send {
-	my ($self, $buffer) = @_;
-
-	if ($self->{socket}) {
-		$self->{socket}->send($buffer, 0);
-	}
 }
 
 
