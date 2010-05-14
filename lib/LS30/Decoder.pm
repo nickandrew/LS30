@@ -123,7 +123,9 @@ Process the 'AT' message. Print it and ignore.
 sub handleAT {
 	my ($self, $string) = @_;
 
-	LS30::Log::timePrint("Ignoring AT: $string");
+	if ($self->{handler} && $self->{handler}->can('handleAT')) {
+		$self->handler->handleAT($string);
+	}
 }
 
 
@@ -138,7 +140,9 @@ Process the 'GSM' message. Print it and ignore.
 sub handleGSM {
 	my ($self, $string) = @_;
 
-	LS30::Log::timePrint("Ignoring GSM: $string");
+	if ($self->{handler} && $self->{handler}->can('handleGSM')) {
+		$self->handler->handleGSM($string);
+	}
 }
 
 
