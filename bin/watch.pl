@@ -29,7 +29,7 @@ if ($@) {
 }
 
 my $selector = Selector->new();
-my $watcher = $class->new($opt_h);
+my $watcher = $class->new($opt_h, @ARGV);
 
 $watcher->addSelector($selector);
 
