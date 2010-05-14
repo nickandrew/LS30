@@ -83,7 +83,9 @@ sub sendCommand {
 	}
 
 	$socket->send($string);
-	LS30::Log::timePrint("Sent: $string");
+	if ($ENV{LS30_DEBUG}) {
+		LS30::Log::timePrint("Sent: $string");
+	}
 
 	# pollServer will return on the first event of any kind received.
 	# We may have to retry, if a non-response is received before a

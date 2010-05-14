@@ -194,7 +194,9 @@ sub sendCommand {
 	}
 
 	$socket->send($string);
-	LS30::Log::timePrint("Sent: $string");
+	if ($ENV{LS30_DEBUG}) {
+		LS30::Log::timePrint("Sent: $string");
+	}
 }
 
 
