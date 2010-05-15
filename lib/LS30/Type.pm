@@ -210,6 +210,36 @@ my $type_table = {
 		'Operation Secne 8' => '?',
 	},
 
+	# Event log codes (similar to ContactID::EventCode)
+	'Event Log Code' => {
+		'1130' => 'Burglar',
+		'1137' => 'Tamper',
+		'1144' => 'Sensor Tamper',
+		'1120' => 'Panic',
+		'1301' => 'AC Loss',
+		'1305' => 'Sys.Reset',
+		'1381' => 'Loss RF',
+		'1384' => 'RF Low Battery',
+		'1400' => 'Disarm',
+		'1601' => 'Loop Test',
+		'1619' => 'Monitor',
+		'3301' => 'AC Restore',
+		'3381' => 'RF Restore',
+		'3384' => 'RF Low Battery Restore',
+		'3400' => 'Away',
+		'3441' => 'Home',
+	},
+
+	# Event source code (similar to 'b3' above)
+	'Event Source Code' => {
+		'00' => 'C',
+		'01' => 'B',
+		'02' => 'F',
+		'03' => 'M',
+		'04' => 'S',
+		'05' => 'Z',
+	},
+
 };
 
 my $reverse_table = { };
