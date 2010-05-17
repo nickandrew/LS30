@@ -124,7 +124,7 @@ sub handleAT {
 	my ($self, $string) = @_;
 
 	if ($self->{handler} && $self->{handler}->can('handleAT')) {
-		$self->handler->handleAT($string);
+		$self->{handler}->handleAT($string);
 	}
 }
 
@@ -141,7 +141,7 @@ sub handleGSM {
 	my ($self, $string) = @_;
 
 	if ($self->{handler} && $self->{handler}->can('handleGSM')) {
-		$self->handler->handleGSM($string);
+		$self->{handler}->handleGSM($string);
 	}
 }
 
