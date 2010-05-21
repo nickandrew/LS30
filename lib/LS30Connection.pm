@@ -250,7 +250,6 @@ sub addBuffer {
 			$pending = $2;
 			processLine($self, $line);
 		} else {
-			LS30::Log::timePrint("Incomplete line: ($pending)");
 			last;
 		}
 	}
