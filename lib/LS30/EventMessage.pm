@@ -26,7 +26,13 @@ package LS30::EventMessage;
 
 use strict;
 
+use Date::Format qw();
+
 use LS30::Type qw();
+
+
+my $this_year;  # Used in adding year to events
+my $this_month;
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +108,22 @@ sub _parseDateTime {
 	$when =~ m/^(\d\d)(\d\d)(\d\d)(\d\d)/;
 	my ($mm, $dd, $hh, $min) = ($1, $2, $3, $4);
 
-	return sprintf("%02d/%02d %02d:%02d", $dd, $mm, $hh, $min);
+	if (! $this_year) {
+		my $now = time();
+		$this_year = Date::Format::time2str('%Y', $now);
+		$this_month = Date::Format::time2str('%m', $now);
+	}
+
+	my $year;
+
+	if ($mm > $this_month) {
+		# It must have been last year
+		$year = $this_year - 1;
+	} else {
+		$year = $this_year;
+	}
+
+	return sprintf("%04d-%02d-%02d %02d:%02d:00", $year, $mm, $dd, $hh, $min);
 }
 
 
