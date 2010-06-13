@@ -15,7 +15,6 @@ my $commands = { };
 my $command_bykey = { };
 
 my $simple_commands = [
-	[ 'Date/Time', 'dt', 11, \&resp_date ],
 	[ 'Switch  1', 's6', 1, \&resp_hex1 ],
 	[ 'Switch  2', 's7', 1, \&resp_hex1 ],
 	[ 'Switch  3', 's4', 1, \&resp_hex1 ],
@@ -100,6 +99,16 @@ my $simple_commands = [
 ];
 
 my $spec_commands = [
+
+	{ title => 'Date/Time',
+		key => 'dt',
+		args => [
+			{ 'length' => 6, func => \&resp_date1, key => 'date' },
+			{ 'length' => 1, type => 'Day of Week', key => 'dow' },
+			{ 'length' => 4, func => \&resp_date2, key => 'time' },
+		],
+	},
+
 	{ title => 'Operation Mode',
 		key => 'n0',
 		args => [
@@ -904,6 +913,60 @@ sub _parseArg {
 	}
 
 	return $rest;
+}
+
+# ---------------------------------------------------------------------------
+# Parse/encode a date: yyyy-mm-dd <-> yymmdd
+# ---------------------------------------------------------------------------
+
+sub resp_date1 {
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
+			return "$2$3$4";
+		}
+
+		die "Invalid format date string: $string";
+	}
+
+	if ($string =~ /^(\d\d)(\d\d)(\d\d)$/) {
+		my $now = time();
+		my $year = Date::Format::time2str('%Y', $now);
+
+		if ($1 > ($year % 100)) {
+			# It's a date from last century
+			$year = $1 + $year - $year % 100 - 100;
+		} else {
+			$year = $1 + $year - $year % 100;
+		}
+
+		return sprintf("%04d-%02d-%02d", $year, $2, $3);
+	}
+
+	die "Invalid format date string: $string";
+}
+
+# ---------------------------------------------------------------------------
+# Parse/create a time string: hh:mm:ss <-> hhm
+# ---------------------------------------------------------------------------
+
+sub resp_date2 {
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		if ($string =~ /^(\d\d):(\d\d)/) {
+			return "$1$2";
+		}
+
+		die "Invalid format time string: $string";
+	}
+
+	if ($string =~ /^(\d\d)(\d\d)$/) {
+		return "$1:$2:00";
+	}
+
+	die "Invalid format time string: $string";
 }
 
 1;

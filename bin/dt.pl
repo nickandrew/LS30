@@ -36,7 +36,7 @@ if (defined $query) {
 		printf("%-40s | %s\n", $query, $response);
 		my $resp = LS30::ResponseMessage->new($response);
 		if ($resp) {
-			printf("Current date/time is %s\n", $resp->{value});
+			printf("Current date/time is %s, %s %s\n", $resp->{dow}, $resp->{'date'}, $resp->{'time'});
 		}
 	}
 }
