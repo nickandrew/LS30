@@ -75,15 +75,15 @@ sub _parseString {
 		return;
 	}
 
-	my ($event_type, $event_code, $id1, $source, $id2, $junk1, $datetime, $highest_event) = ($1, $2, $3, $4, $5, $6, $7, $8);
+	my ($event_type, $event_code, $group_num, $source, $unit_num, $junk1, $datetime, $highest_event) = ($1, $2, $3, $4, $5, $6, $7, $8);
 
 
 	$self->{event_type} = $event_type;
 	$self->{event_code} = $event_code;
 	$self->{code_string} = LS30::Type::getCode('Event Log Code', $event_type . $event_code) || '';
-	$self->{id1} = $id1;
+	$self->{group_num} = $group_num;
 	$self->{source_string} = LS30::Type::getCode('Event Source Code', $source) || '';
-	$self->{id2} = $id2;
+	$self->{unit_num} = $unit_num;
 	$self->{when} = _parseDateTime($datetime);
 	$self->{highest_event} = hex($highest_event);
 	$self->{junk1} = $junk1;
@@ -96,8 +96,8 @@ sub _parseString {
 	$self->{display_string} = sprintf("%s %s%s-%s %s",
 		$self->{when},
 		$self->{source_string},
-		$id1,
-		$id2,
+		$group_num,
+		$unit_num,
 		$self->{code_string},
 	);
 }
