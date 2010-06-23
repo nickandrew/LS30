@@ -70,6 +70,12 @@ sub handleMINPIC {
 
 	my $obj = LS30::DeviceMessage->new($string);
 
+	my $err = $obj->getError();
+	if ($err) {
+		# Invalid string, do not pass to handler
+		return;
+	}
+
 	$self->{handler}->handleDeviceMessage($obj);
 }
 

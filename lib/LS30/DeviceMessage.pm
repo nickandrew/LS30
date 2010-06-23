@@ -152,4 +152,10 @@ sub getUnknown {
 	return $self->{unknown};
 }
 
+sub getError {
+	my ($self) = @_;
+
+	return $self->{error};
+}
+
 1;
