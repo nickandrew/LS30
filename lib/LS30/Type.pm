@@ -23,6 +23,7 @@ my $type_table = {
 
 	# Appears in MINPIC messages
 	'Device Specific Type' => {
+		'Deleted Device' => '00',
 		'Remote Control' => '10',
 		'Keypad' => '19',
 		'Smoke Detector' => '20',
