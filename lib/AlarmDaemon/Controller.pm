@@ -128,6 +128,8 @@ sub serverRead {
 sub clientRead {
 	my ($self, $buffer) = @_;
 
+	LS30::Log::timePrint("Received: $buffer");
+
 	$self->{server}->send($buffer);
 }
 
