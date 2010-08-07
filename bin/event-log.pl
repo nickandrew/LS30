@@ -52,12 +52,3 @@ foreach my $n ($min .. $max) {
 }
 
 exit(0);
-
-sub parseDateTime {
-	my ($when) = @_;
-
-	$when =~ m/^(\d\d)(\d\d)(\d\d)(\d\d)/;
-	my ($mm, $dd, $hh, $min) = ($1, $2, $3, $4);
-
-	return sprintf("%02d/%02d %02d:%02d", $dd, $mm, $hh, $min);
-}
