@@ -200,7 +200,7 @@ my $type_table = {
 		'Switch Scene 5' => '4',
 		'Switch Scene 6' => '5',
 		'Switch Scene 7' => '6',
-		'Switch Secne 8' => '7',
+		'Switch Scene 8' => '7',
 		'Operation Scene 1' => '8',
 		'Operation Scene 2' => '9',
 		'Operation Scene 3' => ':',
@@ -208,7 +208,7 @@ my $type_table = {
 		'Operation Scene 5' => '<',
 		'Operation Scene 6' => '=',
 		'Operation Scene 7' => '>',
-		'Operation Secne 8' => '?',
+		'Operation Scene 8' => '?',
 	},
 
 	# Event log codes (similar to ContactID::EventCode)
