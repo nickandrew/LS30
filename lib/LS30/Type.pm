@@ -326,6 +326,10 @@ Return the empty list if the table does not exist.
 sub listStrings {
 	my ($table) = @_;
 
+	if (!defined $table) {
+		return undef;
+	}
+
 	my $hr = $type_table->{$table};
 	if (! $hr) {
 		return undef;
