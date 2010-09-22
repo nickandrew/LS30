@@ -109,6 +109,13 @@ sub permuteArgs {
 
 	my @rest = @$query_args;
 	my $arg = shift @rest;
+	my $type = $arg->{type};
+
+	if (! $type) {
+		# This is normal. This command takes arguments which can't be enumerated
+		warn "permuteArgs: no 'type' defined for $title, key $arg->{key}\n";
+		return;
+	}
 
 	my @list = LS30::Type::listStrings($arg->{type});
 	my $key = $arg->{key};
