@@ -275,6 +275,30 @@ my $spec_commands = [
 
 ];
 
+my $learn_commands = [
+
+	{ title => 'Learn Burglar Sensor',
+		key => 'ibl',
+	},
+
+	{ title => 'Learn Fire Sensor',
+		key => 'ifl',
+	},
+
+	{ title => 'Learn Controller',
+		key => 'icl',
+	},
+
+	{ title => 'Learn Medical Button',
+		key => 'iml',
+	},
+
+	{ title => 'Learn Special Sensor',
+		key => 'iel',
+	},
+
+];
+
 my $other_commands = [
 	{ title => 'Send Message',
 		key => 'f0',
@@ -526,6 +550,32 @@ sub setCommand {
 	}
 
 	# Add an optional password
+	$cmd .= _password($cmd_spec, $args);
+
+	$cmd .= '&';
+
+	return $cmd;
+}
+
+sub getLearnCommandSpec {
+	my ($title) = @_;
+
+	foreach my $hr (@$learn_commands) {
+		if ($hr->{title} eq $title) {
+			return $hr;
+		}
+	}
+
+	return undef;
+}
+
+sub formatLearnCommand {
+	my ($args) = @_;
+
+	my $cmd_spec = getLearnCommandSpec($args->{title});
+	my $cmd = '!';
+	$cmd .= $cmd_spec->{key};
+
 	$cmd .= _password($cmd_spec, $args);
 
 	$cmd .= '&';
