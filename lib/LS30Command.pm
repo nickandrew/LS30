@@ -14,6 +14,10 @@ use LS30::Type qw();
 my $commands = { };
 my $command_bykey = { };
 
+# Array of all commands with simple syntax: a single value which can be
+# queried and set. The array structure is:
+#   [ 'Command Name', 'code', length_of_response, response_parsing_formatting_function ]
+
 my $simple_commands = [
 	[ 'Switch  1', 's6', 1, \&resp_hex1 ],
 	[ 'Switch  2', 's7', 1, \&resp_hex1 ],
