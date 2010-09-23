@@ -57,7 +57,7 @@ my $simple_commands = [
 	[ 'Telephone Line Cut Detection', 'm2' ],
 	[ 'Mode Change Chirp', 'm3', 1, \&resp_boolean ],
 	[ 'Emergency Button Assignment', 'm4' ],
-	[ 'Entry delay beep', 'm5' ],
+	[ 'Entry delay beep', 'm5', 1, \&resp_boolean ],
 	[ 'Tamper Siren in Disarm', 'm7', 1, \&resp_boolean ],
 	[ 'Telephone Ringer', 'm8' ],
 	[ 'Cease Dialing Mode', 'm9' ],
