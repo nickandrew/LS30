@@ -29,13 +29,23 @@ HOW TO USE
 You need the optional ethernet interface. Configure it on your network.
 It listens on port 1681 by default. Assume its IP address is A.B.C.D
 
+The PERLLIB environment variable needs to be set, so that perl can find
+the modules. PERLLIB is a colon-separated list of pathnames like $PATH.
+If PERLLIB is not already set, then do this from the directory into
+which you unpacked the code:
+
+	export PERLLIB=./lib
+
+If PERLLIB is already set then add ./lib or $PWD/lib to the current
+value.
+
 You should run the proxy daemon (bin/alarm-daemon.pl). This daemon
 will establish a connection to the LS30 and listen on one or more local
 ports for connections from client code. Multiple client connections are
 possible at the same time. You will need this if you intend to control
 the LS30 while monitoring it, or use two different monitors, etc.
 
-Run the proxy daemon:
+Run the proxy daemon as follows:
 
 	bin/alarm-daemon.pl -h A.B.C.D:1681 127.0.0.1:1681
 
@@ -121,4 +131,15 @@ All classes and scripts are written in Perl. They use:
   - Test::More
   - YAML
   - Date::Format
+  - Socket6 (for IPv6)
+  - IO::Socket::INET6 (for IPv6)
+
+Debian/Ubuntu users install perl modules with names like "lib*-perl", so you
+should install the following packages:
+
+  - libio-socket-inet6-perl (for IPv6)
+  - libsocket6-perl (for IPv6)
+  - libtimedate-perl
+  - libyaml-perl
+  - perl-modules
 
