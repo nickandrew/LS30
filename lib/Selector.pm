@@ -306,7 +306,7 @@ sub runTimers {
 	my $timers = $self->{'timers'};
 
 	my $now = time();
-	my $wait_til = $now;
+	my $wait_til = undef;
 
 	foreach my $ref (@$timers) {
 
@@ -317,9 +317,13 @@ sub runTimers {
 			$t = $ref->watchdogTime($self);
 		}
 
-		if (defined $t && $t > $wait_til) {
+		if (defined $t && (! defined $wait_til || $t < $wait_til)) {
 			$wait_til = $t;
 		}
+	}
+
+	if (!defined $wait_til) {
+		return 120;
 	}
 
 	my $how_long = $wait_til - $now;
