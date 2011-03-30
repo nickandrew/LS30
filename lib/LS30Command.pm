@@ -7,7 +7,7 @@ package LS30Command;
 
 use strict;
 
-use Carp qw(carp);
+use Carp qw(carp confess);
 
 use LS30::Type qw();
 
@@ -942,6 +942,11 @@ sub _parseFormat {
 
 sub _parseArg {
 	my ($string, $return, $arg_hr) = @_;
+
+	if (!defined $string) {
+		confess "_parseArg: string is not defined\n";
+		return undef;
+	}
 
 	my $length = $arg_hr->{'length'};
 
