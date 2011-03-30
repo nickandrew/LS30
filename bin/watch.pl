@@ -5,7 +5,7 @@
 #
 #  Watch the messages and react to them
 #
-#  Usage: watch2.pl [options]
+#  Usage: watch.pl [options]
 #
 #  Options:
 #    -c classname        Watching class to use (default is 'Watch')
