@@ -113,6 +113,17 @@ my $spec_commands = [
 		],
 	},
 
+	{ title => 'Information',
+		key => 'if',
+		response => [
+			{ 'length' => 1, func => \&resp_string, key => 'unk1' },
+			{ 'length' => 2, func => \&resp_string, key => 'unk2' },
+			{ 'length' => 2, func => \&resp_string, key => 'group' },
+			{ 'length' => 2, func => \&resp_string, key => 'unit' },
+			{ 'length' => 8, func => \&resp_string, key => 'device_config' },
+		],
+	},
+
 	{ title => 'Operation Mode',
 		key => 'n0',
 		args => [
