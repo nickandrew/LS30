@@ -4,18 +4,25 @@
 #   Licensed under the terms of the GNU General Public License, Version 3
 #
 #   Print a list of known devices.
+#
+#   Options:
+#     -h host:port       Override the server hostname and port
+#     -y                 Create/Modify etc/devices.yaml file
 
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
+use YAML qw();
 
 use LS30::Commander qw();
 use LS30::Type qw();
 use LS30Command qw();
 use LS30Connection qw();
 
-use vars qw($opt_h);
+use vars qw($opt_h $opt_y);
 
-getopts('h:');
+getopts('h:y');
+
+my $devices_file = "etc/devices.yaml";
 
 my $ls30c = LS30Connection->new($opt_h);
 
@@ -30,6 +37,12 @@ my @device_code_list = LS30::Type::listStrings('Device Code');
 
 my $s = '';
 my $s2 = '';
+my $devs = { };
+my $dev_seen = { };
+
+if (-f $devices_file) {
+	$devs = YAML::LoadFile($devices_file);
+}
 
 foreach my $device_name (@device_code_list) {
 	my $code = LS30::Type::getCode('Device Code', $device_name);
@@ -56,6 +69,20 @@ foreach my $device_name (@device_code_list) {
 				$dev_id,
 			);
 
+			if (!exists $devs->{$dev_id}) {
+				# Add a template to the device list
+				my $hr = {
+					name => 'Sample',
+					type => $dev_type_string,
+					zone => sprintf("%s-%s", $z, $c),
+				};
+				bless $hr, 'LS30::Device';
+
+				$devs->{$dev_id} = $hr;
+			}
+
+			$dev_seen->{$dev_id} = 1;
+
 			my $hr = LS30Command::parseDeviceConfig($config);
 			if ($hr) {
 				$s .= Data::Dumper::Dumper($hr);
@@ -66,7 +93,18 @@ foreach my $device_name (@device_code_list) {
 	}
 }
 
-print $s;
-print $s2;
+if ($opt_y) {
+	# Print all missing devices
+	foreach my $dev_id (sort (keys %$devs)) {
+		if (! $dev_seen->{$dev_id}) {
+			print STDERR "Warning: Device $dev_id in $devices_file not seen\n";
+		}
+	}
+
+	YAML::DumpFile($devices_file, $devs);
+} else {
+	print $s;
+	print $s2;
+}
 
 exit(0);
