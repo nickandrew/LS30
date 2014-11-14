@@ -310,6 +310,19 @@ my $learn_commands = [
 
 ];
 
+my $delete_commands = [
+
+	{ title => 'Delete Burglar Sensor',
+		key => 'ibk',
+		no_query => 1,
+		no_set => 1,
+		args => [
+			{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },
+		],
+	},
+
+];
+
 my $other_commands = [
 	{ title => 'Send Message',
 		key => 'f0',
