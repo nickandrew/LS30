@@ -398,6 +398,11 @@ sub addCommands {
 		# These commands are specified via full hashref
 		addCommand($hr);
 	}
+
+	foreach my $hr (@$learn_commands) {
+		# These commands are specified via full hashref
+		addCommand($hr);
+	}
 }
 
 sub listCommands {
