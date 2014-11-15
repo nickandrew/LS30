@@ -1,4 +1,4 @@
-README for LS30 control software
+# LS30 control software
 
 	Nick Andrew <nick@nick-andrew.net>
 	First release 3rd April, 2010
@@ -11,9 +11,9 @@ Scientech Electronics Co, Ltd.
 
 Some URLs for information about the device:
 
-	http://www.lifesos.com.tw/
-	http://210.68.28.137/WebApps/showproductdetail.html?id=3
-	http://www.securepro.com.au/
+  * http://www.lifesos.com.tw/
+  * http://210.68.28.137/WebApps/showproductdetail.html?id=3
+  * http://www.securepro.com.au/
 
 The LS30 has many features, including multiple zones, different kinds
 of alarm, integrated PSTN dialer and optional GSM dialer. Best though,
@@ -24,7 +24,7 @@ This package is the work of Nick Andrew <nick@nick-andrew.net> and is
 not associated with LifeSOS or Scientech. All code is licensed under
 the GNU General Public License, version 3.
 
-HOW TO USE
+# HOW TO USE
 
 You need the optional ethernet interface. Configure it on your network.
 It listens on port 1681 by default. Assume its IP address is A.B.C.D
@@ -39,7 +39,7 @@ which you unpacked the code:
 If PERLLIB is already set then add ./lib or $PWD/lib to the current
 value.
 
-You should run the proxy daemon (bin/alarm-daemon.pl). This daemon
+You should run the proxy daemon (`bin/alarm-daemon.pl`). This daemon
 will establish a connection to the LS30 and listen on one or more local
 ports for connections from client code. Multiple client connections are
 possible at the same time. You will need this if you intend to control
@@ -71,10 +71,10 @@ decode them and print them to standard output.
 
 The types of responses are:
 
-  - Contact ID Event Messages
-  - Device Messages
-  - Command Responses
-  - AT & GSM strings
+  * Contact ID Event Messages
+  * Device Messages
+  * Command Responses
+  * AT & GSM strings
 
 Contact ID Event Messages are strings in the ContactID protocol. They
 contain updates on events (such as arming or disarming) as well as
@@ -120,26 +120,25 @@ to burglary and other situations, especially GSM dialout.
 
 	bin/dt.pl
 
-DEPENDENCIES
+## DEPENDENCIES
 
 All classes and scripts are written in Perl. They use:
 
-  - Data::Dumper
-  - Getopt::Std
-  - IO::Select
-  - IO::Socket
-  - Test::More
-  - YAML
-  - Date::Format
-  - Socket6 (for IPv6)
-  - IO::Socket::INET6 (for IPv6)
+  * Data::Dumper
+  * Getopt::Std
+  * IO::Select
+  * IO::Socket
+  * Test::More
+  * YAML
+  * Date::Format
+  * Socket6 (for IPv6)
+  * IO::Socket::INET6 (for IPv6)
 
 Debian/Ubuntu users install perl modules with names like "lib*-perl", so you
 should install the following packages:
 
-  - libio-socket-inet6-perl (for IPv6)
-  - libsocket6-perl (for IPv6)
-  - libtimedate-perl
-  - libyaml-perl
-  - perl-modules
-
+  * libio-socket-inet6-perl (for IPv6)
+  * libsocket6-perl (for IPv6)
+  * libtimedate-perl
+  * libyaml-perl
+  * perl-modules
