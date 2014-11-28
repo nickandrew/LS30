@@ -1,25 +1,36 @@
 #!/usr/bin/perl -w
-#   vim:sw=4:ts=4:
-#   Copyright (C) 2010, Nick Andrew <nick@nick-andrew.net>
+#
+#   Copyright (C) 2014, Nick Andrew <nick@nick-andrew.net>
 #   Licensed under the terms of the GNU General Public License, Version 3
 #
-#   Test scripts and module syntax
+#   Syntax-check all modules, scripts and test scripts
+
+use strict;
+use warnings;
 
 use Test::More qw(no_plan);
 
-test_dir('lib');
 test_dir('bin');
+test_dir('lib');
+test_dir('perllib');
+test_dir('scripts');
+test_dir('t');
 
 exit(0);
 
 sub test_dir {
 	my ($dir) = @_;
 
+	if (! -d $dir) {
+		return;
+	}
+
 	if (! opendir(DIR, $dir)) {
 		return;
 	}
 
-	my @files = grep { ! /^\./ } readdir(DIR);
+	my @files = sort(grep { ! /^\./ } (readdir DIR));
+	closedir(DIR);
 
 	foreach my $f (@files) {
 		my $path = "$dir/$f";
@@ -27,7 +38,7 @@ sub test_dir {
 		if (-d $path) {
 			test_dir($path);
 		}
-		elsif (-f _ && $f =~ /\.(pl|pm)$/) {
+		elsif (-f $path && $f =~ /\.(pl|pm|t)$/) {
 			test_file($path);
 		}
 	}
@@ -37,17 +48,22 @@ sub test_file {
 	my ($path) = @_;
 
 	open(P, "perl -Mstrict -wc $path 2>&1 |");
-	my @diag = <P>;
-	close(P);
+	my $lines;
+
+	while (<P>) {
+		$lines .= $_;
+	}
+
+	if (! close(P)) {
+		warn "Error closing pipe from perl syntax check $path";
+	}
 
 	my $rc = $?;
 
 	if ($rc) {
-		foreach my $line (@diag) {
-			diag($line);
-		}
-		fail("syntax check failed $path, code $rc");
+		diag($lines);
+		fail("$path failed - code $rc");
 	} else {
-		pass("$path OK");
+		pass($path);
 	}
 }
