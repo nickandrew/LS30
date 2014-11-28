@@ -51,10 +51,10 @@ sub new {
 	my ($class, %args) = @_;
 
 	my $self = {
-		arg_ref => undef,    # args to pass upon trigger event
-		func_ref => undef,   # func to call to trigger
-		next_time => undef,  # time of next trigger (undef means never)
-		recurring => undef,  # number of seconds to re-trigger
+		arg_ref   => undef,    # args to pass upon trigger event
+		func_ref  => undef,    # func to call to trigger
+		next_time => undef,    # time of next trigger (undef means never)
+		recurring => undef,    # number of seconds to re-trigger
 	};
 
 	bless $self, $class;
@@ -216,7 +216,7 @@ sub watchdogEvent {
 	my ($self, $selector) = @_;
 
 	my $func_ref = $self->{func_ref};
-	my $ref = $self->{arg_ref};
+	my $ref      = $self->{arg_ref};
 
 	if ($self->{recurring}) {
 		$self->setDelay($self->{recurring});

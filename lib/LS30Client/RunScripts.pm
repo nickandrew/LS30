@@ -35,18 +35,18 @@ sub new {
 
 	my $self = {
 		server_address => $server_address,
-		ls30c => LS30Connection->new($server_address),
-		pending => '',
+		ls30c          => LS30Connection->new($server_address),
+		pending        => '',
 	};
 
 	bless $self, $class;
 
 	my $ls30c = $self->{ls30c};
-	if (! $ls30c->connect()) {
+	if (!$ls30c->connect()) {
 		die "Unable to connect to server socket";
 	}
 
-	if (! $devices) {
+	if (!$devices) {
 		$devices = LS30::DeviceSet->new();
 		$self->{devices} = $devices;
 	}
@@ -64,26 +64,27 @@ sub addSelector {
 	$self->{'select'} = $selector;
 
 	my $timer2 = Timer->new(
-		func_ref => \&disc_timer_event,
-		arg_ref => [ "timer2", $self, 0, 1 ],
+		func_ref  => \&disc_timer_event,
+		arg_ref   => ["timer2", $self, 0, 1],
 		next_time => undef,
 	);
 	$self->{timer2} = $timer2;
 	$selector->addTimer($timer2);
 
 	my $ls30c = $self->{ls30c};
-	$selector->addSelect( [$ls30c->socket(), $ls30c] );
+	$selector->addSelect([$ls30c->socket(), $ls30c]);
 }
 
 sub disc_timer_event {
 	my ($ref, $selector) = @_;
 
 	LS30::Log::timePrint("Disconnected, retrying connect");
-	my $self = $ref->[1];
+	my $self  = $ref->[1];
 	my $ls30c = $self->{ls30c};
 	my $timer = $self->{timer2};
 
-	if (! $ls30c->connect()) {
+	if (!$ls30c->connect()) {
+
 		# Backoff try later
 		if ($ref->[3] < 64) {
 			$ref->[3] *= 2;
@@ -94,10 +95,11 @@ sub disc_timer_event {
 		$timer->setNextTime($ref->[2]);
 	} else {
 		LS30::Log::timePrint("Connected");
+
 		# Stop the timer
 		$timer->stop();
 
-		$self->{'select'}->addSelect( [$ls30c->socket(), $ls30c] );
+		$self->{'select'}->addSelect([$ls30c->socket(), $ls30c]);
 	}
 }
 
@@ -109,12 +111,12 @@ sub disc_timer_event {
 sub handleDeviceMessage {
 	my ($self, $devmsg_obj) = @_;
 
-	my $string = $devmsg_obj->getString();
-	my $event_name = $devmsg_obj->getEventName();
+	my $string        = $devmsg_obj->getString();
+	my $event_name    = $devmsg_obj->getEventName();
 	my $dev_type_name = $devmsg_obj->getDeviceType();
-	my $device_id = $devmsg_obj->getDeviceID();
-	my $signal = $devmsg_obj->getSignalStrength();
-	my $unknown = $devmsg_obj->getUnknown();
+	my $device_id     = $devmsg_obj->getDeviceID();
+	my $signal        = $devmsg_obj->getSignalStrength();
+	my $unknown       = $devmsg_obj->getUnknown();
 
 	my $ls30c = $self->{ls30c};
 
@@ -122,18 +124,18 @@ sub handleDeviceMessage {
 	my $device_name;
 	my $device_zone = 'Unknown';
 
-	if (! $device_ref) {
+	if (!$device_ref) {
 		$device_name = 'Unknown';
 	} else {
 		$device_zone = $device_ref->{'zone'};
 		$device_name = $device_ref->{'name'};
 	}
 
-	$ENV{DEVICE_NAME} = $device_name;
-	$ENV{DEVICE_ZONE} = $device_zone;
-	$ENV{DEVICE_EVENT} = $event_name;
-	$ENV{DEVICE_TYPE} = $dev_type_name;
-	$ENV{DEVICE_ID} = $device_id;
+	$ENV{DEVICE_NAME}   = $device_name;
+	$ENV{DEVICE_ZONE}   = $device_zone;
+	$ENV{DEVICE_EVENT}  = $event_name;
+	$ENV{DEVICE_TYPE}   = $dev_type_name;
+	$ENV{DEVICE_ID}     = $device_id;
 	$ENV{DEVICE_SIGNAL} = $signal;
 	my $concat = join(' ', $string, $event_name, $dev_type_name, "$device_id $device_name", "signal $signal", ($unknown ? $unknown : ''));
 	runCommands('device', $concat);
@@ -154,12 +156,12 @@ sub handleEventMessage {
 	my $text = $evmsg_obj->asText();
 	LS30::Log::timePrint($text);
 	my $description = $evmsg_obj->getDescription();
-	my $group = $evmsg_obj->getGroup();
-	my $zone = $evmsg_obj->getZone();
+	my $group       = $evmsg_obj->getGroup();
+	my $zone        = $evmsg_obj->getZone();
 
 	$ENV{EVENT_DESCRIPTION} = $description;
-	$ENV{EVENT_GROUP} = $group;
-	$ENV{EVENT_ZONE} = $zone;
+	$ENV{EVENT_GROUP}       = $group;
+	$ENV{EVENT_ZONE}        = $zone;
 	runCommands('event', $text);
 	delete $ENV{EVENT_DESCRIPTION};
 	delete $ENV{EVENT_GROUP};
@@ -174,12 +176,13 @@ sub handleEventMessage {
 sub runCommands {
 	my ($file_prefix, $message) = @_;
 
-	if (! -d $event_dir) {
+	if (!-d $event_dir) {
+
 		# Cannot run anything
 		return;
 	}
 
-	if (! opendir(DIR, $event_dir)) {
+	if (!opendir(DIR, $event_dir)) {
 		warn "Unable to opendir $event_dir - $!";
 		return;
 	}
@@ -194,7 +197,7 @@ sub runCommands {
 		my $path = "$event_dir/$f";
 
 		my @buf = stat($path);
-		next if (! -f _ || ! -r _ || ! -x _);
+		next if (!-f _ || !-r _ || !-x _);
 
 		my $rc = system($path, $message);
 
@@ -219,7 +222,7 @@ sub handleResponse {
 
 	my $resp_hr = LS30Command::parseResponse($line);
 
-	if (! $resp_hr) {
+	if (!$resp_hr) {
 		LS30::Log::timePrint("Received unexpected response $line");
 		return;
 	}
@@ -231,7 +234,7 @@ sub handleResponse {
 sub handleResponseMessage {
 	my ($self, $response_obj) = @_;
 
-	if (! $response_obj) {
+	if (!$response_obj) {
 		LS30::Log::timePrint("Received unexpected response");
 		return;
 	}

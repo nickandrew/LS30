@@ -40,25 +40,25 @@ taken from environment variable LS30_DEVICES.
 sub new {
 	my ($class, $device_file) = @_;
 
-	if (! $device_file) {
+	if (!$device_file) {
 		$device_file = $ENV{'LS30_DEVICES'};
 
-		if (! $device_file) {
+		if (!$device_file) {
 			die "Environment LS30_DEVICES must be set to a filename";
 		}
 	}
 
 	my $data;
 
-	if (! -f $device_file) {
-		$data = { };
+	if (!-f $device_file) {
+		$data = {};
 	} else {
 		$data = YAML::LoadFile($device_file);
 	}
 
 	my $self = {
 		device_file => $device_file,
-		devices => $data,
+		devices     => $data,
 	};
 
 	bless $self, $class;
@@ -80,20 +80,19 @@ sub saveDevices {
 
 	my $device_file = $self->{device_file};
 
-	if (! open(LS30_DEVICES, '>', $device_file)) {
+	if (!open(LS30_DEVICES, '>', $device_file)) {
 		die "Unable to open $device_file for write - $!";
 	}
 
-	if (! print LS30_DEVICES YAML::Dump($self->{devices})) {
+	if (!print LS30_DEVICES YAML::Dump($self->{devices})) {
 		die "Unable to write empty device file - $!";
 	}
 
-	if (! close(LS30_DEVICES)) {
+	if (!close(LS30_DEVICES)) {
 		die "Unable to close device file - $!";
 	}
 
 }
-
 
 
 # ---------------------------------------------------------------------------

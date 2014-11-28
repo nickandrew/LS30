@@ -72,6 +72,7 @@ sub handleMINPIC {
 
 	my $err = $obj->getError();
 	if ($err) {
+
 		# Invalid string, do not pass to handler
 		return;
 	}

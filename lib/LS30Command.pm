@@ -11,95 +11,97 @@ use Carp qw(carp confess);
 
 use LS30::Type qw();
 
-my $commands = { };
-my $command_bykey = { };
+my $commands      = {};
+my $command_bykey = {};
 
 # Array of all commands with simple syntax: a single value which can be
 # queried and set. The array structure is:
 #   [ 'Command Name', 'code', length_of_response, response_parsing_formatting_function ]
 
 my $simple_commands = [
-	[ 'Switch  1', 's6', 1, \&resp_hex1 ],
-	[ 'Switch  2', 's7', 1, \&resp_hex1 ],
-	[ 'Switch  3', 's4', 1, \&resp_hex1 ],
-	[ 'Switch  4', 's5', 1, \&resp_hex1 ],
-	[ 'Switch  5', 's8', 1, \&resp_hex1 ],
-	[ 'Switch  6', 's9', 1, \&resp_hex1 ],
-	[ 'Switch  7', 's:', 1, \&resp_hex1 ],
-	[ 'Switch  8', 's;', 1, \&resp_hex1 ],
-	[ 'Switch  9', 's>', 1, \&resp_hex1 ],
-	[ 'Switch 10', 's?', 1, \&resp_hex1 ],
-	[ 'Switch 11', 's<', 1, \&resp_hex1 ],
-	[ 'Switch 12', 's=', 1, \&resp_hex1 ],
-	[ 'Switch 13', 's0', 1, \&resp_hex1 ],
-	[ 'Switch 14', 's1', 1, \&resp_hex1 ],
-	[ 'Switch 15', 's2', 1, \&resp_hex1 ],
-	[ 'Switch 16', 's3', 1, \&resp_hex1 ],
-	[ 'Auto Answer Ring Count', 'a0' ],
-	[ 'Sensor Supervise Time', 'a2', 2, \&resp_hex2 ],
-	[ 'Modem Ring Count', 'a3', 2, \&resp_hex2 ],
-	[ 'RF Jamming Warning', 'c0' ],
-	[ 'Switch 16 Control', 'c8' ],
-	[ 'RS-232 Control', 'c9' ],
-	[ 'GSM Phone 1', 'g0', 99, \&resp_telno ],
-	[ 'GSM Phone 2', 'g1', 99, \&resp_telno ],
-	[ 'GSM ID', 'g2' ],
-	[ 'GSM PIN No', 'g3' ],
-	[ 'GSM Phone 3', 'g4', 99, \&resp_telno ],
-	[ 'GSM Phone 4', 'g5', 99, \&resp_telno ],
-	[ 'GSM Phone 5', 'g6', 99, \&resp_telno ],
-	[ 'Exit Delay', 'l0', 2, \&resp_hex2 ],
-	[ 'Entry Delay', 'l1', 2, \&resp_hex2 ],
-	[ 'Remote Siren Time', 'l2', 2, \&resp_interval2 ],
-	[ 'Relay Action Time', 'l3', 2, \&resp_delay, ],
-	[ 'Door Bell', 'm0' ],
-	[ 'Dial Tone Check', 'm1' ],
-	[ 'Telephone Line Cut Detection', 'm2' ],
-	[ 'Mode Change Chirp', 'm3', 1, \&resp_boolean ],
-	[ 'Emergency Button Assignment', 'm4' ],
-	[ 'Entry delay beep', 'm5', 1, \&resp_boolean ],
-	[ 'Tamper Siren in Disarm', 'm7', 1, \&resp_boolean ],
-	[ 'Telephone Ringer', 'm8' ],
-	[ 'Cease Dialing Mode', 'm9' ],
-	[ 'Alarm Warning Dong', 'mj' ],
-	[ 'Switch Type', 'mk' ],
-	[ 'Inner Siren Enable', 'n1', 1, \&resp_boolean ],
-	[ 'Dial Mode', 'n2' ],
-	[ 'X-10 House Code', 'n7' ],
-	[ 'Inactivity Function', 'o0' ],
-	[ 'ROM Version', 'vn' ],
-	[ 'Telephone Common 1', 't0', 99, \&resp_telno ],
-	[ 'Telephone Common 2', 't1', 99, \&resp_telno ],
-	[ 'Telephone Common 3', 't2', 99, \&resp_telno ],
-	[ 'Telephone Common 4', 't3', 99, \&resp_telno ],
-	[ 'Telephone Panic', 't4', 99, \&resp_telno ],
-	[ 'Telephone Burglar', 't5', 99, \&resp_telno ],
-	[ 'Telephone Fire', 't6', 99, \&resp_telno ],
-	[ 'Telephone Medical', 't7', 99, \&resp_telno ],
-	[ 'Telephone Special', 't8', 99, \&resp_telno ],
-	[ 'Telephone Latchkey/Power', 't9', 99, \&resp_telno ],
-	[ 'Telephone Pager', 't:', 99, \&resp_telno ],
-	[ 'Telephone Data', 't;', 99, \&resp_telno ],
+	['Switch  1',                    's6', 1,  \&resp_hex1],
+	['Switch  2',                    's7', 1,  \&resp_hex1],
+	['Switch  3',                    's4', 1,  \&resp_hex1],
+	['Switch  4',                    's5', 1,  \&resp_hex1],
+	['Switch  5',                    's8', 1,  \&resp_hex1],
+	['Switch  6',                    's9', 1,  \&resp_hex1],
+	['Switch  7',                    's:', 1,  \&resp_hex1],
+	['Switch  8',                    's;', 1,  \&resp_hex1],
+	['Switch  9',                    's>', 1,  \&resp_hex1],
+	['Switch 10',                    's?', 1,  \&resp_hex1],
+	['Switch 11',                    's<', 1,  \&resp_hex1],
+	['Switch 12',                    's=', 1,  \&resp_hex1],
+	['Switch 13',                    's0', 1,  \&resp_hex1],
+	['Switch 14',                    's1', 1,  \&resp_hex1],
+	['Switch 15',                    's2', 1,  \&resp_hex1],
+	['Switch 16',                    's3', 1,  \&resp_hex1],
+	['Auto Answer Ring Count',       'a0'],
+	['Sensor Supervise Time',        'a2', 2,  \&resp_hex2],
+	['Modem Ring Count',             'a3', 2,  \&resp_hex2],
+	['RF Jamming Warning',           'c0'],
+	['Switch 16 Control',            'c8'],
+	['RS-232 Control',               'c9'],
+	['GSM Phone 1',                  'g0', 99, \&resp_telno],
+	['GSM Phone 2',                  'g1', 99, \&resp_telno],
+	['GSM ID',                       'g2'],
+	['GSM PIN No',                   'g3'],
+	['GSM Phone 3',                  'g4', 99, \&resp_telno],
+	['GSM Phone 4',                  'g5', 99, \&resp_telno],
+	['GSM Phone 5',                  'g6', 99, \&resp_telno],
+	['Exit Delay',                   'l0', 2,  \&resp_hex2],
+	['Entry Delay',                  'l1', 2,  \&resp_hex2],
+	['Remote Siren Time',            'l2', 2,  \&resp_interval2],
+	['Relay Action Time',            'l3', 2,  \&resp_delay,],
+	['Door Bell',                    'm0'],
+	['Dial Tone Check',              'm1'],
+	['Telephone Line Cut Detection', 'm2'],
+	['Mode Change Chirp',            'm3', 1,  \&resp_boolean],
+	['Emergency Button Assignment',  'm4'],
+	['Entry delay beep',             'm5', 1,  \&resp_boolean],
+	['Tamper Siren in Disarm',       'm7', 1,  \&resp_boolean],
+	['Telephone Ringer',             'm8'],
+	['Cease Dialing Mode',           'm9'],
+	['Alarm Warning Dong',           'mj'],
+	['Switch Type',                  'mk'],
+	['Inner Siren Enable',           'n1', 1,  \&resp_boolean],
+	['Dial Mode',                    'n2'],
+	['X-10 House Code',              'n7'],
+	['Inactivity Function',          'o0'],
+	['ROM Version',                  'vn'],
+	['Telephone Common 1',           't0', 99, \&resp_telno],
+	['Telephone Common 2',           't1', 99, \&resp_telno],
+	['Telephone Common 3',           't2', 99, \&resp_telno],
+	['Telephone Common 4',           't3', 99, \&resp_telno],
+	['Telephone Panic',              't4', 99, \&resp_telno],
+	['Telephone Burglar',            't5', 99, \&resp_telno],
+	['Telephone Fire',               't6', 99, \&resp_telno],
+	['Telephone Medical',            't7', 99, \&resp_telno],
+	['Telephone Special',            't8', 99, \&resp_telno],
+	['Telephone Latchkey/Power',     't9', 99, \&resp_telno],
+	['Telephone Pager',              't:', 99, \&resp_telno],
+	['Telephone Data',               't;', 99, \&resp_telno],
+
 	# CMS1
-	[ 'CMS 1 Telephone No', 't<', 99, \&resp_telno ],
-	[ 'CMS 1 User Account No', 't=' ],
-	[ 'CMS 1 Mode Change Report', 'n3' ],
-	[ 'CMS 1 Auto Link Check Period', 'n5' ],
-	[ 'CMS 1 Two-way Audio', 'c3' ],
-	[ 'CMS 1 DTMF Data Length', 'c5' ],
-	[ 'CMS Report', 'c7' ],
-	[ 'CMS 1 GSM No', 'tp', 99, \&resp_telno ],
-	[ 'Ethernet (IP) Report', 'c1' ],
-	[ 'GPRS Report', 'c:' ],
-	[ 'IP Report Format', 'ml' ],
+	['CMS 1 Telephone No',           't<', 99, \&resp_telno],
+	['CMS 1 User Account No',        't='],
+	['CMS 1 Mode Change Report',     'n3'],
+	['CMS 1 Auto Link Check Period', 'n5'],
+	['CMS 1 Two-way Audio',          'c3'],
+	['CMS 1 DTMF Data Length',       'c5'],
+	['CMS Report',                   'c7'],
+	['CMS 1 GSM No',                 'tp', 99, \&resp_telno],
+	['Ethernet (IP) Report',         'c1'],
+	['GPRS Report',                  'c:'],
+	['IP Report Format',             'ml'],
+
 	# CMS2
-	[ 'CMS 2 Telephone No', 't>', 99, \&resp_telno ],
-	[ 'CMS 2 User Account No', 't?' ],
-	[ 'CMS 2 Mode Change Report', 'n4' ],
-	[ 'CMS 2 Auto Link Check Period', 'n6' ],
-	[ 'CMS 2 Two-way Audio', 'c4' ],
-	[ 'CMS 2 DTMF Data Length', 'c6' ],
-	[ 'CMS 2 GSM No', 'tq', 99, \&resp_telno ],
+	['CMS 2 Telephone No',           't>', 99, \&resp_telno],
+	['CMS 2 User Account No',        't?'],
+	['CMS 2 Mode Change Report',     'n4'],
+	['CMS 2 Auto Link Check Period', 'n6'],
+	['CMS 2 Two-way Audio',          'c4'],
+	['CMS 2 DTMF Data Length',       'c6'],
+	['CMS 2 GSM No',                 'tq', 99, \&resp_telno],
 ];
 
 my $spec_commands = [
@@ -360,7 +362,7 @@ sub addCommand {
 	my ($hr) = @_;
 
 	my $title = $hr->{title};
-	my $key = $hr->{key};
+	my $key   = $hr->{key};
 
 	if (exists $commands->{$title}) {
 		warn "Command re-added: $title\n";
@@ -370,7 +372,7 @@ sub addCommand {
 		warn "Command key re-added: $title, $key\n";
 	}
 
-	$commands->{$title} = $hr;
+	$commands->{$title}    = $hr;
 	$command_bykey->{$key} = $hr;
 }
 
@@ -382,7 +384,7 @@ sub addCommands {
 	foreach my $lr (@$simple_commands) {
 		my $hr = {
 			title => $lr->[0],
-			key => $lr->[1],
+			key   => $lr->[1],
 		};
 
 		if ($lr->[2] && $lr->[3]) {
@@ -395,11 +397,13 @@ sub addCommands {
 	}
 
 	foreach my $hr (@$spec_commands) {
+
 		# These commands are specified via full hashref
 		addCommand($hr);
 	}
 
 	foreach my $hr (@$learn_commands) {
+
 		# These commands are specified via full hashref
 		addCommand($hr);
 	}
@@ -418,7 +422,7 @@ sub getCommand {
 sub getCommandByKey {
 	my ($key) = @_;
 
-	if (! %$command_bykey) {
+	if (!%$command_bykey) {
 		addCommands();
 	}
 
@@ -439,7 +443,7 @@ sub _password {
 	# Some commands presumably cannot take a password, e.g.
 	# those which take variable length strings as arguments.
 
-	if (defined $password && ! $cmd_spec->{no_password}) {
+	if (defined $password && !$cmd_spec->{no_password}) {
 		$password = sprintf("%-8.8s", $password . '????????');
 	}
 
@@ -459,12 +463,13 @@ sub queryCommand {
 
 	my $title = $args->{title};
 
-	if (! $title) {
+	if (!$title) {
 		die "queryCommand: args requires a title";
 	}
 
 	my $cmd_spec = getCommand($title);
-	if (! $cmd_spec) {
+	if (!$cmd_spec) {
+
 		# Unknown title
 		return undef;
 	}
@@ -473,7 +478,7 @@ sub queryCommand {
 
 	$cmd .= $cmd_spec->{key};
 
-	if (! $cmd_spec->{no_query}) {
+	if (!$cmd_spec->{no_query}) {
 		$cmd .= '?';
 	}
 
@@ -481,7 +486,7 @@ sub queryCommand {
 		my $lr = $cmd_spec->{query_args};
 
 		foreach my $hr2 (@$lr) {
-			my $key = $hr2->{key};
+			my $key  = $hr2->{key};
 			my $type = $hr2->{type};
 			if ($key) {
 				if (!exists $args->{$key}) {
@@ -498,8 +503,7 @@ sub queryCommand {
 				if ($hr2->{func}) {
 					my $func = $hr2->{func};
 					$value = &$func($input, 'encode');
-				}
-				elsif ($type) {
+				} elsif ($type) {
 					$value = LS30::Type::getCode($type, $input);
 				}
 
@@ -519,7 +523,7 @@ sub queryCommand {
 }
 
 sub setCommand {
-	my ( $args) = @_;
+	my ($args) = @_;
 
 	if (!defined $args || ref($args) ne 'HASH') {
 		die "setCommand: args must be a hashref";
@@ -527,12 +531,13 @@ sub setCommand {
 
 	my $title = $args->{title};
 
-	if (! $title) {
+	if (!$title) {
 		die "setCommand: args requires a title";
 	}
 
 	my $cmd_spec = getCommand($title);
-	if (! $cmd_spec) {
+	if (!$cmd_spec) {
+
 		# Unknown title
 		return undef;
 	}
@@ -541,7 +546,7 @@ sub setCommand {
 
 	$cmd .= $cmd_spec->{key};
 
-	if (! $cmd_spec->{no_set}) {
+	if (!$cmd_spec->{no_set}) {
 		$cmd .= 's';
 	}
 
@@ -558,8 +563,7 @@ sub setCommand {
 				if ($hr2->{func}) {
 					my $func = $hr2->{func};
 					$value = &$func($input, 'encode');
-				}
-				elsif ($hr2->{type}) {
+				} elsif ($hr2->{type}) {
 					if (!defined $input) {
 						warn "Needed set command key $key is missing";
 					} else {
@@ -602,7 +606,7 @@ sub formatLearnCommand {
 	my ($args) = @_;
 
 	my $cmd_spec = getLearnCommandSpec($args->{title});
-	my $cmd = '!';
+	my $cmd      = '!';
 	$cmd .= $cmd_spec->{key};
 
 	$cmd .= _password($cmd_spec, $args);
@@ -616,6 +620,7 @@ sub parseResponse {
 	my ($response) = @_;
 
 	if ($response !~ /^!(.+)&$/) {
+
 		# Doesn't look like a response
 		return undef;
 	}
@@ -639,10 +644,12 @@ sub parseResponse {
 	$hr = getCommandByKey($key);
 	if ($hr) {
 		if (substr($meat, 2, 1) eq 's') {
+
 			# It's a response to a set command
 			$return->{action} = 'set';
 			$meat = substr($meat, 3);
 		} else {
+
 			# It's a response to a query command
 			$return->{action} = 'query';
 			$meat = substr($meat, 2);
@@ -652,7 +659,7 @@ sub parseResponse {
 	}
 
 	$return->{error} = "Unparseable response";
-	$return->{key} = $key;
+	$return->{key}   = $key;
 
 	return $return;
 }
@@ -705,18 +712,15 @@ sub resp_boolean {
 	if ($op && $op eq 'encode') {
 		if ($string =~ /^(on|true|yes)$/i) {
 			return 1;
-		}
-		elsif ($string =~ /^(off|false|no)$/i) {
+		} elsif ($string =~ /^(off|false|no)$/i) {
 			return 0;
-		}
-		elsif ($string =~ /^\d+$/) {
+		} elsif ($string =~ /^\d+$/) {
 			if ($string > 0) {
 				return 1;
 			} else {
 				return 0;
 			}
-		}
-		else {
+		} else {
 			warn "Invalid boolean string: $string\n";
 			return 0;
 		}
@@ -770,6 +774,7 @@ sub resp_telno {
 	my ($string) = @_;
 
 	if ($string eq 'no') {
+
 		# Can mean no number, or permission denied
 		return '';
 	}
@@ -805,11 +810,9 @@ sub resp_interval2 {
 
 		if ($string =~ /^(\d+) minutes/) {
 			$duration = $1 * 60;
-		}
-		elsif ($string =~ /^(\d+) seconds/) {
+		} elsif ($string =~ /^(\d+) seconds/) {
 			$duration = $1;
-		}
-		elsif ($string =~ /^(\d+)$/) {
+		} elsif ($string =~ /^(\d+)$/) {
 			$duration = $1;
 		}
 
@@ -843,13 +846,11 @@ sub resp_decimal_time {
 	my ($string, $op) = @_;
 
 	if ($op && $op eq 'encode') {
-		if (! $string) {
+		if (!$string) {
 			return '????';
-		}
-		elsif ($string =~ /^(\d\d):(\d\d)$/) {
+		} elsif ($string =~ /^(\d\d):(\d\d)$/) {
 			return "$1$2";
-		}
-		else {
+		} else {
 			warn "Incorrect decimal_time $string";
 			return '????';
 		}
@@ -880,6 +881,7 @@ sub resp_password {
 	my ($string, $op) = @_;
 
 	if ($op && $op eq 'encode') {
+
 		# No change or padding required
 		return $string;
 	}
@@ -904,7 +906,7 @@ sub parseDeviceConfig {
 
 	# e.g. "<4100000"
 	$string =~ tr/:;<=>?/abcdef/;
-	my $hr = { };
+	my $hr = {};
 
 	if ($string !~ /^(..)(..)(....)$/) {
 		die "Looking for an 8-char string, not $string";
@@ -913,25 +915,25 @@ sub parseDeviceConfig {
 	my ($xes1, $xes2, $xsw) = ($1, $2, $3);
 	my $es1 = hex($xes1);
 	my $es2 = hex($xes2);
-	my $sw = hex($xsw);
+	my $sw  = hex($xsw);
 
 	$hr->{string} = $string;
 
-	$hr->{bypass} = ($es1 & 0x80) ? 1 : 0;
-	$hr->{delay} = ($es1 & 0x40) ? 1 : 0;
-	$hr->{hrs_24} = ($es1 & 0x20) ? 1 : 0;
-	$hr->{home_guard} = ($es1 & 0x10) ? 1 : 0;
-	$hr->{pre_warning} = ($es1 & 0x08) ? 1 : 0;
-	$hr->{siren_alarm} = ($es1 & 0x04) ? 1 : 0;
-	$hr->{bell} = ($es1 & 0x02) ? 1 : 0;
+	$hr->{bypass}                 = ($es1 & 0x80) ? 1 : 0;
+	$hr->{delay}                  = ($es1 & 0x40) ? 1 : 0;
+	$hr->{hrs_24}                 = ($es1 & 0x20) ? 1 : 0;
+	$hr->{home_guard}             = ($es1 & 0x10) ? 1 : 0;
+	$hr->{pre_warning}            = ($es1 & 0x08) ? 1 : 0;
+	$hr->{siren_alarm}            = ($es1 & 0x04) ? 1 : 0;
+	$hr->{bell}                   = ($es1 & 0x02) ? 1 : 0;
 	$hr->{latchkey_or_inactivity} = ($es1 & 0x01) ? 1 : 0;
 
-	$hr->{es2_reserved_1} = ($es2 & 0x80) ? 1 : 0;
-	$hr->{es2_reserved_2} = ($es2 & 0x40) ? 1 : 0;
-	$hr->{es2_two_way} = ($es2 & 0x20) ? 1 : 0;
+	$hr->{es2_reserved_1}  = ($es2 & 0x80) ? 1 : 0;
+	$hr->{es2_reserved_2}  = ($es2 & 0x40) ? 1 : 0;
+	$hr->{es2_two_way}     = ($es2 & 0x20) ? 1 : 0;
 	$hr->{es2_supervisory} = ($es2 & 0x10) ? 1 : 0;
-	$hr->{es2_rf_voice} = ($es2 & 0x08) ? 1 : 0;
-	$hr->{es2_reserved_3} = $es2 & 0x07;
+	$hr->{es2_rf_voice}    = ($es2 & 0x08) ? 1 : 0;
+	$hr->{es2_reserved_3}  = $es2 & 0x07;
 
 	foreach my $switch (1 .. 15) {
 		my $test = 1 << (16 - $switch);
@@ -979,7 +981,7 @@ sub _parseArg {
 
 	my $length = $arg_hr->{'length'};
 
-	if (! $length) {
+	if (!$length) {
 		die "Need to specify length";
 	}
 
@@ -993,8 +995,7 @@ sub _parseArg {
 	if ($arg_hr->{func}) {
 		my $func_ref = $arg_hr->{func};
 		$return->{$key} = &$func_ref($input, 'decode');
-	}
-	elsif ($arg_hr->{type}) {
+	} elsif ($arg_hr->{type}) {
 		my $type = $arg_hr->{type};
 		my $value = LS30::Type::getString($type, $input);
 		$return->{$key} = $value;
@@ -1023,6 +1024,7 @@ sub resp_date1 {
 		my $year = Date::Format::time2str('%Y', $now);
 
 		if ($1 > ($year % 100)) {
+
 			# It's a date from last century
 			$year = $1 + $year - $year % 100 - 100;
 		} else {

@@ -48,17 +48,17 @@ sub new {
 	my ($class, $selector, $peer_addr) = @_;
 
 	my $self = {
-		current_state => 'disconnected',
-		selector => $selector,
-		peer_addr => $peer_addr,
-		handler => undef,
+		current_state     => 'disconnected',
+		selector          => $selector,
+		peer_addr         => $peer_addr,
+		handler           => undef,
 		watchdog_interval => 320,
-		pending => '',
+		pending           => '',
 	};
 
 	bless $self, $class;
 
-	if (!  $self->connect()) {
+	if (!$self->connect()) {
 		return undef;
 	}
 
@@ -81,19 +81,19 @@ sub connect {
 
 	my $socket = AlarmDaemon::SocketFactory->new(
 		PeerAddr => $self->{peer_addr},
-		Proto => 'tcp',
+		Proto    => 'tcp',
 	);
 
 	if ($socket) {
-		$self->{socket} = $socket;
+		$self->{socket}         = $socket;
 		$self->{last_rcvd_time} = time();
-		$self->{current_state} = 'connected';
+		$self->{current_state}  = 'connected';
 
 		# Setting SO_KEEPALIVE will eventually cause a client socket error if
 		# connection is broken
-		if (! setsockopt($socket, Socket::SOL_SOCKET(), Socket::SO_KEEPALIVE(), 1)) {
+		if (!setsockopt($socket, Socket::SOL_SOCKET(), Socket::SO_KEEPALIVE(), 1)) {
 			warn "Unable to set keepalive\n";
-		};
+		}
 
 		$self->{selector}->addObject($self);
 
@@ -122,8 +122,8 @@ sub disconnect {
 		undef $self->{socket};
 		$self->{current_state} = 'disconnected';
 		my $now = time();
-		$self->{retry_base} = $now;
-		$self->{retry_when} = $now + 2;
+		$self->{retry_base}     = $now;
+		$self->{retry_when}     = $now + 2;
 		$self->{retry_interval} = 4;
 	}
 }
@@ -205,6 +205,7 @@ sub watchdogEvent {
 	my $current_state = $self->{current_state};
 
 	if ($current_state eq 'connected') {
+
 		# Disconnect and wait before reconnecting.
 		LS30::Log::timePrint("Timeout: disconnecting from server");
 		$self->disconnect();
@@ -239,12 +240,14 @@ sub handleRead {
 
 	my $n = $self->{socket}->recv($buffer, 128);
 	if (!defined $n) {
+
 		# Error on the socket
 		$self->disconnect();
 		return;
 	}
 
 	if (length($buffer) == 0) {
+
 		# EOF: Other end closed the connection
 		$self->disconnect();
 		return;
@@ -283,18 +286,21 @@ sub addBuffer {
 	while ($pending ne '') {
 
 		if (substr($pending, 0, 1) eq "\r") {
+
 			# Skip leading \r
 			$pending = substr($pending, 1);
 			next;
 		}
 
 		if (substr($pending, 0, 1) eq "\n") {
+
 			# Skip leading \n
 			$pending = substr($pending, 1);
 			next;
 		}
 
 		if ($pending =~ /^([^\r\n]+)[\r\n]+(.*)/s) {
+
 			# Here's a full line to process
 			my $line = $1;
 			$pending = $2;

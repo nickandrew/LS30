@@ -39,12 +39,12 @@ Create a new listening socket.
 sub new {
 	my ($class, $socket, $handler) = @_;
 
-	if (! $socket) {
+	if (!$socket) {
 		return undef;
 	}
 
 	my $self = {
-		socket => $socket,
+		socket  => $socket,
 		handler => $handler,
 	};
 
@@ -102,7 +102,7 @@ sub handleRead {
 	my $handler = $self->{handler};
 	my ($new_sock, $address) = $socket->accept();
 
-	if (! $address) {
+	if (!$address) {
 		warn "Socket accept failed\n";
 		return;
 	}

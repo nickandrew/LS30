@@ -14,7 +14,7 @@ use vars qw($opt_q $opt_s);
 
 getopts('qs');
 
-if (! $opt_q && ! $opt_s) {
+if (!$opt_q && !$opt_s) {
 	die "Need to specify either option -q or -s";
 }
 

@@ -51,9 +51,9 @@ $ac->addServer($opt_h);
 foreach my $local_addr (@ARGV) {
 	my $listener = AlarmDaemon::SocketFactory->new(
 		LocalAddr => $local_addr,
-		Proto => "tcp",
+		Proto     => "tcp",
 		ReuseAddr => 1,
-		Listen => 5,
+		Listen    => 5,
 	);
 
 	if ($listener) {

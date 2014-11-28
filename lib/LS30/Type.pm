@@ -25,33 +25,33 @@ my $type_table = {
 	'Device Specific Type' => {
 		'Deleted Device' => '00',
 		'Remote Control' => '10',
-		'Keypad' => '19',
+		'Keypad'         => '19',
 		'Smoke Detector' => '20',
-		'Door Switch' => '40',
-		'PIR' => '50',
-		'Siren' => '70',
+		'Door Switch'    => '40',
+		'PIR'            => '50',
+		'Siren'          => '70',
 	},
 
 	# Appears in MINPIC messages
 	'Event Code' => {
-		'Away mode' => '0a10',
+		'Away mode'    => '0a10',
 		'Check Status' => '0a13',
-		'Disarm mode' => '0a14',
-		'Home mode' => '0a18',
-		'Test' => '0a20',
-		'Low Battery' => '0a30',
-		'Open' => '0a40',
-		'Close' => '0a48',
-		'Tamper' => '0a50',
-		'Trigger' => '0a58',
-		'Panic' => '0a60',
+		'Disarm mode'  => '0a14',
+		'Home mode'    => '0a18',
+		'Test'         => '0a20',
+		'Low Battery'  => '0a30',
+		'Open'         => '0a40',
+		'Close'        => '0a48',
+		'Tamper'       => '0a50',
+		'Trigger'      => '0a58',
+		'Panic'        => '0a60',
 	},
 
 	# 'b3' command
 	'Device Type' => {
-		'Controller' => '0',
+		'Controller'     => '0',
 		'Burglar Sensor' => '1',
-		'Fire Sensor' => '2',
+		'Fire Sensor'    => '2',
 		'Medical Button' => '3',
 		'Special Sensor' => '4',
 	},
@@ -59,10 +59,10 @@ my $type_table = {
 	# 2nd letter of 'k' commands: 'kb', 'kc', ...
 	'Device Code' => {
 		'Burglar Sensor' => 'b',
-		'Controller' => 'c',
-		'Fire Sensor' => 'f',
+		'Controller'     => 'c',
+		'Fire Sensor'    => 'f',
 		'Medical Button' => 'm',
-		'Extra Sensor' => 'e',
+		'Extra Sensor'   => 'e',
 	},
 
 	'Group' => {
@@ -93,7 +93,7 @@ my $type_table = {
 
 	# Query/Set Operation Schedule
 	'Schedule Zone' => {
-		'Main' => '0',
+		'Main'    => '0',
 		'Zone 91' => '1',
 		'Zone 92' => '2',
 		'Zone 93' => '3',
@@ -107,18 +107,18 @@ my $type_table = {
 
 	# Used in Query/Set Operation Schedule
 	'Operation Code' => {
-		'Ignore' => '?',
-		'Disarm' => '1',
-		'Home' => '2',
-		'Away' => '3',
+		'Ignore'  => '?',
+		'Disarm'  => '1',
+		'Home'    => '2',
+		'Away'    => '3',
 		'Monitor' => '9',
 	},
 
 	# 'n0' command
 	'Arm Mode' => {
-		'Disarm' => '0',
-		'Home' => '1',
-		'Away' => '2',
+		'Disarm'  => '0',
+		'Home'    => '1',
+		'Away'    => '2',
 		'Monitor' => '8',
 	},
 
@@ -134,46 +134,46 @@ my $type_table = {
 
 	'Schedule Day of Week' => {
 		'Daily' => '0',
-		'Mon' => '1',
-		'Tue' => '2',
-		'Wed' => '3',
-		'Thu' => '4',
-		'Fri' => '5',
-		'Sat' => '6',
-		'Sun' => '7',
+		'Mon'   => '1',
+		'Tue'   => '2',
+		'Wed'   => '3',
+		'Thu'   => '4',
+		'Fri'   => '5',
+		'Sat'   => '6',
+		'Sun'   => '7',
 	},
 
 	'Password' => {
-		'Master' => '0',
-		'USER2' => '1',
-		'USER3' => '2',
-		'USER4' => '3',
-		'USER5' => '4',
-		'USER6' => '5',
-		'USER7' => '6',
-		'USER8' => '7',
-		'USER9(L)' => '8',
+		'Master'    => '0',
+		'USER2'     => '1',
+		'USER3'     => '2',
+		'USER4'     => '3',
+		'USER5'     => '4',
+		'USER6'     => '5',
+		'USER7'     => '6',
+		'USER8'     => '7',
+		'USER9(L)'  => '8',
 		'USER10(L)' => '9',
-		'Duress' => ':',
+		'Duress'    => ':',
 	},
 
 	'Switch' => {
 		'Off' => '0',
-		'On' => '1',
+		'On'  => '1',
 	},
 
 	'Enablement' => {
 		'Disabled' => '0',
-		'Enabled' => '1',
+		'Enabled'  => '1',
 	},
 
 	'Dial Mode' => {
-		'Dial Tone(DTMF)' => '0',
+		'Dial Tone(DTMF)'              => '0',
 		'Dial Pulse (33/66 B/M Ratio)' => '1',
 	},
 
 	'Switch Type' => {
-		'X-10' => '0',
+		'X-10'   => '0',
 		'Type 2' => '1',
 		'Type 3' => '2',
 		'Type 4' => '3',
@@ -181,26 +181,26 @@ my $type_table = {
 	},
 
 	'Emergency Button' => {
-		'Panic' => '0',
+		'Panic'   => '0',
 		'Medical' => '1',
 	},
 
 	# 'd1' command
 	'Siren Type' => {
-		'Standard' => '0',
+		'Standard'  => '0',
 		'HA Series' => '1',
 	},
 
 	# 'u' command
 	'Switch/Operation Scene' => {
-		'Switch Scene 1' => '0',
-		'Switch Scene 2' => '1',
-		'Switch Scene 3' => '2',
-		'Switch Scene 4' => '3',
-		'Switch Scene 5' => '4',
-		'Switch Scene 6' => '5',
-		'Switch Scene 7' => '6',
-		'Switch Scene 8' => '7',
+		'Switch Scene 1'    => '0',
+		'Switch Scene 2'    => '1',
+		'Switch Scene 3'    => '2',
+		'Switch Scene 4'    => '3',
+		'Switch Scene 5'    => '4',
+		'Switch Scene 6'    => '5',
+		'Switch Scene 7'    => '6',
+		'Switch Scene 8'    => '7',
 		'Operation Scene 1' => '8',
 		'Operation Scene 2' => '9',
 		'Operation Scene 3' => ':',
@@ -250,7 +250,7 @@ my $type_table = {
 
 };
 
-my $reverse_table = { };
+my $reverse_table = {};
 
 
 # ---------------------------------------------------------------------------
@@ -273,7 +273,7 @@ sub getCode {
 	}
 
 	my $hr = $type_table->{$table};
-	if (! $hr) {
+	if (!$hr) {
 		confess "No such LS30::Type ($table)";
 	}
 
@@ -297,11 +297,12 @@ sub getString {
 	my ($table, $code) = @_;
 
 	my $hr = $type_table->{$table};
-	if (! $hr) {
+	if (!$hr) {
 		confess "No such LS30::Type ($table)";
 	}
 
-	if (! $reverse_table->{$table}) {
+	if (!$reverse_table->{$table}) {
+
 		# Build the reverse table
 		foreach my $k (keys %$hr) {
 			my $value = $hr->{$k};
@@ -331,7 +332,7 @@ sub listStrings {
 	}
 
 	my $hr = $type_table->{$table};
-	if (! $hr) {
+	if (!$hr) {
 		return undef;
 	}
 

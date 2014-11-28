@@ -31,9 +31,10 @@ $ls30c->connect();
 LS30Command::addCommands();
 
 my $ls30cmdr = LS30::Commander->new($ls30c);
-my $now = time();
+my $now      = time();
 
 if ($opt_p) {
+
 	# Wait until seconds are zero
 	my $sec = time2str('%S', $now);
 
@@ -45,10 +46,10 @@ if ($opt_p) {
 }
 
 my $hr = {
-	title => 'Date/Time',
+	title  => 'Date/Time',
 	'date' => time2str('%Y-%m-%d', $now),
 	'time' => time2str('%H:%M:%S', $now),
-	'dow' => time2str('%a', $now),
+	'dow'  => time2str('%a', $now),
 };
 
 my $cmd = LS30Command::setCommand($hr);
@@ -59,14 +60,14 @@ if (!defined $cmd) {
 
 my $response = $ls30cmdr->sendCommand($cmd);
 
-if (! $response) {
+if (!$response) {
 	die "Command was sent, but no response was received";
 }
 
 printf("Sent: %-40s | Response: %s\n", $cmd, $response);
 my $resp = LS30::ResponseMessage->new($response);
 
-if (! $resp || $resp->{title} ne 'Date/Time') {
+if (!$resp || $resp->{title} ne 'Date/Time') {
 	die "Couldn't parse response\n";
 }
 

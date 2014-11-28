@@ -38,7 +38,7 @@ If string is not supplied, return an empty object.
 sub new {
 	my ($class, $string) = @_;
 
-	my $self = { };
+	my $self = {};
 	bless $self, $class;
 
 	if ($string) {
@@ -61,12 +61,13 @@ sub _parseString {
 	my ($self, $string) = @_;
 
 	if ($string !~ /^!(.+)&$/) {
+
 		# Doesn't look like a response
 		confess "Invalid ResponseMessage string: $string";
 	}
 
 	my $return = LS30Command::parseResponse($string);
-	if (! $return) {
+	if (!$return) {
 		$self->{'error'} = "Unparseable response $string";
 		return;
 	}

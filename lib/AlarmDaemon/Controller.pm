@@ -33,11 +33,11 @@ sub new {
 	my ($class) = @_;
 
 	my $self = {
-		clients => 0,
-		client_sockets => { },
-		pending_data => undef,
-		selector => undef,
-		server => undef,
+		clients        => 0,
+		client_sockets => {},
+		pending_data   => undef,
+		selector       => undef,
+		server         => undef,
 	};
 
 	bless $self, $class;
@@ -51,7 +51,7 @@ sub addListener {
 	my ($self, $socket) = @_;
 
 	my $listener = AlarmDaemon::ListenSocket->new($socket, $self);
-	if (! $listener) {
+	if (!$listener) {
 		warn "Unable to add listener\n";
 		return;
 	}
@@ -63,7 +63,7 @@ sub addServer {
 	my ($self, $peer_addr) = @_;
 
 	my $object = AlarmDaemon::ServerSocket->new($self->{selector}, $peer_addr);
-	if (! $object) {
+	if (!$object) {
 		warn "Unable to instantiate an AlarmDaemon::ServerSocket to $peer_addr\n";
 		return;
 	}
@@ -78,7 +78,7 @@ sub addClient {
 	LS30::Log::timePrint("New client");
 	my $client = AlarmDaemon::ClientSocket->new($self->{selector}, $socket, $self);
 	$self->{client_sockets}->{$socket} = $client;
-	$self->{clients} ++;
+	$self->{clients}++;
 
 	if (defined $self->{pending_data}) {
 		LS30::Log::timePrint("Sent pending: $self->{pending_data}");
@@ -93,7 +93,7 @@ sub removeClient {
 	my $socket = $client->socket();
 	if (exists $self->{client_sockets}->{$socket}) {
 		delete $self->{client_sockets}->{$socket};
-		$self->{clients} --;
+		$self->{clients}--;
 		LS30::Log::timePrint("Removed client");
 	}
 }
@@ -120,7 +120,7 @@ sub serverRead {
 
 	LS30::Log::timePrint("Emitting: $buffer$rest");
 
-	foreach my $object (values %{$self->{client_sockets}}) {
+	foreach my $object (values %{ $self->{client_sockets} }) {
 		$object->send($buffer);
 	}
 }

@@ -25,8 +25,8 @@ LS30Command::addCommands();
 
 my $ls30cmdr = LS30::Commander->new($ls30c);
 
-my $data = { };
-my $min = shift @ARGV;
+my $data = {};
+my $min  = shift @ARGV;
 $min = 0 if (!defined $min);
 my $max = shift @ARGV;
 $max = 511 if (!defined $max);
@@ -42,9 +42,9 @@ foreach my $n ($min .. $max) {
 	my $cmd = LS30Command::queryCommand($cmd_hr);
 
 	my $response = $ls30cmdr->sendCommand($cmd);
-	my $obj = LS30::EventMessage->new($response);
+	my $obj      = LS30::EventMessage->new($response);
 
-	next if (! $obj);
+	next if (!$obj);
 	printf("Event %3d\n", $n);
 	print Dumper($obj);
 

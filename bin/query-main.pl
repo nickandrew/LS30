@@ -45,11 +45,11 @@ my @output;
 foreach my $hr (@$queries) {
 	my $cmd_spec = LS30Command::getCommand($hr->{title});
 
-	my $cmd = LS30Command::queryCommand($hr);
+	my $cmd      = LS30Command::queryCommand($hr);
 	my $response = $ls30cmdr->sendCommand($cmd);
 
 	if ($response) {
-		push(@output, [ $hr->{title}, $cmd, $response ] );
+		push(@output, [$hr->{title}, $cmd, $response]);
 	}
 }
 
@@ -62,7 +62,7 @@ foreach my $lr (@output) {
 	}
 
 	my $resp_obj = LS30::ResponseMessage->new($response);
-	if (! $resp_obj) {
+	if (!$resp_obj) {
 		printf "%-40s | %-15s | %s\n", $title, $cmd, $response;
 	} else {
 		my $v = $resp_obj->{value};

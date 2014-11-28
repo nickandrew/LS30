@@ -47,7 +47,7 @@ If string is not supplied, return an empty object.
 sub new {
 	my ($class, $string) = @_;
 
-	my $self = { };
+	my $self = {};
 	bless $self, $class;
 
 	if ($string) {
@@ -75,7 +75,7 @@ sub _parseString {
 
 	my ($acct, $mt, $q, $xyz, $gg, $ccc, $s) = ($1, $2, $3, $4, $5, $6, $7);
 
-	my $unknown = '';
+	my $unknown  = '';
 	my $describe = '';
 
 	if ($acct ne '1688') {
@@ -84,11 +84,9 @@ sub _parseString {
 
 	if ($mt eq '18') {
 		$self->{type} = 'Preferred';
-	}
-	elsif ($mt eq '98') {
+	} elsif ($mt eq '98') {
 		$self->{type} = 'Optional';
-	}
-	else {
+	} else {
 		$self->{type} = 'Unknown';
 		$unknown .= " mt($mt)";
 	}
@@ -108,8 +106,8 @@ sub _parseString {
 	$self->{event_description} = $event_description;
 
 	$self->{string} = $string;
-	$self->{group} = "$gg";
-	$self->{zone} = "$ccc";
+	$self->{group}  = "$gg";
+	$self->{zone}   = "$ccc";
 
 	if ($unknown) {
 		$self->{unknown} = $unknown;

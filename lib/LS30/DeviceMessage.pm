@@ -47,7 +47,7 @@ If string is not supplied, return an empty object.
 sub new {
 	my ($class, $string) = @_;
 
-	my $self = { };
+	my $self = {};
 	bless $self, $class;
 
 	if ($string) {
@@ -81,7 +81,7 @@ sub _parseString {
 	my $signal_int = hex($signal) - 32;
 	my $type_name = LS30::Type::getString('Event Code', $type);
 
-	if (! $type_name) {
+	if (!$type_name) {
 		$type_name = 'Unknown';
 		$unknown .= " UnknownType($type)";
 	}
@@ -105,15 +105,15 @@ sub _parseString {
 		$self->{unknown} = $unknown;
 	}
 
-	$self->{string} = $string;
-	$self->{event_code} = $type;
-	$self->{event_name} = $type_name;
-	$self->{device_id} = $device_id;
-	$self->{device_type} = $dev_type_name;
+	$self->{string}          = $string;
+	$self->{event_code}      = $type;
+	$self->{event_name}      = $type_name;
+	$self->{device_id}       = $device_id;
+	$self->{device_type}     = $dev_type_name;
 	$self->{signal_strength} = $signal_int;
-	$self->{unk1} = $unk1;
-	$self->{unk2} = $unk2;
-	$self->{unk3} = $unk3;
+	$self->{unk1}            = $unk1;
+	$self->{unk2}            = $unk2;
+	$self->{unk3}            = $unk3;
 }
 
 sub getEventName {

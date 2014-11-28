@@ -29,9 +29,9 @@ my $ipv6_supported = 0;
 
 eval "use Socket6";
 
-if (! $@) {
+if (!$@) {
 	eval "use IO::Socket::INET6";
-	if (! $@) {
+	if (!$@) {
 		$ipv6_supported = 1;
 	}
 }

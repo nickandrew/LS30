@@ -36,11 +36,12 @@ LS30Command::addCommands();
 
 my $ls30cmdr = LS30::Commander->new($ls30c);
 
-my $event_data = { };
+my $event_data = {};
 
 if (-e $yaml_file) {
 	$event_data = YAML::LoadFile($yaml_file);
 } else {
+
 	# Initialise the file
 	$event_data->{last_event_id} = 0;
 }
@@ -54,7 +55,7 @@ if ($event_data->{last_event_id} == $highest_event) {
 
 # Event numbers go from 1 .. 512
 my $event_n = nextEvent($event_data->{last_event_id});
-my $count = 0;
+my $count   = 0;
 
 while (1) {
 
@@ -63,11 +64,11 @@ while (1) {
 		value => $event_n,
 	};
 
-	my $cmd = LS30Command::queryCommand($cmd_hr);
+	my $cmd      = LS30Command::queryCommand($cmd_hr);
 	my $response = $ls30cmdr->sendCommand($cmd);
-	my $obj = LS30::EventMessage->new($response);
+	my $obj      = LS30::EventMessage->new($response);
 
-	if (! $obj) {
+	if (!$obj) {
 		last;
 	}
 
@@ -75,11 +76,12 @@ while (1) {
 		displayEvent($event_n, $obj);
 	}
 
-	push(@{$event_data->{events}}, $obj);
+	push(@{ $event_data->{events} }, $obj);
 
-	$count ++;
+	$count++;
 
 	if ($opt_l && $count >= $opt_l) {
+
 		# Limit reached, stop here
 		last;
 	}
@@ -91,7 +93,7 @@ while (1) {
 
 $event_data->{last_event_id} = $event_n;
 
-if (! YAML::DumpFile($yaml_file, $event_data)) {
+if (!YAML::DumpFile($yaml_file, $event_data)) {
 	die "Unable to save YAML data to $yaml_file";
 }
 
@@ -109,11 +111,11 @@ sub highestEvent {
 		value => 1,
 	};
 
-	my $cmd = LS30Command::queryCommand($cmd_hr);
+	my $cmd      = LS30Command::queryCommand($cmd_hr);
 	my $response = $ls30cmdr->sendCommand($cmd);
-	my $obj = LS30::EventMessage->new($response);
+	my $obj      = LS30::EventMessage->new($response);
 
-	if (! $obj) {
+	if (!$obj) {
 		die "Couldn't find highest event number";
 	}
 
@@ -127,7 +129,7 @@ sub highestEvent {
 sub nextEvent {
 	my ($event_number) = @_;
 
-	$event_number ++;
+	$event_number++;
 	if ($event_number > 512) {
 		$event_number = 1;
 	}

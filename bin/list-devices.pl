@@ -35,10 +35,10 @@ my $ls30cmdr = LS30::Commander->new($ls30c);
 my @responses;
 my @device_code_list = LS30::Type::listStrings('Device Code');
 
-my $s = '';
-my $s2 = '';
-my $devs = { };
-my $dev_seen = { };
+my $s        = '';
+my $s2       = '';
+my $devs     = {};
+my $dev_seen = {};
 
 if (-f $devices_file) {
 	$devs = YAML::LoadFile($devices_file);
@@ -52,6 +52,7 @@ foreach my $device_name (@device_code_list) {
 		my $response = $ls30cmdr->sendCommand($cmd);
 
 		if ($response =~ /^!k.000/) {
+
 			# No device, stop looking
 			last;
 		}
@@ -70,6 +71,7 @@ foreach my $device_name (@device_code_list) {
 			);
 
 			if (!exists $devs->{$dev_id}) {
+
 				# Add a template to the device list
 				my $hr = {
 					name => 'Sample',
@@ -94,9 +96,10 @@ foreach my $device_name (@device_code_list) {
 }
 
 if ($opt_y) {
+
 	# Print all missing devices
 	foreach my $dev_id (sort (keys %$devs)) {
-		if (! $dev_seen->{$dev_id}) {
+		if (!$dev_seen->{$dev_id}) {
 			print STDERR "Warning: Device $dev_id in $devices_file not seen\n";
 		}
 	}

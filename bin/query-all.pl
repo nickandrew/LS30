@@ -39,7 +39,8 @@ foreach my $title (LS30Command::listCommands()) {
 
 	my $cmd_spec = LS30Command::getCommand($title);
 
-	if (! $cmd_spec) {
+	if (!$cmd_spec) {
+
 		# Unknown title?
 		next;
 	}
@@ -51,12 +52,12 @@ foreach my $title (LS30Command::listCommands()) {
 	if ($cmd_spec->{query_args}) {
 		permuteArgs($cmd_spec->{query_args}, $cmd_ref, $title);
 	} else {
-		my $query = LS30Command::queryCommand($cmd_ref);
+		my $query    = LS30Command::queryCommand($cmd_ref);
 		my $response = $ls30cmdr->sendCommand($query);
 
 		my $hr = {
-			title => $title,
-			query => $query,
+			title    => $title,
+			query    => $query,
 			response => $response,
 		};
 
@@ -91,15 +92,16 @@ exit(0);
 sub permuteArgs {
 	my ($query_args, $cmd_ref, $title) = @_;
 
-	if (! @$query_args) {
+	if (!@$query_args) {
+
 		# Recursion has finished; issue command
-		my $cmd = LS30Command::queryCommand($cmd_ref);
+		my $cmd  = LS30Command::queryCommand($cmd_ref);
 		my $resp = $ls30cmdr->sendCommand($cmd);
 
 		# Save response
 		my $hr = {
-			title => $title,
-			query => $cmd,
+			title    => $title,
+			query    => $cmd,
 			response => $resp,
 		};
 
@@ -108,17 +110,18 @@ sub permuteArgs {
 	}
 
 	my @rest = @$query_args;
-	my $arg = shift @rest;
+	my $arg  = shift @rest;
 	my $type = $arg->{type};
 
-	if (! $type) {
+	if (!$type) {
+
 		# This is normal. This command takes arguments which can't be enumerated
 		warn "permuteArgs: no 'type' defined for $title, key $arg->{key}\n";
 		return;
 	}
 
 	my @list = LS30::Type::listStrings($arg->{type});
-	my $key = $arg->{key};
+	my $key  = $arg->{key};
 
 	foreach my $v (@list) {
 		$cmd_ref->{$key} = $v;

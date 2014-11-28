@@ -42,15 +42,15 @@ sub new {
 	if (!defined $server_address) {
 		$server_address = $ENV{'LS30_SERVER'};
 
-		if (! $server_address) {
+		if (!$server_address) {
 			die "Environment LS30_SERVER must be set to host:port of LS30 server";
 		}
 	}
 
 	my $self = {
 		server_address => $server_address,
-		pending => '',
-		handler => undef,
+		pending        => '',
+		handler        => undef,
 	};
 
 	bless $self, $class;
@@ -72,16 +72,16 @@ sub connect {
 
 	my $server_address = $self->{server_address};
 
-	if (! $server_address) {
+	if (!$server_address) {
 		die "No server address";
 	}
 
 	my $conn = AlarmDaemon::SocketFactory->new(
 		PeerAddr => $self->{server_address},
-		Proto => "tcp",
+		Proto    => "tcp",
 	);
 
-	if (! $conn) {
+	if (!$conn) {
 		return 0;
 	}
 
@@ -140,16 +140,16 @@ sub handleRead {
 	my $n = $socket->recv($buffer, 256);
 
 	if (!defined $n) {
+
 		# Error
 		$self->disconnect_event($selector, $socket);
-	}
-	else {
+	} else {
 		$n = length($buffer);
 		if ($n == 0) {
+
 			# EOF
 			$self->disconnect_event($selector, $socket);
-		}
-		else {
+		} else {
 			$self->addBuffer($buffer);
 		}
 	}
@@ -189,7 +189,7 @@ sub sendCommand {
 
 	my $socket = $self->{socket};
 
-	if (! $socket) {
+	if (!$socket) {
 		die "Unable to sendCommand(): Not connected";
 	}
 
@@ -233,18 +233,21 @@ sub addBuffer {
 	while ($pending ne '') {
 
 		if (substr($pending, 0, 1) eq "\r") {
+
 			# Skip leading \r
 			$pending = substr($pending, 1);
 			next;
 		}
 
 		if (substr($pending, 0, 1) eq "\n") {
+
 			# Skip leading \n
 			$pending = substr($pending, 1);
 			next;
 		}
 
 		if ($pending =~ /^([^\r\n]+)[\r\n]+(.*)/s) {
+
 			# Here's a full line to process
 			my $line = $1;
 			$pending = $2;
@@ -292,6 +295,7 @@ sub processLine {
 	}
 
 	if ($line eq '!&') {
+
 		# This is only a prompt
 		return;
 	}
@@ -303,12 +307,14 @@ sub processLine {
 	}
 
 	if ($line =~ /^(AT.+)/) {
+
 		# Ignore AT command
 		$self->runHandler('AT', $line);
 		return;
 	}
 
 	if ($line =~ /^(GSM=.+)/) {
+
 		# Ignore GSM command
 		$self->runHandler('GSM', $line);
 		return;
@@ -378,30 +384,24 @@ sub runHandler {
 
 	my $object = $self->{handler};
 
-	if (! defined $object) {
+	if (!defined $object) {
 		LS30::Log::timePrint("Cannot run handler for $type");
 		return;
 	}
 
 	if ($type eq 'MINPIC') {
 		$object->handleMINPIC(@_);
-	}
-	elsif ($type eq 'CONTACTID') {
+	} elsif ($type eq 'CONTACTID') {
 		$object->handleCONTACTID(@_);
-	}
-	elsif ($type eq 'Response') {
+	} elsif ($type eq 'Response') {
 		$object->handleResponse(@_);
-	}
-	elsif ($type eq 'AT') {
+	} elsif ($type eq 'AT') {
 		$object->handleAT(@_);
-	}
-	elsif ($type eq 'GSM') {
+	} elsif ($type eq 'GSM') {
 		$object->handleGSM(@_);
-	}
-	elsif ($type eq 'Disconnect') {
+	} elsif ($type eq 'Disconnect') {
 		$object->handleDisconnect(@_);
-	}
-	else {
+	} else {
 		LS30::Log::timePrint("No handler function defined for $type");
 	}
 }

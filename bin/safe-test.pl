@@ -16,7 +16,7 @@ use vars qw($opt_h $opt_n $opt_y);
 
 getopts('h:ny');
 
-if (! $opt_n && ! $opt_y) {
+if (!$opt_n && !$opt_y) {
 	die "Must specify either option -n or -y";
 }
 
@@ -57,11 +57,11 @@ my @output;
 foreach my $hr (@$cmds) {
 	my $cmd_spec = LS30Command::getCommand($hr->{title});
 
-	my $cmd = LS30Command::setCommand($hr);
+	my $cmd      = LS30Command::setCommand($hr);
 	my $response = $ls30cmdr->sendCommand($cmd);
 
 	if ($response) {
-		push(@output, [ $hr->{title}, $cmd, $response ] );
+		push(@output, [$hr->{title}, $cmd, $response]);
 	}
 }
 

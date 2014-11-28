@@ -41,7 +41,7 @@ sub new {
 	my ($class, $ls30c, $timeout) = @_;
 
 	my $self = {
-		ls30c => $ls30c,
+		ls30c    => $ls30c,
 		selector => Selector->new(),
 	};
 
@@ -55,7 +55,7 @@ sub new {
 
 	$ls30c->setHandler($self);
 
-	$self->{selector}->addSelect( [$ls30c->socket(), $ls30c] );
+	$self->{selector}->addSelect([$ls30c->socket(), $ls30c]);
 
 	return $self;
 }
@@ -75,10 +75,10 @@ Return undef if no response was received after a timeout.
 sub sendCommand {
 	my ($self, $string) = @_;
 
-	my $ls30c = $self->{ls30c};
+	my $ls30c  = $self->{ls30c};
 	my $socket = $ls30c->socket();
 
-	if (! $socket) {
+	if (!$socket) {
 		die "Unable to sendCommand(): Not connected";
 	}
 

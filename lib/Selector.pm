@@ -66,8 +66,8 @@ sub new {
 	my ($class) = @_;
 
 	my $self = {
-		'timers' => [ ],
-		'select' => IO::Select->new(),
+		'timers'  => [],
+		'select'  => IO::Select->new(),
 		'sockets' => 0,
 	};
 
@@ -90,7 +90,7 @@ sub addSelect {
 	my ($self, $lr) = @_;
 
 	$self->{'select'}->add($lr);
-	$self->{'sockets'} ++;
+	$self->{'sockets'}++;
 }
 
 
@@ -107,8 +107,8 @@ sub addObject {
 
 	if ($object->can('socket')) {
 		my $socket = $object->socket();
-		$self->{'select'}->add( [$socket, $object] );
-		$self->{'sockets'} ++;
+		$self->{'select'}->add([$socket, $object]);
+		$self->{'sockets'}++;
 	}
 
 	# If the object is also a Timer, add it to the timers
@@ -134,7 +134,7 @@ sub removeSelect {
 	my $select = $self->{'select'};
 	if ($select->exists($lr)) {
 		$select->remove($lr);
-		$self->{'sockets'} --;
+		$self->{'sockets'}--;
 	}
 }
 
@@ -151,7 +151,7 @@ The reference is an object of class Timer or subclass.
 sub addTimer {
 	my ($self, $obj) = @_;
 
-	push(@{$self->{'timers'}}, $obj);
+	push(@{ $self->{'timers'} }, $obj);
 }
 
 
@@ -170,7 +170,7 @@ sub removeTimer {
 	my @new_timers;
 	my $found = 0;
 
-	foreach my $r (@{$self->{'timers'}}) {
+	foreach my $r (@{ $self->{'timers'} }) {
 		if ($r == $obj) {
 			$found = 1;
 			next;
@@ -212,7 +212,7 @@ sub eventLoop {
 
 	my $select = $self->{'select'};
 
-	if (! $select) {
+	if (!$select) {
 		die "Unable to eventLoop(): No IO::Select object";
 	}
 
@@ -248,7 +248,7 @@ sub pollServer {
 
 	my $select = $self->{'select'};
 
-	if (! $select) {
+	if (!$select) {
 		die "Unable to pollServer(): No IO::Select object";
 	}
 
@@ -258,7 +258,8 @@ sub pollServer {
 		$how_long = $timeout;
 	}
 
-	if (! $self->{sockets}) {
+	if (!$self->{sockets}) {
+
 		# No sockets, just wait a bit
 		sleep($how_long);
 		return;
@@ -275,7 +276,7 @@ sub pollServer {
 
 			my ($socket, $object) = @$handle;
 
-			if (! $object) {
+			if (!$object) {
 				warn "Unable to call handleRead() on undefined object\n";
 			} else {
 				$object->handleRead($self, $socket);
@@ -305,7 +306,7 @@ sub runTimers {
 
 	my $timers = $self->{'timers'};
 
-	my $now = time();
+	my $now      = time();
 	my $wait_til = undef;
 
 	foreach my $ref (@$timers) {
@@ -317,7 +318,7 @@ sub runTimers {
 			$t = $ref->watchdogTime($self);
 		}
 
-		if (defined $t && (! defined $wait_til || $t < $wait_til)) {
+		if (defined $t && (!defined $wait_til || $t < $wait_til)) {
 			$wait_til = $t;
 		}
 	}
@@ -329,8 +330,7 @@ sub runTimers {
 	my $how_long = $wait_til - $now;
 	if ($how_long == 0) {
 		$how_long = 1;
-	}
-	elsif ($how_long > 60) {
+	} elsif ($how_long > 60) {
 		$how_long = 60;
 	}
 

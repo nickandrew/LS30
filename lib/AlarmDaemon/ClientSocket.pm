@@ -38,9 +38,9 @@ sub new {
 	my ($class, $selector, $socket, $handler) = @_;
 
 	my $self = {
-		socket => $socket,
+		socket   => $socket,
 		selector => $selector,
-		handler => $handler,
+		handler  => $handler,
 	};
 
 	bless $self, $class;
@@ -116,6 +116,7 @@ sub handleRead {
 
 	my $n = $self->{socket}->recv($buffer, 128);
 	if (!defined $n) {
+
 		# Error on the socket
 		LS30::Log::timePrint("Client socket error");
 		$handler->removeClient($self);
@@ -126,6 +127,7 @@ sub handleRead {
 	my $l = length($buffer);
 
 	if ($l == 0) {
+
 		# Other end closed connection
 		$handler->removeClient($self);
 		$self->disconnect();

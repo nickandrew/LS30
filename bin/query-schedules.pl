@@ -52,9 +52,9 @@ foreach my $day_of_week (@days_of_week) {
 		my $response = $ls30cmdr->sendCommand($cmd);
 
 		my $hr = {
-			day => $day_of_week,
-			id => $id,
-			cmd => $cmd,
+			day      => $day_of_week,
+			id       => $id,
+			cmd      => $cmd,
 			response => $response,
 		};
 

@@ -31,7 +31,7 @@ use Date::Format qw();
 use LS30::Type qw();
 
 
-my $this_year;  # Used in adding year to events
+my $this_year;    # Used in adding year to events
 my $this_month;
 
 
@@ -48,7 +48,7 @@ If string is not supplied, return an empty object.
 sub new {
 	my ($class, $string) = @_;
 
-	my $self = { };
+	my $self = {};
 	bless $self, $class;
 
 	if ($string) {
@@ -78,18 +78,18 @@ sub _parseString {
 	my ($event_type, $event_code, $group_num, $source, $unit_num, $junk1, $datetime, $highest_event) = ($1, $2, $3, $4, $5, $6, $7, $8);
 
 
-	$self->{event_type} = $event_type;
-	$self->{event_code} = $event_code;
-	$self->{code_string} = LS30::Type::getCode('Event Log Code', $event_type . $event_code) || '';
-	$self->{group_num} = $group_num;
+	$self->{event_type}    = $event_type;
+	$self->{event_code}    = $event_code;
+	$self->{code_string}   = LS30::Type::getCode('Event Log Code', $event_type . $event_code) || '';
+	$self->{group_num}     = $group_num;
 	$self->{source_string} = LS30::Type::getCode('Event Source Code', $source) || '';
-	$self->{unit_num} = $unit_num;
-	$self->{when} = _parseDateTime($datetime);
+	$self->{unit_num}      = $unit_num;
+	$self->{when}          = _parseDateTime($datetime);
 	$self->{highest_event} = hex($highest_event);
-	$self->{junk1} = $junk1;
-	$self->{string} = $string;
+	$self->{junk1}         = $junk1;
+	$self->{string}        = $string;
 
-	if (! $self->{code_string} || ! $self->{source_string}) {
+	if (!$self->{code_string} || !$self->{source_string}) {
 		$self->{unknown} = 1;
 	}
 
@@ -108,15 +108,16 @@ sub _parseDateTime {
 	$when =~ m/^(\d\d)(\d\d)(\d\d)(\d\d)/;
 	my ($mm, $dd, $hh, $min) = ($1, $2, $3, $4);
 
-	if (! $this_year) {
+	if (!$this_year) {
 		my $now = time();
-		$this_year = Date::Format::time2str('%Y', $now);
+		$this_year  = Date::Format::time2str('%Y', $now);
 		$this_month = Date::Format::time2str('%m', $now);
 	}
 
 	my $year;
 
 	if ($mm > $this_month) {
+
 		# It must have been last year
 		$year = $this_year - 1;
 	} else {

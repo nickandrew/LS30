@@ -30,7 +30,7 @@ my @responses;
 foreach my $cmd (@ARGV) {
 	my $response = $ls30cmdr->sendCommand($cmd);
 
-	push(@responses, [ $cmd, $response ]);
+	push(@responses, [$cmd, $response]);
 }
 
 foreach my $lr (@responses) {
