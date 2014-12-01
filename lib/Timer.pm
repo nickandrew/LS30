@@ -59,10 +59,14 @@ sub new {
 
 	bless $self, $class;
 
-	foreach my $k qw(arg_ref func_ref next_time recurring) {
+	foreach my $k (qw(arg_ref func_ref recurring)) {
 		if (exists $args{$k}) {
 			$self->{$k} = $args{$k};
 		}
+	}
+
+	if ($args{next_time}) {
+		$self->setNextTime($args{next_time});
 	}
 
 	return $self;
