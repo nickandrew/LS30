@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 #
 #   Copyright (C) 2014, Nick Andrew <nick@nick-andrew.net>
 #   Licensed under the terms of the GNU General Public License, Version 3
