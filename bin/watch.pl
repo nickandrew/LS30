@@ -10,6 +10,9 @@
 #    -c classname        Watching class to use (default is 'Watch')
 #    -h host:port        Address of LS30 device or server
 
+use strict;
+use warnings;
+
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 

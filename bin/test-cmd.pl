@@ -4,6 +4,9 @@
 #
 #   Test command generation - output command string and hashref to STDOUT
 
+use strict;
+use warnings;
+
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 

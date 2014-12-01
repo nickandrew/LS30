@@ -11,6 +11,9 @@
 #   -h host:port      Connect to the specified host:port
 #   -p                Precise: wait for the minute mark before setting.
 
+use strict;
+use warnings;
+
 use Date::Format qw(time2str);
 use Getopt::Std qw(getopts);
 

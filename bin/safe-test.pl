@@ -4,6 +4,9 @@
 #
 #   Set or clear 'safe testing' mode (alarms do not make any noise)
 
+use strict;
+use warnings;
+
 use Getopt::Std qw(getopts);
 
 use LS30Command qw();

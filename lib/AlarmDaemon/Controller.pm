@@ -21,6 +21,7 @@ become new clients.
 package AlarmDaemon::Controller;
 
 use strict;
+use warnings;
 
 use AlarmDaemon::ClientSocket qw();
 use AlarmDaemon::ListenSocket qw();

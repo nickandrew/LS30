@@ -20,6 +20,7 @@ It can send a command and then wait several seconds for a response.
 package LS30::Commander;
 
 use strict;
+use warnings;
 
 use LS30::Log qw();
 use Selector qw();

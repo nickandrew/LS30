@@ -25,6 +25,7 @@ Message classes which parse the raw string.
 package LS30::Decoder;
 
 use strict;
+use warnings;
 
 use LS30::DeviceMessage qw();
 use LS30::Log qw();

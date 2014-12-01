@@ -19,6 +19,7 @@ This class parses response messages from the LS30 (e.g. "!a0&").
 package LS30::ResponseMessage;
 
 use strict;
+use warnings;
 
 use Carp qw(confess);
 

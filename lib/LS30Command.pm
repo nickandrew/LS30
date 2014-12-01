@@ -5,6 +5,7 @@
 package LS30Command;
 
 use strict;
+use warnings;
 
 use Carp qw(carp confess);
 

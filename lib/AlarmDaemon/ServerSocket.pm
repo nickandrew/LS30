@@ -24,6 +24,7 @@ another.
 package AlarmDaemon::ServerSocket;
 
 use strict;
+use warnings;
 
 use AlarmDaemon::CommonSocket qw();
 use AlarmDaemon::SocketFactory qw();

@@ -20,6 +20,7 @@ the protocol decoding.
 package LS30Connection;
 
 use strict;
+use warnings;
 
 use Data::Dumper qw(Dumper);
 use Date::Format qw(time2str);

@@ -4,6 +4,9 @@
 #
 #   Query date and time
 
+use strict;
+use warnings;
+
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 

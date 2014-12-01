@@ -9,6 +9,7 @@
 #     -s filename           Save queries and responses to YAML file
 
 use strict;
+use warnings;
 
 use Getopt::Std qw(getopts);
 use YAML qw();

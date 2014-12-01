@@ -4,6 +4,9 @@
 #
 #   Show the values of the most important operational parameters
 
+use strict;
+use warnings;
+
 
 use Getopt::Std qw(getopts);
 

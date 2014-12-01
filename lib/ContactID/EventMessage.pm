@@ -26,6 +26,7 @@ The objects of this class represent the above strings decoded.
 package ContactID::EventMessage;
 
 use strict;
+use warnings;
 
 use Carp qw(confess);
 

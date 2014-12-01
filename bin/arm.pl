@@ -4,6 +4,9 @@
 #
 #   Arm or Disarm the alarm
 
+use strict;
+use warnings;
+
 use Getopt::Std qw(getopts);
 
 use LS30Command qw();

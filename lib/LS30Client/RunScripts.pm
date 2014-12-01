@@ -7,6 +7,7 @@
 package LS30Client::RunScripts;
 
 use strict;
+use warnings;
 
 use ContactID::EventCode qw();
 use LS30::DeviceSet qw();

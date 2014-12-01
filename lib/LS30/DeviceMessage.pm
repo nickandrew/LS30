@@ -27,6 +27,7 @@ The objects of this class represent the above strings decoded.
 package LS30::DeviceMessage;
 
 use strict;
+use warnings;
 
 use Carp qw(confess);
 

@@ -15,6 +15,7 @@ LS30::Type - Enumerated types used by LS30 Alarm system
 package LS30::Type;
 
 use strict;
+use warnings;
 
 use Carp qw(confess);
 

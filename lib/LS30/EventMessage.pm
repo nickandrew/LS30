@@ -24,6 +24,7 @@ The objects of this class represent the above string decoded.
 package LS30::EventMessage;
 
 use strict;
+use warnings;
 
 use Date::Format qw();
 

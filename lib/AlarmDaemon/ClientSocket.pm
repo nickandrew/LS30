@@ -19,6 +19,7 @@ This class maintains a socket connection to a client.
 package AlarmDaemon::ClientSocket;
 
 use strict;
+use warnings;
 
 use AlarmDaemon::CommonSocket qw();
 

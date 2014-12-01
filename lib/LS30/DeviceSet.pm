@@ -20,6 +20,7 @@ on instantiation and can find a device by its 6-digit hex code.
 package LS30::DeviceSet;
 
 use strict;
+use warnings;
 
 use YAML qw();
 

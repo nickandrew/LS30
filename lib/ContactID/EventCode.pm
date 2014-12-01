@@ -25,6 +25,7 @@ into corresponding short English descriptions.
 package ContactID::EventCode;
 
 use strict;
+use warnings;
 
 # Event codes come from DC-05 "Digital Communication Standard - Ademco Contact ID Protocol"
 # Document is at http://www.smartelectron.ru/files/DC-05_Contact_ID.pdf

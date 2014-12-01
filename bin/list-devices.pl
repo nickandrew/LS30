@@ -8,6 +8,9 @@
 #     -h host:port       Override the server hostname and port
 #     -y                 Create/Modify etc/devices.yaml file
 
+use strict;
+use warnings;
+
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 use YAML qw();

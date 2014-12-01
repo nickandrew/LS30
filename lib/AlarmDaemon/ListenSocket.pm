@@ -21,6 +21,7 @@ This class implements a listening socket.
 package AlarmDaemon::ListenSocket;
 
 use strict;
+use warnings;
 
 use AlarmDaemon::CommonSocket qw();
 

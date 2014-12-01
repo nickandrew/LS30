@@ -19,6 +19,7 @@ This class contains methods common to all the Socket classes
 =cut
 
 use strict;
+use warnings;
 
 package AlarmDaemon::CommonSocket;
 

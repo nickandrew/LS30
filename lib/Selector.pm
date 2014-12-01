@@ -48,6 +48,7 @@ Otherwise, a maximum of 60 seconds wait time is used.
 package Selector;
 
 use strict;
+use warnings;
 
 use IO::Select qw();
 

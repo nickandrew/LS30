@@ -19,6 +19,7 @@ Useful logging functions.
 package LS30::Log;
 
 use strict;
+use warnings;
 
 use Date::Format qw(time2str);
 

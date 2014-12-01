@@ -4,6 +4,9 @@
 #
 #   Send raw commands and print raw responses.
 
+use strict;
+use warnings;
+
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 

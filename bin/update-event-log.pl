@@ -12,6 +12,9 @@
 #   -l n                Read at most 'n' events
 #   -v                  Print new events as they are read.
 
+use strict;
+use warnings;
+
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 use YAML qw();

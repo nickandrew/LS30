@@ -18,6 +18,7 @@
 #  All I/O to/from the remote host is logged.
 
 use strict;
+use warnings;
 
 use Getopt::Std qw(getopts);
 use IO::Select qw();

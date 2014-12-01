@@ -21,6 +21,7 @@ with IPv4). If not, only IPv4 socket classes are used.
 package AlarmDaemon::SocketFactory;
 
 use strict;
+use warnings;
 
 use Socket qw();
 
