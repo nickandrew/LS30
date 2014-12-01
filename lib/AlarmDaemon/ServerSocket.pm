@@ -36,7 +36,7 @@ use base qw(AlarmDaemon::CommonSocket Timer);
 
 # ---------------------------------------------------------------------------
 
-=item new($selector, $peer_addr)
+=item new($peer_addr)
 
 Connect to the server (identified as host:port) and return the newly
 instantiated AlarmDaemon::ServerSocket object. If unable to connect,
@@ -45,11 +45,10 @@ return undef.
 =cut
 
 sub new {
-	my ($class, $selector, $peer_addr) = @_;
+	my ($class, $peer_addr) = @_;
 
 	my $self = {
 		current_state     => 'disconnected',
-		selector          => $selector,
 		peer_addr         => $peer_addr,
 		handler           => undef,
 		watchdog_interval => 320,
@@ -84,23 +83,33 @@ sub connect {
 		Proto    => 'tcp',
 	);
 
-	if ($socket) {
-		$self->{socket}         = $socket;
-		$self->{last_rcvd_time} = time();
-		$self->{current_state}  = 'connected';
-
-		# Setting SO_KEEPALIVE will eventually cause a client socket error if
-		# connection is broken
-		if (!setsockopt($socket, Socket::SOL_SOCKET(), Socket::SO_KEEPALIVE(), 1)) {
-			warn "Unable to set keepalive\n";
-		}
-
-		$self->{selector}->addObject($self);
-
-		return 1;
+	if (!$socket) {
+		warn "Unable to create a new socket to $self->{peer_addr}";
+		return 0;
 	}
 
-	return 0;
+	$self->{socket}         = $socket;
+	$self->{last_rcvd_time} = time();
+	$self->{current_state}  = 'connected';
+
+	# Setting SO_KEEPALIVE will eventually cause a client socket error if
+	# connection is broken
+	if (!setsockopt($socket, Socket::SOL_SOCKET(), Socket::SO_KEEPALIVE(), 1)) {
+		warn "Unable to set keepalive\n";
+	}
+
+	my $w;
+	$w = AnyEvent->io(
+		fh   => $socket,
+		poll => 'r',
+		cb   => sub {
+			$self->handleRead();
+		}
+	);
+
+	$self->{poller} = $w;
+
+	return 1;
 }
 
 
@@ -117,7 +126,7 @@ sub disconnect {
 
 	if ($self->{socket}) {
 		LS30::Log::timePrint("Disconnecting");
-		$self->{selector}->removeSelect($self->socket());
+		delete $self->{poller};
 		close($self->{socket});
 		undef $self->{socket};
 		$self->{current_state} = 'disconnected';
@@ -133,7 +142,7 @@ sub disconnect {
 
 =item tryConnect()
 
-Try to connect again. If successful, add ourselved back into the selector.
+Try to connect again.
 Log success or failure.
 
 =cut
@@ -195,12 +204,14 @@ sub watchdogTime {
 
 =item watchdogEvent()
 
-Called when the watchdog timer expires. Currently do nothing.
+Called when the watchdog timer expires.
+
+If we're not connected, try to reconnect.
 
 =cut
 
 sub watchdogEvent {
-	my ($self, $selector) = @_;
+	my ($self) = @_;
 
 	my $current_state = $self->{current_state};
 
