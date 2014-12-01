@@ -75,7 +75,7 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item watchdogTime($selector)
+=item watchdogTime()
 
 Return a time_t value of the desired triggering time. 'undef' means never.
 A value in the past is acceptable.
@@ -83,7 +83,7 @@ A value in the past is acceptable.
 =cut
 
 sub watchdogTime {
-	my ($self, $selector) = @_;
+	my ($self) = @_;
 
 	my $next_time = $self->{next_time};
 	return $next_time;
@@ -117,6 +117,15 @@ sub setNextTime {
 	my ($self, $t) = @_;
 
 	$self->{next_time} = $t;
+
+	$self->{timer} = AnyEvent->timer(
+		after => $t - time(),
+		cb => sub {
+			$self->watchdogEvent();
+		}
+	);
+
+	return $self;
 }
 
 
@@ -203,7 +212,7 @@ sub stop {
 
 # ---------------------------------------------------------------------------
 
-=item watchdogEvent($selector)
+=item watchdogEvent()
 
 Called upon the triggering of this timer.
 
@@ -212,12 +221,12 @@ set to some time_t value).
 
 If func_ref is set, then call the function like this:
 
-   &$func_ref($ref, $selector);
+   &$func_ref($ref);
 
 =cut
 
 sub watchdogEvent {
-	my ($self, $selector) = @_;
+	my ($self) = @_;
 
 	my $func_ref = $self->{func_ref};
 	my $ref      = $self->{arg_ref};
@@ -229,7 +238,7 @@ sub watchdogEvent {
 	}
 
 	if ($func_ref) {
-		&$func_ref($ref, $selector);
+		&$func_ref($ref);
 	}
 }
 
