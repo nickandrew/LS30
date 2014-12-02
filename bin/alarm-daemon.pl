@@ -21,7 +21,6 @@ use strict;
 use warnings;
 
 use Getopt::Std qw(getopts);
-use IO::Select qw();
 
 use AlarmDaemon::Controller qw();
 use AlarmDaemon::SocketFactory qw();

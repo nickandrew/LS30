@@ -27,7 +27,7 @@ use AlarmDaemon::ClientSocket qw();
 use AlarmDaemon::ListenSocket qw();
 use AlarmDaemon::ServerSocket qw();
 use LS30::Log qw();
-use Selector qw();
+use AnyEvent;
 
 sub new {
 	my ($class) = @_;
@@ -35,14 +35,13 @@ sub new {
 	my $self = {
 		clients        => 0,
 		client_sockets => {},
+		condvar        => AnyEvent->condvar,
+		listeners      => {},
 		pending_data   => undef,
-		selector       => undef,
 		server         => undef,
 	};
 
 	bless $self, $class;
-
-	$self->{selector} = Selector->new();
 
 	return $self;
 }
@@ -56,13 +55,14 @@ sub addListener {
 		return;
 	}
 
-	$self->{selector}->addSelect([$socket, $listener]);
+	$self->{listeners}->{$socket} = $listener;
+	return $self;
 }
 
 sub addServer {
 	my ($self, $peer_addr) = @_;
 
-	my $object = AlarmDaemon::ServerSocket->new($self->{selector}, $peer_addr);
+	my $object = AlarmDaemon::ServerSocket->new($peer_addr);
 	if (!$object) {
 		warn "Unable to instantiate an AlarmDaemon::ServerSocket to $peer_addr\n";
 		return;
@@ -76,7 +76,7 @@ sub addClient {
 	my ($self, $socket) = @_;
 
 	LS30::Log::timePrint("New client");
-	my $client = AlarmDaemon::ClientSocket->new($self->{selector}, $socket, $self);
+	my $client = AlarmDaemon::ClientSocket->new($socket, $self);
 	$self->{client_sockets}->{$socket} = $client;
 	$self->{clients}++;
 
@@ -101,7 +101,7 @@ sub removeClient {
 sub eventLoop {
 	my ($self) = @_;
 
-	$self->{selector}->eventLoop();
+	$self->{condvar}->recv();
 }
 
 sub serverRead {
