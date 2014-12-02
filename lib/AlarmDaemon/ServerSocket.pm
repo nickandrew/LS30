@@ -315,7 +315,7 @@ sub addBuffer {
 			# Here's a full line to process
 			my $line = $1;
 			$pending = $2;
-			processLine($self, $line);
+			$self->processLine($line);
 		} else {
 			last;
 		}
