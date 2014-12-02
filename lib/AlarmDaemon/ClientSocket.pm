@@ -28,24 +28,29 @@ use base qw(AlarmDaemon::CommonSocket);
 
 # ---------------------------------------------------------------------------
 
-=item new($selector, $socket, $handler)
+=item new($socket, $handler)
 
 Return a new instance of AlarmDaemon::ClientSocket for the specified socket.
 
 =cut
 
 sub new {
-	my ($class, $selector, $socket, $handler) = @_;
+	my ($class, $socket, $handler) = @_;
 
 	my $self = {
 		socket   => $socket,
-		selector => $selector,
 		handler  => $handler,
 	};
 
 	bless $self, $class;
 
-	$self->{selector}->addObject($self);
+	$self->{poller} = AnyEvent->io(
+		fh   => $socket,
+		poll => 'r',
+		cb   => sub {
+			$self->handleRead();
+		}
+	);
 
 	return $self;
 }
@@ -63,7 +68,7 @@ sub disconnect {
 	my ($self) = @_;
 
 	if ($self->{socket}) {
-		$self->{selector}->removeSelect($self->socket());
+		delete $self->{poller};
 		close($self->{socket});
 		undef $self->{socket};
 	}
@@ -109,12 +114,13 @@ Read data from the socket. Pass it to our handler object.
 =cut
 
 sub handleRead {
-	my ($self, $selector, $socket) = @_;
+	my ($self) = @_;
 
 	my $buffer;
 	my $handler = $self->{handler};
 
 	my $n = $self->{socket}->recv($buffer, 128);
+
 	if (!defined $n) {
 
 		# Error on the socket
