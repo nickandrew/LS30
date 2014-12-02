@@ -50,6 +50,14 @@ sub new {
 
 	bless $self, $class;
 
+	$self->{poller} = AnyEvent->io(
+		fh   => $socket,
+		poll => 'r',
+		cb   => sub {
+			$self->handleRead();
+		}
+	);
+
 	return $self;
 }
 
@@ -81,6 +89,7 @@ sub disconnect {
 	my ($self) = @_;
 
 	if ($self->{socket}) {
+		delete $self->{poller};
 		close($self->{socket});
 		undef $self->{socket};
 	}
@@ -97,9 +106,10 @@ to accept.
 =cut
 
 sub handleRead {
-	my ($self, $selector, $socket) = @_;
+	my ($self) = @_;
 
 	my $handler = $self->{handler};
+	my $socket  = $self->{socket};
 	my ($new_sock, $address) = $socket->accept();
 
 	if (!$address) {
