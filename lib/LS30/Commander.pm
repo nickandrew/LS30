@@ -23,7 +23,6 @@ use strict;
 use warnings;
 
 use LS30::Log qw();
-use Selector qw();
 
 # ---------------------------------------------------------------------------
 
@@ -42,7 +41,6 @@ sub new {
 
 	my $self = {
 		ls30c    => $ls30c,
-		selector => Selector->new(),
 	};
 
 	if (defined $timeout && $timeout > 0) {
@@ -54,8 +52,6 @@ sub new {
 	bless $self, $class;
 
 	$ls30c->setHandler($self);
-
-	$self->{selector}->addSelect([$ls30c->socket(), $ls30c]);
 
 	return $self;
 }
@@ -95,19 +91,25 @@ sub sendCommand {
 	my $how_long = $self->{timeout};
 	my $end_time = time() + $how_long;
 
-	while ($how_long > 0) {
-		$self->{selector}->pollServer($how_long);
-
-		my $response = $self->getResponse();
-
-		if (defined $response) {
-			return $response;
+	my $timer = Timer->new(
+		next_time => $end_time,
+		func_ref => sub {
+			$self->{condvar}->send(-1);
 		}
+	);
 
-		$how_long = $end_time - time();
+	$self->{condvar} = AnyEvent->condvar;
+	my $rc = $self->{condvar}->recv;
+
+	if ($rc == -1) {
+		# Timeout
+		LS30::Log::timePrint("Timeout on sendCommand wait for response");
+		return undef;
 	}
 
-	return undef;
+	my $response = $self->getResponse();
+
+	return $response;
 }
 
 
@@ -153,6 +155,7 @@ sub handleResponse {
 	my ($self, $string) = @_;
 
 	$self->{last_response} = $string;
+	$self->{condvar}->send(0);
 }
 
 
