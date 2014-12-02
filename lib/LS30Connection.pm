@@ -11,6 +11,8 @@ LS30Connection - Maintain a connection to LS30 device
 This class keeps a TCP connection to an LS30 device and performs some of
 the protocol decoding.
 
+It is a subclass of AlarmDaemon::ServerSocket.
+
 =head1 METHODS
 
 =over
@@ -24,9 +26,9 @@ use warnings;
 
 use Data::Dumper qw(Dumper);
 use Date::Format qw(time2str);
+use AnyEvent qw();
 
-use AlarmDaemon::SocketFactory qw();
-use LS30::Log qw();
+use base qw(AlarmDaemon::ServerSocket);
 
 # ---------------------------------------------------------------------------
 
@@ -47,118 +49,17 @@ sub new {
 		}
 	}
 
-	my $self = {
-		server_address => $server_address,
-		pending        => '',
-		handler        => undef,
-	};
-
+	my $self = $class->SUPER::new($server_address);
 	bless $self, $class;
 
+	print "Self is a $self\n";
 	return $self;
 }
 
 
 # ---------------------------------------------------------------------------
 
-=item connect()
-
-Connect to our server. Return 1 if a connection was made, else 0.
-
-=cut
-
-sub connect {
-	my ($self) = @_;
-
-	my $server_address = $self->{server_address};
-
-	if (!$server_address) {
-		die "No server address";
-	}
-
-	my $conn = AlarmDaemon::SocketFactory->new(
-		PeerAddr => $self->{server_address},
-		Proto    => "tcp",
-	);
-
-	if (!$conn) {
-		return 0;
-	}
-
-	$self->{socket} = $conn;
-
-	return 1;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item disconnect()
-
-Disconnect from our server and delete the socket.
-
-=cut
-
-sub disconnect {
-	my ($self) = @_;
-
-	if ($self->{socket}) {
-		$self->{socket}->close();
-		delete $self->{socket};
-	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item socket()
-
-Return our socket reference.
-
-=cut
-
-sub socket {
-	my ($self) = @_;
-
-	return $self->{socket};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item handleRead($selector, $socket)
-
-Attempt to read data from our socket. Call disconnect_event() if there is
-an error or EOF. Otherwise, process all data received.
-
-=cut
-
-sub handleRead {
-	my ($self, $selector, $socket) = @_;
-
-	my $buffer;
-	my $n = $socket->recv($buffer, 256);
-
-	if (!defined $n) {
-
-		# Error
-		$self->disconnect_event($selector, $socket);
-	} else {
-		$n = length($buffer);
-		if ($n == 0) {
-
-			# EOF
-			$self->disconnect_event($selector, $socket);
-		} else {
-			$self->addBuffer($buffer);
-		}
-	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item disconnect_event($selector, $socket)
+=item disconnect($self)
 
 There was an Error or EOF on our socket connection. Remove us from the
 specified selector, close our socket (disconnect) and run the Disconnect
@@ -166,12 +67,10 @@ event handler.
 
 =cut
 
-sub disconnect_event {
-	my ($self, $selector, $socket) = @_;
+sub disconnect {
+	my ($self) = @_;
 
-	$selector->removeSelect($socket);
-	$self->disconnect();
-
+	$self->SUPER::disconnect();
 	$self->runHandler('Disconnect');
 }
 
@@ -197,67 +96,6 @@ sub sendCommand {
 	if ($ENV{LS30_DEBUG}) {
 		LS30::Log::timePrint("Sent: $string");
 	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item setHandler($object)
-
-Keep a reference to the object which will process all our emitted events.
-
-=cut
-
-sub setHandler {
-	my ($self, $object) = @_;
-
-	$self->{handler} = $object;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item addBuffer($buffer)
-
-Add $buffer to our queue of data pending processing. Any complete lines
-(lines ending in CR or LF) are passed to processLine().
-
-=cut
-
-sub addBuffer {
-	my ($self, $buffer) = @_;
-
-	$self->{pending} .= $buffer;
-	my $pending = $self->{pending};
-
-	while ($pending ne '') {
-
-		if (substr($pending, 0, 1) eq "\r") {
-
-			# Skip leading \r
-			$pending = substr($pending, 1);
-			next;
-		}
-
-		if (substr($pending, 0, 1) eq "\n") {
-
-			# Skip leading \n
-			$pending = substr($pending, 1);
-			next;
-		}
-
-		if ($pending =~ /^([^\r\n]+)[\r\n]+(.*)/s) {
-
-			# Here's a full line to process
-			my $line = $1;
-			$pending = $2;
-			processLine($self, $line);
-		} else {
-			last;
-		}
-	}
-
-	$self->{pending} = $pending;
 }
 
 
