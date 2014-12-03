@@ -140,7 +140,7 @@ sub handleDeviceMessage {
 	my $concat = join(' ', $string, $event_name, $dev_type_name, "$device_id $device_name", "signal $signal", ($unknown ? $unknown : ''));
 	runCommands('device', $concat);
 
-	foreach my $k qw(DEVICE_NAME DEVICE_EVENT DEVICE_TYPE DEVICE_ID DEVICE_SIGNAL DEVICE_ZONE) {
+	foreach my $k (qw(DEVICE_NAME DEVICE_EVENT DEVICE_TYPE DEVICE_ID DEVICE_SIGNAL DEVICE_ZONE)) {
 		delete $ENV{$k};
 	}
 }

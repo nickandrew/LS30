@@ -49,7 +49,7 @@ if (-f $devices_file) {
 foreach my $device_name (@device_code_list) {
 	my $code = LS30::Type::getCode('Device Code', $device_name);
 
-	foreach my $device_number qw(00 01 02 03 04 05 06 07 08 09) {
+	foreach my $device_number (qw(00 01 02 03 04 05 06 07 08 09)) {
 		my $cmd = sprintf("!k%s?%2s&", $code, $device_number);
 		my $response = $ls30cmdr->sendCommand($cmd);
 
