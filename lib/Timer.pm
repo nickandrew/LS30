@@ -118,12 +118,16 @@ sub setNextTime {
 
 	$self->{next_time} = $t;
 
-	$self->{timer} = AnyEvent->timer(
-		after => $t - time(),
-		cb => sub {
-			$self->watchdogEvent();
-		}
-	);
+	if ($t) {
+		$self->{timer} = AnyEvent->timer(
+			after => $t - time(),
+			cb => sub {
+				$self->watchdogEvent();
+			}
+		);
+	} else {
+		delete $self->{timer};
+	}
 
 	return $self;
 }
@@ -143,9 +147,9 @@ sub setDelay {
 	my $next_time = $self->{next_time};
 
 	if ($next_time) {
-		$self->{next_time} += $interval;
+		$self->setNextTime($next_time + $interval);
 	} else {
-		$self->{next_time} = time() + $interval;
+		$self->setNextTime(time() + $interval);
 	}
 }
 
@@ -206,7 +210,7 @@ Set next_time to undef. This will stop the timer triggering.
 sub stop {
 	my ($self) = @_;
 
-	$self->{next_time} = undef;
+	$self->setNextTime(undef);
 }
 
 
