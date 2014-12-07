@@ -52,7 +52,6 @@ sub new {
 	my $self = $class->SUPER::new($server_address);
 	bless $self, $class;
 
-	print "Self is a $self\n";
 	return $self;
 }
 
@@ -164,14 +163,14 @@ sub processLine {
 	if ($line =~ /^(.+)(MINPIC=.+)/) {
 		my ($junk, $minpic) = ($1, $2);
 		LS30::Log::timePrint("Skipping junk $junk");
-		processLine($minpic);
+		$self->processLine($minpic);
 		return;
 	}
 
 	if ($line =~ /^(.+)(XINPIC=.+)/) {
 		my ($junk, $minpic) = ($1, $2);
 		LS30::Log::timePrint("Skipping junk $junk");
-		processLine($minpic);
+		$self->processLine($minpic);
 		return;
 	}
 
