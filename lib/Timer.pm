@@ -8,11 +8,9 @@ Timer - An object which will trigger at some time
 
 =head1 DESCRIPTION
 
-A Selector object can have one or more Timer objects which are
-used to trigger events at certain times. Each Timer keeps a
-single time_t value which is the earliest time the event should
-trigger. The event can trigger at any time on or after this
-value.
+A Timer is used to trigger events at certain times. Each Timer keeps
+a single time_t value which is the earliest time the event should
+trigger. The event can trigger at any time on or after this value.
 
 =head1 METHODS
 
