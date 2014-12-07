@@ -16,7 +16,7 @@ use warnings;
 use Data::Dumper qw(Dumper);
 use Getopt::Std qw(getopts);
 
-use Selector qw();
+use AnyEvent qw();
 
 use vars qw($opt_c $opt_h);
 
@@ -30,11 +30,11 @@ if ($@) {
 	die "Unable to require class $class";
 }
 
-my $selector = Selector->new();
 my $watcher = $class->new($opt_h, @ARGV);
 
-$watcher->addSelector($selector);
+my $condvar = AnyEvent->condvar;
 
-$selector->eventLoop();
+# Loop forever
+$condvar->recv;
 
 exit(0);

@@ -52,47 +52,18 @@ sub new {
 
 	$ls30c->setHandler($decoder);
 
+	# Setup a disconnection retry timer, initially disabled
+	$self->{timer2} = Timer->new(
+		func_ref  => \&disc_timer_event,
+		arg_ref   => ["timer2", $self, 0, 1], # name, self, time to wait, backoff
+		next_time => undef,
+	);
+
 	return $self;
 }
 
-sub addSelector {
-	my ($self, $selector) = @_;
-
-	$self->{'select'} = $selector;
-
-	my $now    = time();
-	my $dur    = 600;
-	my $arg1   = ["timer1", $self, $dur];
-	my $timer1 = Timer->new(
-		func_ref  => \&timer_event,
-		arg_ref   => $arg1,
-		next_time => $now + $dur,
-		recurring => $dur,
-	);
-	LS30::Log::timePrint(sprintf("Hello! %s will trigger every %d seconds\n", $arg1->[0], $dur));
-	$self->{timer1} = $timer1;
-	$selector->addTimer($timer1);
-
-	my $timer2 = Timer->new(
-		func_ref  => \&disc_timer_event,
-		arg_ref   => ["timer2", $self, 0, 1],
-		next_time => undef,
-	);
-	$self->{timer2} = $timer2;
-	$selector->addTimer($timer2);
-
-	my $ls30c = $self->{ls30c};
-	$selector->addSelect([$ls30c->socket(), $ls30c]);
-}
-
-sub timer_event {
-	my ($ref, $selector) = @_;
-
-	LS30::Log::timePrint(sprintf("Timer %s triggered!", $ref->[0]));
-}
-
 sub disc_timer_event {
-	my ($ref, $selector) = @_;
+	my ($ref) = @_;
 
 	LS30::Log::timePrint("Disconnected, retrying connect");
 	my $self  = $ref->[1];
@@ -114,7 +85,6 @@ sub disc_timer_event {
 
 		# Stop the timer
 		$timer->stop();
-		$self->{'select'}->addSelect([$ls30c->socket(), $ls30c]);
 	}
 }
 
@@ -153,9 +123,9 @@ sub handleEventMessage {
 sub handleDisconnect {
 	my ($self) = @_;
 
-	$self->{timer2}->{arg_ref}->[3] = 4;
+	$self->{timer2}->getargs->[3] = 4;
 	my $when = time() + 4;
-	$self->{timer2}->{arg_ref}->[2] = $when;
+	$self->{timer2}->getargs->[2] = $when;
 	$self->{timer2}->setNextTime($when);
 }
 
