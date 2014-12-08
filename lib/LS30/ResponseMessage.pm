@@ -77,4 +77,10 @@ sub _parseString {
 	}
 }
 
+sub value {
+	my ($self) = @_;
+
+	return $self->{value};
+}
+
 1;
