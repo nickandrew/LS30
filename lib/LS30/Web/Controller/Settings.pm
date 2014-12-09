@@ -6,24 +6,26 @@ package LS30::Web::Controller::Settings;
 
 use Mojo::Base 'LS30::Web::Controller::Base';
 
-sub general {
-	my $self = shift;
-
-	my $queries = [
+my $queries = {
+	general => [
 		{ title => 'Inner Siren Time', },
 		{ title => 'Remote Siren Time', },
 		{ title => 'Inner Siren Enable', },
 		{ title => 'Exit Delay', },
 		{ title => 'Entry Delay', },
 		{ title => 'Entry delay beep', },
+	],
+	mode => [
 		{ title => 'Operation Mode', },
-	];
+	],
+};
+
+sub _simple {
+	my ($self, $type) = @_;
 
 	my $json = {};
 
-	foreach my $hr (@$queries) {
-		my $cmd_spec = LS30Command::getCommand($hr->{title});
-
+	foreach my $hr (@{$queries->{$type}}) {
 		my $cmd      = LS30Command::queryCommand($hr);
 		my $resp_obj = $self->sendCommand($cmd);
 
@@ -36,14 +38,16 @@ sub general {
 	$self->render(json => $json);
 }
 
+sub general {
+	my $self = shift;
+
+	$self->_simple('general');
+}
+
 sub mode {
 	my $self = shift;
 
-	my $cmd_ref = {title => 'Operation Mode'};
-	my $cmd = LS30Command::queryCommand($cmd_ref);
-	my $response = $self->sendCommand($cmd);
-
-	$self->render(json => {mode => $response->value});
+	$self->_simple('mode');
 }
 
 1;
