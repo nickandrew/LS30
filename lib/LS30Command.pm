@@ -138,6 +138,9 @@ my $spec_commands = [
 		query_args => [
 			{ 'length' => 1, type => 'Device Type', key => 'device_type' },
 		],
+		response => [
+			{ 'length' => 2, func => \&resp_hex2, key => 'value' },
+		],
 	},
 
 	{ title => 'Remote Siren Type',
