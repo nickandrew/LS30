@@ -10,6 +10,7 @@ use LS30Command qw();
 use LS30Connection qw();
 use LS30::Commander qw();
 use LS30::ResponseMessage qw();
+use LS30::Type qw();
 use YAML qw();
 
 my $config;

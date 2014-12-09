@@ -22,6 +22,8 @@ sub startup {
   my $settings = $r->get('/settings')->to(controller => 'settings');
   $settings->get('/general')->to(action => 'general');
   $settings->get('/mode')->to(action => 'mode');
+
+  my $devices = $r->get('/devices')->to(controller => 'devices', action => 'list');
 }
 
 1;
