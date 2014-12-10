@@ -126,8 +126,7 @@ All classes and scripts are written in Perl. They use:
 
   * Data::Dumper
   * Getopt::Std
-  * IO::Select
-  * IO::Socket
+  * AnyEvent
   * Test::More
   * YAML
   * Date::Format
