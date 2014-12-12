@@ -118,7 +118,7 @@ sub setNextTime {
 
 	if ($t) {
 		$self->{timer} = AnyEvent->timer(
-			after => $t - time(),
+			after => $t - AnyEvent->now,
 			cb => sub {
 				$self->watchdogEvent();
 			}
