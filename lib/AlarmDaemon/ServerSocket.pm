@@ -78,6 +78,11 @@ time to detect quicker if the server has gone away.
 sub connect {
 	my ($self) = @_;
 
+	if ($self->{current_state} eq 'connected') {
+		# Nothing to do
+		return 1;
+	}
+
 	my $socket = AlarmDaemon::SocketFactory->new(
 		PeerAddr => $self->{peer_addr},
 		Proto    => 'tcp',
