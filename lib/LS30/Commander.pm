@@ -40,7 +40,8 @@ sub new {
 	my ($class, $ls30c, $timeout) = @_;
 
 	my $self = {
-		ls30c    => $ls30c,
+		command_queue => [],      # Queue of pending commands and callbacks
+		ls30c         => $ls30c,  # Connection to LS30 device
 	};
 
 	if (defined $timeout && $timeout > 0) {
@@ -58,6 +59,52 @@ sub new {
 
 
 # ---------------------------------------------------------------------------
+# Send a command to the device.
+# ---------------------------------------------------------------------------
+
+sub _sendCommand {
+	my ($self, $string) = @_;
+
+	my $ls30c  = $self->{ls30c};
+	my $socket = $ls30c->socket();
+
+	if (!$socket) {
+		die "Unable to _sendCommand(): Not connected";
+	}
+
+	$socket->send($string);
+	if ($ENV{LS30_DEBUG}) {
+		LS30::Log::timePrint("Sent: $string");
+	}
+
+	$self->{condvar} = AnyEvent->condvar;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item queueCommand($string, $cb)
+
+Queue the supplied command to be sent to the device, and arrange for $cb
+to be called when a response is received (or upon a timeout).
+
+=cut
+
+sub queueCommand {
+	my ($self, $string, $cb) = @_;
+
+	# If there's presently no command outstanding, send the command immediately
+	if (!$self->{command_queue} || !@{$self->{command_queue}}) {
+		$self->{command_queue} = [];
+		$self->_sendCommand($string);
+	}
+
+	# Queue up the command and associated callback
+	push(@{$self->{command_queue}}, [$string, $cb]);
+}
+
+
+# ---------------------------------------------------------------------------
 
 =item sendCommand($string)
 
@@ -71,34 +118,9 @@ Return undef if no response was received after a timeout.
 sub sendCommand {
 	my ($self, $string) = @_;
 
-	my $ls30c  = $self->{ls30c};
-	my $socket = $ls30c->socket();
+	$self->_sendCommand($string);
 
-	if (!$socket) {
-		die "Unable to sendCommand(): Not connected";
-	}
-
-	$socket->send($string);
-	if ($ENV{LS30_DEBUG}) {
-		LS30::Log::timePrint("Sent: $string");
-	}
-
-	# pollServer will return on the first event of any kind received.
-	# We may have to retry, if a non-response is received before a
-	# response. Implement retry logic to a maximum time interval of
-	# $self->{timeout} seconds.
-
-	my $how_long = $self->{timeout};
-	my $end_time = time() + $how_long;
-
-	my $timer = Timer->new(
-		next_time => $end_time,
-		func_ref => sub {
-			$self->{condvar}->send(-1);
-		}
-	);
-
-	$self->{condvar} = AnyEvent->condvar;
+	# Now wait for the response
 	my $rc = $self->{condvar}->recv;
 
 	if ($rc == -1) {
@@ -155,6 +177,23 @@ sub handleResponse {
 	my ($self, $string) = @_;
 
 	$self->{last_response} = $string;
+
+	# Call callback if any, and send next command
+	if (@{$self->{command_queue}}) {
+		my $lr = pop(@{$self->{command_queue}});
+		my ($cmd, $cb) = @_;
+		# $cmd was the command which is being responded-to so it is not needed
+		$cb->($string);
+	}
+
+	# If there's a pending command, send it now
+	if ($self->{command_queue}->[0]) {
+		my $cmd = $self->{command_queue}->[0]->[0];
+		$self->_sendCommand($cmd);
+		# Next call to this function will run the callback for this command.
+	}
+
+	# Signal that a response is ready.
 	$self->{condvar}->send(0);
 }
 
