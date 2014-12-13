@@ -62,7 +62,7 @@ my $type_table = {
 		'Controller'     => 'c',
 		'Fire Sensor'    => 'f',
 		'Medical Button' => 'm',
-		'Extra Sensor'   => 'e',
+		'Special Sensor' => 'e',
 	},
 
 	'Group' => {

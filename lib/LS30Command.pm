@@ -207,7 +207,7 @@ my $spec_commands = [
 		],
 	},
 
-	{ title => 'Extra Sensor Status',
+	{ title => 'Special Sensor Status',
 		key => 'ke',
 		response => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
