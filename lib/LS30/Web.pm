@@ -23,7 +23,9 @@ sub startup {
   $settings->get('/general')->to(action => 'general');
   $settings->get('/mode')->to(action => 'mode');
 
-  my $devices = $r->get('/devices')->to(controller => 'devices', action => 'list');
+  my $devices = $r->get('/devices')->to(controller => 'devices');
+  $devices->get('/')->to(action => 'list');
+  $devices->get('/:type')->to(action => 'list_type');
 }
 
 1;
