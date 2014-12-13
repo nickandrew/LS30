@@ -68,6 +68,7 @@ sub add_routes {
 	my ($self, $routes_base) = @_;
 
 	$routes_base->get('/')->to(action => 'index');
+	$routes_base->get('/date')->to(action => 'date');
 
 	my $package = ref($self);
 
@@ -88,16 +89,27 @@ sub add_routes {
 sub index {
 	my ($self) = @_;
 
-	my $json = [];
-	push($json, $_) for (keys %$simple_queries);
+	my @list = ('date');
+	push(@list, $_) for (keys %$simple_queries);
+	@list = sort(@list);
 
-	$self->render(json => $json);
+	$self->render(json => \@list);
 }
 
-sub mode {
+sub date {
 	my $self = shift;
 
-	$self->_simple('mode');
+	my $cmd      = LS30Command::queryCommand({title => 'Date/Time'});
+	my $resp_obj = $self->sendCommand($cmd);
+
+	if (!$resp_obj) {
+		return $self->render(status => 500, json => {error => "No response received"});
+	}
+
+	my $json = $resp_obj->to_hash;
+	delete $json->{$_} for ('action', 'string', 'title');
+
+	$self->render(json => $json);
 }
 
 1;
