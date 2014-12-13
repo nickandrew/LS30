@@ -58,7 +58,99 @@ avoid missing useful messages.
 To run client code you should set the address of your proxy daemon in
 the environment:
 
-	export LS30_SERVER=127.0.0.1:1681
+    export LS30_SERVER=127.0.0.1:1681
+
+# REST Web server
+
+There is a rudimentary REST server now to provide access to the device.
+
+To start it, run `bin/webserver`. It listens by default on `localhost:3000`
+
+## REST Endpoints
+
+All the REST endpoints return JSON data structures.
+
+### GET /settings/general
+
+Setting Name | Example Value
+------------ | -------------
+Entry Delay | 10
+Entry delay beep | 0
+Exit Delay | 18
+Inner Siren Enable | 1
+Inner Siren Time | 180
+Remote Siren Time | 3 minutes
+
+### GET /settings/mode
+
+Setting Name | Example Value
+------------ | -------------
+Operation Mode | Disarm
+
+### GET /devices
+
+Sample output (formatted):
+
+```json
+{
+    "Special Sensor":{
+        "count":0
+    },
+    "Burglar Sensor":{
+        "count":6
+    },
+    "Fire Sensor":{
+        "count":1
+    },
+    "Medical Button":{
+        "count":0
+    },
+    "Controller":{
+        "count":3
+    }
+}
+```
+
+### GET /devices/Burglar%20Sensor
+
+Sample output (formatted):
+
+```json
+{
+    "123456": {
+        "type":"PIR",
+        "junk3":"7a",
+        "config":"04100000",
+        "rest":"9100",
+        "zone":"01",
+        "id":"01",
+        "junk2":"0010",
+        "device_id":"123456"
+    },
+    "789abc": {
+        "zone":"01",
+        "id":"02",
+        "junk2":"0010",
+        "device_id":"789abc",
+        "type":"PIR",
+        "config":"04100000",
+        "rest":"8100",
+        "junk3":"a6"
+    },
+    "def012": {
+        "rest":"7100",
+        "config":"04100000",
+        "junk3":"89",
+        "type":"PIR",
+        "junk2":"0010",
+        "device_id":"def012",
+        "id":"03",
+        "zone":"01"
+    }
+}
+```
+
+# Scripts
 
 You can now run scripts:
 
