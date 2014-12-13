@@ -108,8 +108,12 @@ sub serverRead {
 	my ($self, $buffer) = @_;
 
 	if ($self->{clients} == 0) {
-		LS30::Log::timePrint("Pending: $buffer");
-		$self->{pending_data} .= $buffer;
+		# Only MINPIC, XINPIC and CONTACTID events should be pending.
+		# Weed out responses to other clients.
+		if ($buffer !~ /^!/) {
+			LS30::Log::timePrint("Pending: $buffer");
+			$self->{pending_data} .= $buffer;
+		}
 		return;
 	}
 
