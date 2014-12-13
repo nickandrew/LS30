@@ -77,10 +77,24 @@ sub _parseString {
 	}
 }
 
+sub to_hash {
+	my ($self) = @_;
+
+	my %return = map { $_ => $self->{$_} } (keys %$self);
+
+	return \%return;
+}
+
 sub value {
 	my ($self) = @_;
 
 	return $self->{value};
+}
+
+sub get {
+	my ($self, $key) = @_;
+
+	return $self->{$key};
 }
 
 1;
