@@ -6,6 +6,8 @@ package LS30::Web;
 
 use Mojo::Base 'Mojolicious';
 
+use LS30::Web::Controller::Settings qw();
+
 # This method will run once at server start
 sub startup {
   my $self = shift;
@@ -20,8 +22,8 @@ sub startup {
   $r->get('/')->to('example#welcome');
 
   my $settings = $r->get('/settings')->to(controller => 'settings');
-  $settings->get('/general')->to(action => 'general');
-  $settings->get('/mode')->to(action => 'mode');
+  my $settings_controller = LS30::Web::Controller::Settings->new();
+  $settings_controller->add_routes($settings);
 
   my $devices = $r->get('/devices')->to(controller => 'devices');
   $devices->get('/')->to(action => 'list');
