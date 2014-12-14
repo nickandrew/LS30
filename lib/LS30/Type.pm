@@ -155,6 +155,8 @@ my $type_table = {
 		'USER9(L)'  => '8',
 		'USER10(L)' => '9',
 		'Duress'    => ':',
+		'CMS1'      => '<',
+		'CMS2'      => '=',
 	},
 
 	'Switch' => {
