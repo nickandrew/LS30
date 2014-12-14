@@ -156,7 +156,7 @@ You can now run scripts:
 
 1. Watch daemon
 
-	bin/watch.pl -c Watch
+	`bin/watch.pl -c Watch`
 
 This will connect and observe all responses from the LS30. It tries to
 decode them and print them to standard output.
@@ -186,19 +186,19 @@ with the GSM dialer.
 
 2. Arm and Disarm the LS30
 
-	`bin/arm.pl -m away`
-	`bin/arm.pl -m disarm`
-	`bin/arm.pl -m home`
-	`bin/arm.pl -m monitor`
+    `bin/arm.pl -m away`
+    `bin/arm.pl -m disarm`
+    `bin/arm.pl -m home`
+    `bin/arm.pl -m monitor`
 
 3. Send commands and decode the responses
 
-	`bin/send.pl '!n1?&'`
+    `bin/send.pl '!n1?&'`
 
 4. Make the system safe for trigger testing
 
-	`bin/safe-test.pl -y`
-	`bin/safe-test.pl -n`
+    `bin/safe-test.pl -y`
+    `bin/safe-test.pl -n`
 
 This command sets certain parameters to ensure that if the LS30 is triggered
 in away mode, it won't set off the siren(s). Used for testing the LS30 response
@@ -206,11 +206,11 @@ to burglary and other situations, especially GSM dialout.
 
 5. List registered devices
 
-	`bin/list-devices.pl`
+    `bin/list-devices.pl`
 
 6. Get the date and time
 
-	`bin/dt.pl`
+    `bin/dt.pl`
 
 ## DEPENDENCIES
 
