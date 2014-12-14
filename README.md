@@ -216,18 +216,19 @@ to burglary and other situations, especially GSM dialout.
 
 All classes and scripts are written in Perl. They use:
 
-  * Data::Dumper
-  * Getopt::Std
   * AnyEvent
+  * Data::Dumper
+  * Date::Format
+  * Getopt::Std
+  * IO::Socket::INET6 (for IPv6)
+  * Socket6 (for IPv6)
   * Test::More
   * YAML
-  * Date::Format
-  * Socket6 (for IPv6)
-  * IO::Socket::INET6 (for IPv6)
 
 Debian/Ubuntu users install perl modules with names like "lib*-perl", so you
 should install the following packages:
 
+  * libanyevent-perl
   * libio-socket-inet6-perl (for IPv6)
   * libsocket6-perl (for IPv6)
   * libtimedate-perl
