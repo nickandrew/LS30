@@ -25,6 +25,11 @@ use vars qw($opt_h $opt_s);
 
 getopts('h:s:');
 
+{
+	no warnings;
+	$Data::Dumper::Sortkeys = 1;
+}
+
 my $ls30c = LS30Connection->new($opt_h);
 
 $ls30c->connect();
@@ -35,7 +40,7 @@ my $ls30cmdr = LS30::Commander->new($ls30c);
 
 my @data;
 
-foreach my $title (LS30Command::listCommands()) {
+foreach my $title (sort (LS30Command::listCommands())) {
 
 	my $cmd_spec = LS30Command::getCommand($title);
 
