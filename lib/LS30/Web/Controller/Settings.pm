@@ -20,6 +20,15 @@ my $simple_queries = {
 		{ title => 'Entry Delay', },
 		{ title => 'Entry delay beep', },
 	],
+	gsm => [
+		{ title => 'GSM Phone 1', },
+		{ title => 'GSM Phone 2', },
+		{ title => 'GSM Phone 3', },
+		{ title => 'GSM Phone 4', },
+		{ title => 'GSM Phone 5', },
+		{ title => 'GSM ID', },
+		{ title => 'GSM PIN No', },
+	],
 	mode => [
 		{ title => 'Operation Mode', },
 	],
