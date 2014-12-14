@@ -99,7 +99,9 @@ sub list_type {
 		}
 
 		foreach my $device_number (0 .. $device_count - 1) {
-			my $cmd = sprintf("!k%s?%2d&", $device_code, $device_number);
+			# Surprisingly, %2d actually works, ala: '!kb? 2&'
+			# NOTE: Could be hex, not decimal
+			my $cmd = sprintf("!k%s?%02d&", $device_code, $device_number);
 			my $response = $self->sendCommand($cmd);
 
 			if (!$response) {
