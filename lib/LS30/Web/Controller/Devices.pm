@@ -79,7 +79,7 @@ sub list_type {
 		return $self->render(status => 404, json => {error => "No such device type $type" });
 	}
 
-	my $cmd = LS30Command::queryCommand({title => 'Device Count', device_type => $device_type_code});
+	my $cmd = LS30Command::queryCommand({title => 'Device Count', device_type => $type});
 	if (!$cmd) {
 		return $self->render(status => 500, json => {error => "Unable to get Device Count command"});
 	}
