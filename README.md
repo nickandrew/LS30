@@ -186,10 +186,12 @@ with the GSM dialer.
 
 2. Arm and Disarm the LS30
 
-    `bin/arm.pl -m away`
-    `bin/arm.pl -m disarm`
-    `bin/arm.pl -m home`
-    `bin/arm.pl -m monitor`
+```
+    bin/arm.pl -m away
+    bin/arm.pl -m disarm
+    bin/arm.pl -m home
+    bin/arm.pl -m monitor
+```
 
 3. Send commands and decode the responses
 
@@ -197,8 +199,10 @@ with the GSM dialer.
 
 4. Make the system safe for trigger testing
 
-    `bin/safe-test.pl -y`
-    `bin/safe-test.pl -n`
+```
+    bin/safe-test.pl -y
+    bin/safe-test.pl -n
+```
 
 This command sets certain parameters to ensure that if the LS30 is triggered
 in away mode, it won't set off the siren(s). Used for testing the LS30 response
