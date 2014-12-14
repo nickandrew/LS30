@@ -67,7 +67,7 @@ my $simple_commands = [
 	['Dial Mode',                    'n2'],
 	['X-10 House Code',              'n7'],
 	['Inactivity Function',          'o0'],
-	['ROM Version',                  'vn'],
+	['ROM Version',                  'vn'],  # Read-only
 	['Telephone Common 1',           't0', 99, \&resp_telno],
 	['Telephone Common 2',           't1', 99, \&resp_telno],
 	['Telephone Common 3',           't2', 99, \&resp_telno],
@@ -105,6 +105,28 @@ my $simple_commands = [
 ];
 
 my $spec_commands = [
+
+	{ title => 'CMS 1 Change Password',
+		key => 'ps<',
+		args => [
+			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
+		],
+	},
+
+	{ title => 'CMS 2 Change Password',
+		key => 'ps=',
+		args => [
+			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
+		],
+	},
+
+	{ title => 'Relay Control',
+		key => 'l6',
+		no_query => 1,
+		args => [
+			{ 'length' => 1, func => \&resp_boolean, key => 'value' },
+		],
+	},
 
 	{ title => 'Date/Time',
 		key => 'dt',
@@ -285,6 +307,7 @@ my $spec_commands = [
 		# Note 1-char key
 		key => 'u',
 		query_args => [
+			# Low values are the switch scenes 1-8; high values are operation scenes 1-8
 			{ 'length' => 1, type => 'Switch/Operation Scene', key => 'value' },
 		],
 	},
@@ -344,7 +367,7 @@ my $other_commands = [
 
 my $single_char_responses = {
 	'h' => {
-		title => 'Operation Schedule',
+		title => 'Switch Schedule',
 		args => [
 			{ 'length' => 4, func => \&resp_decimal_time, key => 'start_time' },
 			{ 'length' => 1, type => 'Schedule Zone', key => 'zone' },
