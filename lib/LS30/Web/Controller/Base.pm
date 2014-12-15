@@ -9,7 +9,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use LS30Command qw();
 use LS30Connection qw();
 use LS30::Commander qw();
-use LS30::ResponseMessage qw();
+use LS30::Message qw();
 use LS30::Type qw();
 use YAML qw();
 
@@ -55,7 +55,7 @@ sub sendCommand {
 
 	my $ls30cmdr = $self->connection();
 	my $response = $ls30cmdr->sendCommand($cmd);
-	my $resp_obj = LS30::ResponseMessage->new($response);
+	my $resp_obj = LS30::Message->parse($response);
 
 	return $resp_obj;
 }

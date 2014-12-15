@@ -28,6 +28,8 @@ sub startup {
   my $devices = $r->get('/devices')->to(controller => 'devices');
   $devices->get('/')->to(action => 'list');
   $devices->get('/:type')->to(action => 'list_type');
+
+  $r->get('/eventlog')->to(controller => 'EventLog', action => 'list');
 }
 
 1;
