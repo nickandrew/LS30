@@ -26,6 +26,10 @@ package LS30::EventMessage;
 use strict;
 use warnings;
 
+use vars qw(@ISA);
+
+@ISA = qw(LS30::Message);
+
 use Date::Format qw();
 
 use LS30::Type qw();

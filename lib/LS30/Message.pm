@@ -4,7 +4,7 @@
 
 =head1 NAME
 
-LS30::ResponseMessage - Parsed response message
+LS30::Message - A response message from the LS30
 
 =head1 DESCRIPTION
 
@@ -16,37 +16,35 @@ This class parses response messages from the LS30 (e.g. "!a0&").
 
 =cut
 
-package LS30::ResponseMessage;
+package LS30::Message;
 
 use strict;
 use warnings;
 
-use vars qw(@ISA);
-
-@ISA = qw(LS30::Message);
-
 use Carp qw(confess);
 
 use LS30Command qw();
+use LS30::EventMessage qw();
+use LS30::ResponseMessage qw();
 
 # ---------------------------------------------------------------------------
 
-=item new($string)
+=item parse($string)
 
-Parse $string and return a new LS30::ResponseMessage.
+Parse $string and return a new LS30::ResponseMessage or LS30::EventMessage.
 
 If string is not supplied, return an empty object.
 
 =cut
 
-sub new {
+sub parse {
 	my ($class, $string) = @_;
 
 	my $self = {};
 	bless $self, $class;
 
 	if ($string) {
-		$self->_parseString($string);
+		return $self->_parseString($string);
 	}
 
 	return $self;
@@ -70,15 +68,22 @@ sub _parseString {
 		confess "Invalid ResponseMessage string: $string";
 	}
 
+	if ($string =~ /^!ev/) {
+		return LS30::EventMessage->new($string);
+	}
+
 	my $return = LS30Command::parseResponse($string);
 	if (!$return) {
 		$self->{'error'} = "Unparseable response $string";
-		return;
+		return $self;
 	}
 
 	foreach my $k (keys %$return) {
 		$self->{$k} = $return->{$k};
 	}
+
+	bless $self, 'LS30::ResponseMessage';
+	return $self;
 }
 
 sub to_hash {
