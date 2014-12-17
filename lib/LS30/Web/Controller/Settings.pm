@@ -32,6 +32,29 @@ my $simple_queries = {
 	mode => [
 		{ title => 'Operation Mode', },
 	],
+	modem => [
+		{ title => 'Auto Answer Ring Count' },
+		{ title => 'Modem Ring Count' },
+		{ title => 'Dial Tone Check' },
+		{ title => 'Telephone Line Cut Detection' },
+	],
+	phone => [
+		{title => 'Telephone Common 1'},
+		{title => 'Telephone Common 2'},
+		{title => 'Telephone Common 3'},
+		{title => 'Telephone Common 4'},
+		{title => 'Telephone Panic'},
+		{title => 'Telephone Burglar'},
+		{title => 'Telephone Fire'},
+		{title => 'Telephone Medical'},
+		{title => 'Telephone Special'},
+		{title => 'Telephone Latchkey/Power'},
+		{title => 'Telephone Pager'},
+		{title => 'Telephone Data'},
+		{title => 'Telephone Ringer'},
+		{title => 'Cease Dialing Mode'},
+		{title => 'Dial Mode'},
+	],
 	switches => [
 		{ title => 'Switch 1' },
 		{ title => 'Switch 2' },
@@ -49,9 +72,6 @@ my $simple_queries = {
 		{ title => 'Switch 14' },
 		{ title => 'Switch 15' },
 		{ title => 'Switch 16' },
-	],
-	modem => [
-		{ title => 'Auto Answer Ring Count' },
 	],
 };
 
