@@ -81,7 +81,10 @@ sub _simple {
 	my $json = {};
 
 	foreach my $hr (@{$simple_queries->{$type}}) {
-		my $cmd      = LS30Command::queryCommand($hr);
+		my $cmd = LS30Command::queryCommand($hr);
+		if (!$cmd) {
+			return $self->render(status => 500, text => "No such command $hr->{title}\n");
+		}
 		my $resp_obj = $self->sendCommand($cmd);
 
 		if ($resp_obj) {
