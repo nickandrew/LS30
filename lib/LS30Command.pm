@@ -414,8 +414,9 @@ sub addCommands {
 		};
 
 		if ($lr->[2] && $lr->[3]) {
+			my $type = (ref $lr->[3]) ? 'func' : 'type';
 			$hr->{args} = [
-				{ 'length' => $lr->[2], func => $lr->[3], key => 'value' },
+				{ 'length' => $lr->[2], $type => $lr->[3], key => 'value' },
 			];
 		}
 
