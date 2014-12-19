@@ -164,9 +164,35 @@ my $type_table = {
 		'On'  => '1',
 	},
 
+	'Yes/No 1' => {
+		'No'  => '0',
+		'Yes' => '1',
+	},
+
+	'Yes/No 2' => {
+		'No'  => '0',
+		'Yes' => '2',
+	},
+
+	'CMS Report' => {
+		'All' => '0',
+		'One' => '1',
+	},
+
+	'DTMF duration' => {
+		'50ms' => '0',
+		'100ms'  => '1',
+	},
+
 	'Enablement' => {
 		'Disabled' => '0',
 		'Enabled'  => '1',
+	},
+
+	'IP Report Format' => {
+		'Scientech'    => 0,
+		'CSV IP Alarm' => 1,
+		'Reserved'     => 2,
 	},
 
 	'Dial Mode' => {
