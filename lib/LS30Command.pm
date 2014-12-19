@@ -83,16 +83,16 @@ my $simple_commands = [
 
 	# CMS1
 	['CMS 1 Telephone No',           't<', 99, \&resp_telno],
-	['CMS 1 User Account No',        't='],
-	['CMS 1 Mode Change Report',     'n3'],
-	['CMS 1 Auto Link Check Period', 'n5'],
-	['CMS 1 Two-way Audio',          'c3'],
-	['CMS 1 DTMF Data Length',       'c5'],
-	['CMS Report',                   'c7'],
+	['CMS 1 User Account No',        't=', 99, \&resp_string],
+	['CMS 1 Mode Change Report',     'n3',  1, 'Enablement'],
+	['CMS 1 Auto Link Check Period', 'n5',  2, \&resp_hex2],
+	['CMS 1 Two-way Audio',          'c3',  1, 'Enablement'],
+	['CMS 1 DTMF Data Length',       'c5',  1, 'DTMF duration'],
+	['CMS Report',                   'c7',  1, 'CMS Report'],
 	['CMS 1 GSM No',                 'tp', 99, \&resp_telno],
-	['Ethernet (IP) Report',         'c1'],
-	['GPRS Report',                  'c:'],
-	['IP Report Format',             'ml'],
+	['Ethernet (IP) Report',         'c1',  1, 'Yes/No 2'],
+	['GPRS Report',                  'c:',  1, 'Yes/No 1'],
+	['IP Report Format',             'ml',  1, 'IP Report Format'],
 
 	# CMS2
 	['CMS 2 Telephone No',           't>', 99, \&resp_telno],
