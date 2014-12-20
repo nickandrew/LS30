@@ -12,6 +12,20 @@ use Mojo::Base 'LS30::Web::Controller::Base';
 # ---------------------------------------------------------------------------
 
 my $simple_queries = {
+	cms1 => [
+		{title => 'CMS 1 Telephone No'},
+		{title => 'CMS 1 User Account No'},
+		{title => 'CMS 1 Mode Change Report'},
+		{title => 'CMS 1 Auto Link Check Period'},
+		{title => 'CMS 1 Two-way Audio'},
+		{title => 'CMS 1 DTMF Data Length'},
+		{title => 'CMS Report'},
+		{title => 'CMS 1 GSM No'},
+		{title => 'Ethernet (IP) Report'},
+		{title => 'GPRS Report'},
+		{title => 'IP Report Format'},
+	],
+
 	general => [
 		{ title => 'Inner Siren Time', },
 		{ title => 'Remote Siren Time', },
