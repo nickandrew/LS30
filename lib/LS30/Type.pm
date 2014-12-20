@@ -194,10 +194,15 @@ my $type_table = {
 		'Enabled'  => '1',
 	},
 
+	'Reverse Enablement' => {
+		'Enabled'  => '0',
+		'Disabled' => '1',
+	},
+
 	'IP Report Format' => {
-		'Scientech'    => 0,
-		'CSV IP Alarm' => 1,
-		'Reserved'     => 2,
+		'Scientech'    => '0',
+		'CSV IP Alarm' => '1',
+		'Reserved'     => '2',
 	},
 
 	'Dial Mode' => {
@@ -215,14 +220,19 @@ my $type_table = {
 	},
 
 	'Telephone Line Cut' => {
-		'Permanent Off' => 0,
-		'Away Mode On'  => 1,
-		'Permanent On'  => 2,
+		'Permanent Off' => '0',
+		'Away Mode On'  => '1',
+		'Permanent On'  => '2',
 	},
 
 	'Emergency Button' => {
 		'Panic'   => '0',
 		'Medical' => '1',
+	},
+
+	'Switch 16' => {
+		'Disarm=On' => '0',
+		'Arm=On'    => '1',
 	},
 
 	# 'd1' command
