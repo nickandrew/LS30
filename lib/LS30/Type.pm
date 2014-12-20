@@ -203,6 +203,7 @@ my $type_table = {
 	'Dial Mode' => {
 		'Dial Tone(DTMF)'              => '0',
 		'Dial Pulse (33/66 B/M Ratio)' => '1',
+		'Dial Pulse (40/60 B/M Ratio)' => '2',
 	},
 
 	'Switch Type' => {
@@ -211,6 +212,12 @@ my $type_table = {
 		'Type 3' => '2',
 		'Type 4' => '3',
 		'Type 5' => '4',
+	},
+
+	'Telephone Line Cut' => {
+		'Permanent Off' => 0,
+		'Away Mode On'  => 1,
+		'Permanent On'  => 2,
 	},
 
 	'Emergency Button' => {

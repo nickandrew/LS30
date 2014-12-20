@@ -54,7 +54,7 @@ my $simple_commands = [
 	['Relay Action Time',            'l3', 2,  \&resp_delay,],
 	['Door Bell',                    'm0'],
 	['Dial Tone Check',              'm1'],
-	['Telephone Line Cut Detection', 'm2'],
+	['Telephone Line Cut Detection', 'm2',  1, 'Telephone Line Cut'],
 	['Mode Change Chirp',            'm3', 1,  \&resp_boolean],
 	['Emergency Button Assignment',  'm4'],
 	['Entry delay beep',             'm5', 1,  \&resp_boolean],
@@ -64,7 +64,7 @@ my $simple_commands = [
 	['Alarm Warning Dong',           'mj'],
 	['Switch Type',                  'mk'],
 	['Inner Siren Enable',           'n1', 1,  \&resp_boolean],
-	['Dial Mode',                    'n2'],
+	['Dial Mode',                    'n2',  1, 'Dial Mode'],
 	['X-10 House Code',              'n7'],
 	['Inactivity Function',          'o0'],
 	['ROM Version',                  'vn'],  # Read-only
