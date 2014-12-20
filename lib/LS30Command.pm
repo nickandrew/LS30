@@ -60,7 +60,7 @@ my $simple_commands = [
 	['Entry delay beep',             'm5', 1,  \&resp_boolean],
 	['Tamper Siren in Disarm',       'm7', 1,  \&resp_boolean],
 	['Telephone Ringer',             'm8'],
-	['Cease Dialing Mode',           'm9'],
+	['Cease Dialing Mode',           'm9',  1, 'Cease Dialing'],
 	['Alarm Warning Dong',           'mj'],
 	['Switch Type',                  'mk'],
 	['Inner Siren Enable',           'n1', 1,  \&resp_boolean],

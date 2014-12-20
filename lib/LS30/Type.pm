@@ -122,6 +122,11 @@ my $type_table = {
 		'Monitor' => '8',
 	},
 
+	'Cease Dialing' => {
+		'30-minute expires'           => '0',
+		'Made successful CMS dialing' => '1',
+	},
+
 	'Day of Week' => {
 		'Mon' => '1',
 		'Tue' => '2',
