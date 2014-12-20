@@ -96,11 +96,11 @@ my $simple_commands = [
 
 	# CMS2
 	['CMS 2 Telephone No',           't>', 99, \&resp_telno],
-	['CMS 2 User Account No',        't?'],
-	['CMS 2 Mode Change Report',     'n4'],
-	['CMS 2 Auto Link Check Period', 'n6'],
-	['CMS 2 Two-way Audio',          'c4'],
-	['CMS 2 DTMF Data Length',       'c6'],
+	['CMS 2 User Account No',        't?', 99, \&resp_string],
+	['CMS 2 Mode Change Report',     'n4',  1, 'Enablement'],
+	['CMS 2 Auto Link Check Period', 'n6',  2, \&resp_hex2],
+	['CMS 2 Two-way Audio',          'c4',  1, 'Enablement'],
+	['CMS 2 DTMF Data Length',       'c6',  1, 'DTMF duration'],
 	['CMS 2 GSM No',                 'tq', 99, \&resp_telno],
 ];
 

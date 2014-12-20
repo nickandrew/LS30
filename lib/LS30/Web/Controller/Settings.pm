@@ -26,6 +26,16 @@ my $simple_queries = {
 		{title => 'IP Report Format'},
 	],
 
+	cms2 => [
+		{title => 'CMS 2 Telephone No'},
+		{title => 'CMS 2 User Account No'},
+		{title => 'CMS 2 Mode Change Report'},
+		{title => 'CMS 2 Auto Link Check Period'},
+		{title => 'CMS 2 Two-way Audio'},
+		{title => 'CMS 2 DTMF Data Length'},
+		{title => 'CMS 2 GSM No'},
+	],
+
 	general => [
 		{ title => 'Inner Siren Time', },
 		{ title => 'Remote Siren Time', },
