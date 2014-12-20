@@ -53,21 +53,21 @@ my $simple_commands = [
 	['Remote Siren Time',            'l2', 2,  \&resp_interval2],
 	['Relay Action Time',            'l3', 2,  \&resp_delay],
 	['Door Bell',                    'm0'],
-	['Dial Tone Check',              'm1',  1, 'Enablement'],
-	['Telephone Line Cut Detection', 'm2',  1, 'Telephone Line Cut'],
+	['Dial Tone Check',              'm1', 1,  'Enablement'],
+	['Telephone Line Cut Detection', 'm2', 1,  'Telephone Line Cut'],
 	['Mode Change Chirp',            'm3', 1,  \&resp_boolean],
 	['Emergency Button Assignment',  'm4'],
 	['Entry delay beep',             'm5', 1,  \&resp_boolean],
 	['Tamper Siren in Disarm',       'm7', 1,  \&resp_boolean],
-	['Telephone Ringer',             'm8',  1, 'Enablement'],
-	['Cease Dialing Mode',           'm9',  1, 'Cease Dialing'],
+	['Telephone Ringer',             'm8', 1,  'Enablement'],
+	['Cease Dialing Mode',           'm9', 1,  'Cease Dialing'],
 	['Alarm Warning Dong',           'mj'],
 	['Switch Type',                  'mk'],
 	['Inner Siren Enable',           'n1', 1,  \&resp_boolean],
-	['Dial Mode',                    'n2',  1, 'Dial Mode'],
+	['Dial Mode',                    'n2', 1,  'Dial Mode'],
 	['X-10 House Code',              'n7'],
 	['Inactivity Function',          'o0'],
-	['ROM Version',                  'vn'],  # Read-only
+	['ROM Version',                  'vn', 99, \&resp_string],          # Read-only
 	['Telephone Common 1',           't0', 99, \&resp_telno],
 	['Telephone Common 2',           't1', 99, \&resp_telno],
 	['Telephone Common 3',           't2', 99, \&resp_telno],
@@ -75,70 +75,69 @@ my $simple_commands = [
 	['Telephone Panic',              't4', 99, \&resp_telno],
 	['Telephone Burglar',            't5', 99, \&resp_telno],
 	['Telephone Fire',               't6', 99, \&resp_telno],
-	['Telephone Medical',            't7', 99, \&resp_telno], # Suffix 'v' (Voice) or 't' (DTMF)
-	['Telephone Special',            't8', 99, \&resp_telno],
-	['Telephone Latchkey/Power',     't9', 99, \&resp_telno],
-	['Telephone Pager',              't:', 99, \&resp_telno],
-	['Telephone Data',               't;', 99, \&resp_telno],
+	['Telephone Medical',        't7', 99, \&resp_telno],    # Suffix 'v' (Voice) or 't' (DTMF)
+	['Telephone Special',        't8', 99, \&resp_telno],
+	['Telephone Latchkey/Power', 't9', 99, \&resp_telno],
+	['Telephone Pager',          't:', 99, \&resp_telno],
+	['Telephone Data',           't;', 99, \&resp_telno],
 
 	# CMS1
 	['CMS 1 Telephone No',           't<', 99, \&resp_telno],
 	['CMS 1 User Account No',        't=', 99, \&resp_string],
-	['CMS 1 Mode Change Report',     'n3',  1, 'Enablement'],
-	['CMS 1 Auto Link Check Period', 'n5',  2, \&resp_hex2],
-	['CMS 1 Two-way Audio',          'c3',  1, 'Enablement'],
-	['CMS 1 DTMF Data Length',       'c5',  1, 'DTMF duration'],
-	['CMS Report',                   'c7',  1, 'CMS Report'],
+	['CMS 1 Mode Change Report',     'n3', 1,  'Enablement'],
+	['CMS 1 Auto Link Check Period', 'n5', 2,  \&resp_hex2],
+	['CMS 1 Two-way Audio',          'c3', 1,  'Enablement'],
+	['CMS 1 DTMF Data Length',       'c5', 1,  'DTMF duration'],
+	['CMS Report',                   'c7', 1,  'CMS Report'],
 	['CMS 1 GSM No',                 'tp', 99, \&resp_telno],
-	['Ethernet (IP) Report',         'c1',  1, 'Yes/No 2'],
-	['GPRS Report',                  'c:',  1, 'Yes/No 1'],
-	['IP Report Format',             'ml',  1, 'IP Report Format'],
+	['Ethernet (IP) Report',         'c1', 1,  'Yes/No 2'],
+	['GPRS Report',                  'c:', 1,  'Yes/No 1'],
+	['IP Report Format',             'ml', 1,  'IP Report Format'],
 
 	# CMS2
 	['CMS 2 Telephone No',           't>', 99, \&resp_telno],
 	['CMS 2 User Account No',        't?', 99, \&resp_string],
-	['CMS 2 Mode Change Report',     'n4',  1, 'Enablement'],
-	['CMS 2 Auto Link Check Period', 'n6',  2, \&resp_hex2],
-	['CMS 2 Two-way Audio',          'c4',  1, 'Enablement'],
-	['CMS 2 DTMF Data Length',       'c6',  1, 'DTMF duration'],
+	['CMS 2 Mode Change Report',     'n4', 1,  'Enablement'],
+	['CMS 2 Auto Link Check Period', 'n6', 2,  \&resp_hex2],
+	['CMS 2 Two-way Audio',          'c4', 1,  'Enablement'],
+	['CMS 2 DTMF Data Length',       'c6', 1,  'DTMF duration'],
 	['CMS 2 GSM No',                 'tq', 99, \&resp_telno],
 ];
 
 my $spec_commands = [
 
-	{ title => 'CMS 1 Change Password',
-		key => 'ps<',
-		args => [
-			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
-		],
+	{
+		title => 'CMS 1 Change Password',
+		key   => 'ps<',
+		args  => [{ 'length' => 8, func => \&resp_password, key => 'new_password' },],
 	},
 
-	{ title => 'CMS 2 Change Password',
-		key => 'ps=',
-		args => [
-			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
-		],
+	{
+		title => 'CMS 2 Change Password',
+		key   => 'ps=',
+		args  => [{ 'length' => 8, func => \&resp_password, key => 'new_password' },],
 	},
 
-	{ title => 'Relay Control',
-		key => 'l6',
+	{
+		title    => 'Relay Control',
+		key      => 'l6',
 		no_query => 1,
-		args => [
-			{ 'length' => 1, func => \&resp_boolean, key => 'value' },
-		],
+		args     => [{ 'length' => 1, func => \&resp_boolean, key => 'value' },],
 	},
 
-	{ title => 'Date/Time',
-		key => 'dt',
-		args => [
-			{ 'length' => 6, func => \&resp_date1, key => 'date' },
+	{
+		title => 'Date/Time',
+		key   => 'dt',
+		args  => [
+			{ 'length' => 6, func => \&resp_date1,  key => 'date' },
 			{ 'length' => 1, type => 'Day of Week', key => 'dow' },
-			{ 'length' => 4, func => \&resp_date2, key => 'time' },
+			{ 'length' => 4, func => \&resp_date2,  key => 'time' },
 		],
 	},
 
-	{ title => 'Information',
-		key => 'if',
+	{
+		title    => 'Information',
+		key      => 'if',
 		response => [
 			{ 'length' => 1, func => \&resp_string, key => 'unk1' },
 			{ 'length' => 2, func => \&resp_string, key => 'unk2' },
@@ -148,165 +147,169 @@ my $spec_commands = [
 		],
 	},
 
-	{ title => 'Operation Mode',
-		key => 'n0',
-		args => [
-			{ 'length' => 1, type => 'Arm Mode', key => 'value' },
-		],
+	{
+		title => 'Operation Mode',
+		key   => 'n0',
+		args  => [{ 'length' => 1, type => 'Arm Mode', key => 'value' },],
 	},
 
-	{ title => 'Device Count',
-		key => 'b3',
-		query_args => [
-			{ 'length' => 1, type => 'Device Type', key => 'device_type' },
-		],
-		response => [
-			{ 'length' => 2, func => \&resp_hex2, key => 'value' },
-		],
+	{
+		title      => 'Device Count',
+		key        => 'b3',
+		query_args => [{ 'length' => 1, type => 'Device Type', key => 'device_type' },],
+		response   => [{ 'length' => 2, func => \&resp_hex2, key => 'value' },],
 	},
 
-	{ title => 'Remote Siren Type',
-		key => 'd1',
-		args => [
+	{
+		title => 'Remote Siren Type',
+		key   => 'd1',
+		args  => [
 			{ 'length' => 1, type => 'Siren Type', key => 'value' },
-			{ 'length' => 2, func => \&resp_hex2, key => 'Siren ID' },
+			{ 'length' => 2, func => \&resp_hex2,  key => 'Siren ID' },
 		],
 	},
 
-	{ title => 'Burglar Sensor Status',
-		key => 'kb',
+	{
+		title    => 'Burglar Sensor Status',
+		key      => 'kb',
 		response => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
-			{ 'length' => 6, func => \&resp_string, key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string, key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string, key => 'junk3' },
-			{ 'length' => 2, func => \&resp_string, key => 'zone' },
-			{ 'length' => 2, func => \&resp_string, key => 'id' },
-			{ 'length' => 8, func => \&resp_string, key => 'config' },
-			{ 'length' => 4, func => \&resp_string, key => 'rest' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
 		],
 	},
 
-	{ title => 'Controller Status',
-		key => 'kc',
+	{
+		title    => 'Controller Status',
+		key      => 'kc',
 		response => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
-			{ 'length' => 6, func => \&resp_string, key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string, key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string, key => 'junk3' },
-			{ 'length' => 2, func => \&resp_string, key => 'zone' },
-			{ 'length' => 2, func => \&resp_string, key => 'id' },
-			{ 'length' => 8, func => \&resp_string, key => 'config' },
-			{ 'length' => 4, func => \&resp_string, key => 'rest' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
 		],
 	},
 
-	{ title => 'Fire Status',
-		key => 'kf',
+	{
+		title    => 'Fire Status',
+		key      => 'kf',
 		response => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
-			{ 'length' => 6, func => \&resp_string, key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string, key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string, key => 'junk3' },
-			{ 'length' => 2, func => \&resp_string, key => 'zone' },
-			{ 'length' => 2, func => \&resp_string, key => 'id' },
-			{ 'length' => 8, func => \&resp_string, key => 'config' },
-			{ 'length' => 4, func => \&resp_string, key => 'rest' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
 		],
 	},
 
-	{ title => 'Medical Sensor Status',
-		key => 'km',
+	{
+		title    => 'Medical Sensor Status',
+		key      => 'km',
 		response => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
-			{ 'length' => 6, func => \&resp_string, key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string, key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string, key => 'junk3' },
-			{ 'length' => 2, func => \&resp_string, key => 'zone' },
-			{ 'length' => 2, func => \&resp_string, key => 'id' },
-			{ 'length' => 8, func => \&resp_string, key => 'config' },
-			{ 'length' => 4, func => \&resp_string, key => 'rest' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
 		],
 	},
 
-	{ title => 'Special Sensor Status',
-		key => 'ke',
+	{
+		title    => 'Special Sensor Status',
+		key      => 'ke',
 		response => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
-			{ 'length' => 6, func => \&resp_string, key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string, key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string, key => 'junk3' },
-			{ 'length' => 2, func => \&resp_string, key => 'zone' },
-			{ 'length' => 2, func => \&resp_string, key => 'id' },
-			{ 'length' => 8, func => \&resp_string, key => 'config' },
-			{ 'length' => 4, func => \&resp_string, key => 'rest' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
 		],
 	},
 
-	{ title => 'Query Operation Schedule',
-		key => 'hq',
-		no_query => 1,
+	{
+		title      => 'Query Operation Schedule',
+		key        => 'hq',
+		no_query   => 1,
 		query_args => [
 			{ 'length' => 1, type => 'Schedule Day of Week', key => 'day_of_week' },
-			{ 'length' => 2, func => \&resp_hex2, key => 'id' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 	},
 
-	{ title => 'Set Operation Schedule',
-		key => 'hr',
+	{
+		title    => 'Set Operation Schedule',
+		key      => 'hr',
 		no_query => 1,
-		no_set => 1,
-		args => [
+		no_set   => 1,
+		args     => [
 			{ 'length' => 1, type => 'Schedule Day of Week', key => 'day_of_week' },
-			{ 'length' => 2, func => \&resp_hex2, key => 'id' },
-			{ 'length' => 4, func => \&resp_decimal_time, key => 'start_time' },
-			{ 'length' => 1, type => 'Schedule Zone', key => 'zone' },
-			{ 'length' => 1, type => 'Operation Code', key => 'op_code' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
+			{ 'length' => 4, func => \&resp_decimal_time,    key => 'start_time' },
+			{ 'length' => 1, type => 'Schedule Zone',        key => 'zone' },
+			{ 'length' => 1, type => 'Operation Code',       key => 'op_code' },
 		],
 	},
 
-	{ title => 'Partial Arm',
-		key => 'n8',
-		query_args => [
-			{ 'length' => 2, type => 'Group 91-99', key => 'group_number' },
-		],
-		response => [
-			{ 'length' => 2, type => 'Group 91-99', key => 'group_number' },
+	{
+		title      => 'Partial Arm',
+		key        => 'n8',
+		query_args => [{ 'length' => 2, type => 'Group 91-99', key => 'group_number' },],
+		response   => [
+			{ 'length' => 2, type => 'Group 91-99',  key => 'group_number' },
 			{ 'length' => 1, func => \&resp_boolean, key => 'value' },
 		],
 	},
 
-	{ title => 'Event',
-		key => 'ev',
-		no_query => 1,
-		query_args => [
-			{ 'length' => 3, func => \&resp_hex3, key => 'value' },
-		],
+	{
+		title      => 'Event',
+		key        => 'ev',
+		no_query   => 1,
+		query_args => [{ 'length' => 3, func => \&resp_hex3, key => 'value' },],
 	},
 
-	{ title => 'Inner Siren Time',
-		key => 'l4',
-		args => [
-			{ 'length' => 2, func => \&resp_hex2, key => 'value' },
-		],
+	{
+		title => 'Inner Siren Time',
+		key   => 'l4',
+		args  => [{ 'length' => 2, func => \&resp_hex2, key => 'value' },],
 	},
 
-	{ title => 'Password',
+	{
+		title => 'Password',
+
 		# Note 1-char key
-		key => 'p',
-		query_args => [
-			{ 'length' => 1, type => 'Password', key => 'password_no' },
-		],
-		args => [
-			{ 'length' => 1, type => 'Password', key => 'password_no' },
+		key        => 'p',
+		query_args => [{ 'length' => 1, type => 'Password', key => 'password_no' },],
+		args       => [
+			{ 'length' => 1, type => 'Password',      key => 'password_no' },
 			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
 		],
 	},
 
-	{ title => 'Switch/Operation Scene',
+	{
+		title => 'Switch/Operation Scene',
+
 		# Note 1-char key
-		key => 'u',
+		key        => 'u',
 		query_args => [
+
 			# Low values are the switch scenes 1-8; high values are operation scenes 1-8
 			{ 'length' => 1, type => 'Switch/Operation Scene', key => 'value' },
 		],
@@ -316,51 +319,58 @@ my $spec_commands = [
 
 my $learn_commands = [
 
-	{ title => 'Learn Burglar Sensor',
-		key => 'ibl',
+	{
+		title => 'Learn Burglar Sensor',
+		key   => 'ibl',
 	},
 
-	{ title => 'Learn Fire Sensor',
-		key => 'ifl',
+	{
+		title => 'Learn Fire Sensor',
+		key   => 'ifl',
 	},
 
-	{ title => 'Learn Controller',
-		key => 'icl',
+	{
+		title => 'Learn Controller',
+		key   => 'icl',
 	},
 
-	{ title => 'Learn Medical Button',
-		key => 'iml',
+	{
+		title => 'Learn Medical Button',
+		key   => 'iml',
 	},
 
-	{ title => 'Learn Special Sensor',
-		key => 'iel',
+	{
+		title => 'Learn Special Sensor',
+		key   => 'iel',
 	},
 
 ];
 
 my $delete_commands = [
 
-	{ title => 'Delete Burglar Sensor',
-		key => 'ibk',
+	{
+		title    => 'Delete Burglar Sensor',
+		key      => 'ibk',
 		no_query => 1,
-		no_set => 1,
-		args => [
-			{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },
-		],
+		no_set   => 1,
+		args     => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
 ];
 
-my $other_commands = [
-	{ title => 'Send Message',
-		key => 'f0',
-		type => 'command',
+my $other_commands = [{
+		title => 'Send Message',
+		key   => 'f0',
+		type  => 'command',
+
 		# Arg is 1 string, various length
 		# Response is same as command
 	},
-	{ title => 'Voice Playback',
-		key => 'vp',
-		type => 'command',
+	{
+		title => 'Voice Playback',
+		key   => 'vp',
+		type  => 'command',
+
 		# Arg is 0 .. ?
 	},
 ];
@@ -368,18 +378,16 @@ my $other_commands = [
 my $single_char_responses = {
 	'h' => {
 		title => 'Switch Schedule',
-		args => [
+		args  => [
 			{ 'length' => 4, func => \&resp_decimal_time, key => 'start_time' },
-			{ 'length' => 1, type => 'Schedule Zone', key => 'zone' },
-			{ 'length' => 1, type => 'Operation Code', key => 'op_code' },
+			{ 'length' => 1, type => 'Schedule Zone',     key => 'zone' },
+			{ 'length' => 1, type => 'Operation Code',    key => 'op_code' },
 		],
 	},
 
 	'p' => {
 		title => 'Password',
-		args => [
-			{ 'length' => 8, func => \&resp_password, key => 'current_password' },
-		],
+		args  => [{ 'length' => 8, func => \&resp_password, key => 'current_password' },],
 	},
 };
 
@@ -415,9 +423,7 @@ sub addCommands {
 
 		if ($lr->[2] && $lr->[3]) {
 			my $type = (ref $lr->[3]) ? 'func' : 'type';
-			$hr->{args} = [
-				{ 'length' => $lr->[2], $type => $lr->[3], key => 'value' },
-			];
+			$hr->{args} = [{ 'length' => $lr->[2], $type => $lr->[3], key => 'value' },];
 		}
 
 		addCommand($hr);
@@ -517,10 +523,9 @@ sub queryCommand {
 			my $type = $hr2->{type};
 			if ($key) {
 				if (!exists $args->{$key}) {
-					my $s = sprintf("Args for %s is missing key %s (%s)",
-						$title,
-						$key,
-						($type ? "code table $type" : "function"),
+					my $s = sprintf(
+						"Args for %s is missing key %s (%s)",
+						$title, $key, ($type ? "code table $type" : "function"),
 					);
 					warn $s;
 				}
@@ -654,9 +659,7 @@ sub parseResponse {
 
 	my $meat = $1;
 
-	my $return = {
-		string => $response,
-	};
+	my $return = { string => $response, };
 
 	my $skey = substr($meat, 0, 1);
 
