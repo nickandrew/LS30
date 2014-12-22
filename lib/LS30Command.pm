@@ -148,6 +148,7 @@ my $spec_commands = [
 	},
 
 	{
+		is_setting => 1,
 		title => 'Operation Mode',
 		key   => 'n0',
 		args  => [{ 'length' => 1, type => 'Arm Mode', key => 'value' },],
@@ -417,6 +418,7 @@ sub addCommands {
 
 	foreach my $lr (@$simple_commands) {
 		my $hr = {
+			is_setting => 1,
 			title => $lr->[0],
 			key   => $lr->[1],
 		};
@@ -592,19 +594,11 @@ sub setCommand {
 				my $input = $args->{$key};
 
 				my $value;
-				if ($hr2->{func}) {
-					my $func = $hr2->{func};
-					$value = &$func($input, 'encode');
-				} elsif ($hr2->{type}) {
-					if (!defined $input) {
-						warn "Needed set command key $key is missing";
-					} else {
-						my $type = $hr2->{type};
-						$value = LS30::Type::getCode($type, $input);
-						if (!defined $value) {
-							warn "Incorrect value $input for Table $type, string $input";
-						}
-					}
+
+				if (!defined $input) {
+					warn "Needed set command key $key is missing";
+				} else {
+					$value = _testValue($hr2, $input);
 				}
 
 				if (defined $value) {
@@ -1087,6 +1081,64 @@ sub resp_date2 {
 	}
 
 	die "Invalid format time string: $string";
+}
+
+# ---------------------------------------------------------------------------
+# Test if the supplied value is valid as an argument.
+# hr is an argument hashref, not a setting hashref.
+# Return undef if there's a problem, otherwise the converted value.
+# ---------------------------------------------------------------------------
+
+sub _testValue {
+	my ($hr, $input) = @_;
+
+	my $func = $hr->{func};
+
+	if ($func) {
+		# Input is defined in terms of a function
+		my $ok = &$func($input, 'encode');
+		if (!defined $ok) {
+			# Assume it's bad
+			return undef;
+		} else {
+			return $ok;
+		}
+	}
+
+	my $type = $hr->{type};
+
+	if ($type) {
+		if (!defined $input) {
+			return undef;
+		} else {
+			my $type = $hr->{type};
+			my $ok = LS30::Type::getCode($type, $input);
+			if (!defined $ok) {
+				warn "Incorrect value <$input> for table <$type>\n";
+			}
+			return $ok;
+		}
+	}
+
+	return undef;
+}
+
+sub testSettingValue {
+	my ($title, $value) = @_;
+
+	my $hr = getCommand($title);
+
+	if (!defined $hr || !$hr->{is_setting}) {
+		warn "No setting <$title>\n";
+		return 0;
+	}
+
+	if (!$hr->{args} || !$hr->{args}->[0]) {
+		warn "Setting <$title> has no defined arguments\n";
+		return 0;
+	}
+
+	return _testValue($hr->{args}->[0], $value);
 }
 
 1;
