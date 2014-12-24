@@ -81,68 +81,96 @@ sub _setting {
 
 =item I<getSetting($setting_name, $cached)>
 
-Return the current value of $setting_name (which is defined in LS30Command).
+Return a condvar which will receive
+the current value of $setting_name (which is defined in LS30Command).
 
-If $cached is set, a cached one may be returned, otherwise upstream is
-queried and the value is cached.
+If $cached is set, a cached value may be returned, otherwise upstream is
+queried and the value is cached before being returned through the condvar.
+
+Example:
+
+    # Synchronous code
+    # my $value = $model->getSetting('Operation Mode', 1)->recv;
+
+    # Asynchronous
+    # my $cv = $model->getSetting('Operation Mode', 1);
+    # $cv->cb(sub {
+    #    my $value = $cv->recv;
+    #    # ...
+    # });
 
 =cut
 
 sub getSetting {
 	my ($self, $setting_name, $cached) = @_;
 
+	my $cv = AnyEvent->condvar;
+
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
 		print STDERR "Is not a setting: <$setting_name>\n";
-		return undef;
+		$cv->send(undef);
+		return $cv;
 	}
 
 	my $key = $hr->{key};
 	my $value = $self->_setting($setting_name);
 
 	if ($cached && defined $value) {
-		return $value;
+		$cv->send($value);
+		return $cv;
 	}
 
 	my $upstream = $self->upstream();
 
 	if ($upstream) {
-		$value = $upstream->getSetting($setting_name, $cached);
-		$self->_setting($setting_name, $value);
-		return $value;
+		my $cv2 = $upstream->getSetting($setting_name, $cached);
+		$cv2->cb(sub {
+			my $value = $cv2->recv;
+			$self->_setting($setting_name, $value);
+			$cv->send($value);
+		});
+		return $cv;
 	}
 
 	if (defined $value) {
-		return $value;
+		$cv->send($value);
+		return $cv;
 	}
 
 	# TODO Return a default value.
-	return undef;
+	$cv->send(undef);
+	return $cv;
 }
 
 =item I<setSetting($setting_name, $value)>
 
-Set a new value for $setting_name (which is defined in LS30Command).
+Return a condvar associated with setting
+a new value for $setting_name (which is defined in LS30Command).
 
 If an upstream is set, the value is always propagated to upstream.
 
-Return undef if there was some problem, 1 otherwise.
+Return (through the condvar) undef if there was some problem, 1 otherwise.
 
 =cut
 
 sub setSetting {
 	my ($self, $setting_name, $value) = @_;
 
+	my $cv = AnyEvent->condvar;
+
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
 		warn "Is not a setting: <$setting_name>\n";
-		return undef;
+		$cv->send(undef);
+		return $cv;
 	}
 
 	my $raw_value = LS30Command::testSettingValue($setting_name, $value);
 	if (!defined $raw_value) {
 		warn "Value <$value> is not valid for setting <$setting_name>\n";
-		return undef;
+		$cv->send(undef);
+		return $cv;
 	}
 
 	my $key = $hr->{key};
@@ -150,11 +178,21 @@ sub setSetting {
 	my $upstream = $self->upstream();
 
 	if ($upstream) {
-		$upstream->setSetting($setting_name, $value);
+		my $cv2 = $upstream->setSetting($setting_name, $value);
+		$cv2->cb(sub {
+			my $rc = $cv2->recv;
+			if ($rc) {
+				# Ok, so cache the saved value
+				$self->_setting($setting_name, $value);
+			}
+			$cv->send($rc);
+		});
+		return $cv;
 	}
 
 	$self->_setting($setting_name, $value);
-	return 1;
+	$cv->send(1);
+	return $cv;
 }
 
 1;

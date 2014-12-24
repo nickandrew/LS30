@@ -6,6 +6,7 @@ use strict;
 use warnings;
 
 use Test::More qw(no_plan);
+use AnyEvent qw();
 
 use LS30Command qw();
 use LS30::Model qw();
@@ -17,21 +18,33 @@ isa_ok($model, 'LS30::Model');
 
 can_ok($model, qw(upstream getSetting setSetting));
 
-my $rc;
+my ($cv, $rc, $value);
 
-$rc = $model->setSetting('Operation Mode', 'Disarm');
+$cv = $model->setSetting('Operation Mode', 'Disarm');
+isa_ok($cv, 'AnyEvent::CondVar');
+$rc = $cv->recv;
 ok($rc == 1, "setSetting valid value");
 
-$rc = $model->setSetting('Operation Mode', 'Invalid');
+$cv = $model->setSetting('Operation Mode', 'Invalid');
+$rc = $cv->recv;
 ok(!defined $rc, "setSetting invalid value");
 
-$rc = $model->setSetting('Invalid Setting Name', 'Invalid');
+$cv = $model->setSetting('Invalid Setting Name', 'Invalid');
+$rc = $cv->recv;
 ok(!defined $rc, "setSetting invalid setting name");
 
-my $value;
-
-$value = $model->getSetting('Operation Mode');
+# Test first synchronous style
+$cv = $model->getSetting('Operation Mode');
+$value = $cv->recv;
 ok($value eq 'Disarm', "getSetting Operation Mode");
 
-$value = $model->getSetting('Something invalid');
+# Then asynchronous
+$cv = $model->getSetting('Operation Mode');
+$cv->cb(sub {
+	$value = $cv->recv;
+	ok($value eq 'Disarm', "getSetting Operation Mode asynchronous");
+});
+
+$cv = $model->getSetting('Something invalid');
+$value = $cv->recv;
 ok(!defined $value, "getSetting invalid setting name");
