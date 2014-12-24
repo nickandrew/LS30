@@ -180,8 +180,8 @@ sub handleResponse {
 
 	# Call callback if any, and send next command
 	if (@{$self->{command_queue}}) {
-		my $lr = pop(@{$self->{command_queue}});
-		my ($cmd, $cb) = @_;
+		my $lr = shift(@{$self->{command_queue}});
+		my ($cmd, $cb) = @$lr;
 		# $cmd was the command which is being responded-to so it is not needed
 		$cb->($string);
 	}
