@@ -616,6 +616,40 @@ sub setCommand {
 	return $cmd;
 }
 
+sub clearCommand {
+	my ($args) = @_;
+
+	if (!defined $args || ref($args) ne 'HASH') {
+		die "setCommand: args must be a hashref";
+	}
+
+	my $title = $args->{title};
+
+	if (!$title) {
+		die "clearCommand: args requires a title";
+	}
+
+	my $cmd_spec = getCommand($title);
+	if (!$cmd_spec) {
+
+		# Unknown title
+		return undef;
+	}
+
+	my $cmd = '!';
+
+	$cmd .= $cmd_spec->{key};
+
+	$cmd .= 'k';
+
+	# Add an optional password
+	$cmd .= _password($cmd_spec, $args);
+
+	$cmd .= '&';
+
+	return $cmd;
+}
+
 sub getLearnCommandSpec {
 	my ($title) = @_;
 
@@ -671,6 +705,11 @@ sub parseResponse {
 
 			# It's a response to a set command
 			$return->{action} = 'set';
+			$meat = substr($meat, 3);
+		} elsif (substr($meat, 2, 1) eq 'k') {
+
+			# It's a response to a clear command
+			$return->{action} = 'clear';
 			$meat = substr($meat, 3);
 		} else {
 
