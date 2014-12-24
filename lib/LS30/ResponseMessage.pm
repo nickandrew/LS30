@@ -23,7 +23,7 @@ use warnings;
 
 use vars qw(@ISA);
 
-@ISA = qw(LS30::Message);
+use base qw(LS30::Message);
 
 use Carp qw(confess);
 

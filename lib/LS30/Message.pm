@@ -69,6 +69,7 @@ sub _parseString {
 	}
 
 	if ($string =~ /^!ev/) {
+		require LS30::EventMessage;
 		return LS30::EventMessage->new($string);
 	}
 
@@ -82,6 +83,7 @@ sub _parseString {
 		$self->{$k} = $return->{$k};
 	}
 
+	require LS30::ResponseMessage;
 	bless $self, 'LS30::ResponseMessage';
 	return $self;
 }
