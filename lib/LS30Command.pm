@@ -2,6 +2,29 @@
 #   Copyright (C) 2010-2014, Nick Andrew <nick@nick-andrew.net>
 #   Licensed under the terms of the GNU General Public License, Version 3
 
+=head1 NAME
+
+LS30Command - Definition of the LS-30 command set
+
+=head1 DESCRIPTION
+
+All known LS-30 commands are defined here.
+
+There are 'simple' commands, which more or less correspond to the named
+settings, which read or write a single value.
+
+There are more complicated commands which take more than one parameter,
+and may return complex data structures.
+
+There are also learn-type commands which put the LS-30 into a device
+learning state.
+
+=head1 METHODS
+
+=over
+
+=cut
+
 package LS30Command;
 
 use strict;
@@ -392,6 +415,13 @@ my $single_char_responses = {
 	},
 };
 
+# ---------------------------------------------------------------------------
+
+=item I<addCommand($hr)>
+
+Add the command specification to the class list of commands. Used internally.
+
+=cut
 
 sub addCommand {
 	my ($hr) = @_;
@@ -411,6 +441,15 @@ sub addCommand {
 	$command_bykey->{$key} = $hr;
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<addCommands()>
+
+Add all known commands to the class list of commands.
+
+Must be called once in client code.
+
+=cut
 
 sub addCommands {
 
@@ -444,15 +483,41 @@ sub addCommands {
 	}
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<listCommands()>
+
+Return a list of the titles of all known commands.
+
+=cut
+
 sub listCommands {
 	return (sort (keys %$commands));
 }
+
+# ---------------------------------------------------------------------------
+
+=item I<getCommand($title)>
+
+Return the hashref describing the command with the given title.
+
+=cut
 
 sub getCommand {
 	my ($title) = @_;
 
 	return $commands->{$title};
 }
+
+# ---------------------------------------------------------------------------
+
+=item I<getCommandByKey($key)>
+
+Return the title of the command which has the given (1 or 2 char) key.
+
+Used to decode the protocol.
+
+=cut
 
 sub getCommandByKey {
 	my ($key) = @_;
@@ -463,6 +528,10 @@ sub getCommandByKey {
 
 	return $command_bykey->{$key};
 }
+
+# ---------------------------------------------------------------------------
+# Return a password string for appending to a command
+# ---------------------------------------------------------------------------
 
 sub _password {
 	my ($cmd_spec, $args) = @_;
@@ -488,6 +557,17 @@ sub _password {
 
 	return $password;
 }
+
+# ---------------------------------------------------------------------------
+
+=item I<queryCommand($args)>
+
+Construct and return a query command string.
+
+$args is a hashref containing 'title' and possibly other command-specific
+arguments.
+
+=cut
 
 sub queryCommand {
 	my ($args) = @_;
@@ -556,6 +636,21 @@ sub queryCommand {
 	return $cmd;
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<setCommand($args)>
+
+Construct and return a set command string.
+
+$args is a hashref containing 'title' and possibly other command-specific
+arguments.
+
+If the command to be issued takes a single variable (e.g. is a setting),
+that variable will be called 'value'. Otherwise, it depends on the command
+specification.
+
+=cut
+
 sub setCommand {
 	my ($args) = @_;
 
@@ -616,6 +711,16 @@ sub setCommand {
 	return $cmd;
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<clearCommand($args)>
+
+Construct and return a clear command string.
+
+$args is a hashref containing 'title'.
+
+=cut
+
 sub clearCommand {
 	my ($args) = @_;
 
@@ -650,6 +755,14 @@ sub clearCommand {
 	return $cmd;
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<getLearnCommandSpec($title)>
+
+Return the hashref specifying a specific learning command.
+
+=cut
+
 sub getLearnCommandSpec {
 	my ($title) = @_;
 
@@ -661,6 +774,14 @@ sub getLearnCommandSpec {
 
 	return undef;
 }
+
+# ---------------------------------------------------------------------------
+
+=item I<formatLearnCommand($args)>
+
+Create a learn command string, specified by the supplied $args hashref.
+
+=cut
 
 sub formatLearnCommand {
 	my ($args) = @_;
@@ -675,6 +796,18 @@ sub formatLearnCommand {
 
 	return $cmd;
 }
+
+# ---------------------------------------------------------------------------
+
+=item I<parseResponse($string)>
+
+Parse the response string received from a device.
+
+Response strings start with '!' and end with '&'.
+
+Return a detailed hashref.
+
+=cut
 
 sub parseResponse {
 	my ($response) = @_;
@@ -960,9 +1093,14 @@ sub resp_password {
 }
 
 # ---------------------------------------------------------------------------
-# Parse device config hex string: Returned from k[bcmfe] and ib commands
-# Return a hashref.
-# ---------------------------------------------------------------------------
+
+=item I<parseDeviceConfig($string)>
+
+Parse device config hex string: Returned from k[bcmfe] and ib commands.
+
+Return a hashref.
+
+=cut
 
 sub parseDeviceConfig {
 	my ($string) = @_;
@@ -1162,6 +1300,19 @@ sub _testValue {
 	return undef;
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<testSettingValue($title, $value)>
+
+Test if the supplied value $value is valid for the specified title $title.
+
+If invalid, return undef.
+
+Otherwise return the mapped value (i.e. the value which would appear in a
+command or response string).
+
+=cut
+
 sub testSettingValue {
 	my ($title, $value) = @_;
 
@@ -1179,5 +1330,9 @@ sub testSettingValue {
 
 	return _testValue($hr->{args}->[0], $value);
 }
+
+=back
+
+=cut
 
 1;
