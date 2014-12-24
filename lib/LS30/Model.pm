@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 #   Copyright (C) 2010-2014, Nick Andrew <nick@nick-andrew.net>
 #   Licensed under the terms of the GNU General Public License, Version 3
 
@@ -8,9 +8,9 @@ LS30::Model - A representation of an LS30 alarm system
 
 =head1 SYNOPSIS
 
-#   my $model = LS30::Model->new();
-#   my $current_mode = $model->getSetting('Operation Mode');
-#   $model->setSetting('Operation Mode', 'Arm');
+  #   my $model = LS30::Model->new();
+  #   my $current_mode = $model->getSetting('Operation Mode')->recv;
+  #   $model->setSetting('Operation Mode', 'Arm');
 
 =head1 DESCRIPTION
 
@@ -148,7 +148,7 @@ sub getSetting {
 Return a condvar associated with setting
 a new value for $setting_name (which is defined in LS30Command).
 
-If an upstream is set, the value is always propagated to upstream.
+If an upstream is set, the value is always first propagated to upstream.
 
 Return (through the condvar) undef if there was some problem, 1 otherwise.
 
