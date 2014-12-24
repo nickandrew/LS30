@@ -64,13 +64,6 @@ my $simple_commands = [
 	['RF Jamming Warning',           'c0', 1,  'Enablement'],
 	['Switch 16 Control',            'c8', 1,  'Switch 16'],
 	['RS-232 Control',               'c9', 1,  'Reverse Enablement'],
-	['GSM Phone 1',                  'g0', 23, \&resp_telno],
-	['GSM Phone 2',                  'g1', 23, \&resp_telno],
-	['GSM ID',                       'g2', 23, \&resp_string],
-	['GSM PIN No',                   'g3', 23, \&resp_string],
-	['GSM Phone 3',                  'g4', 23, \&resp_telno],
-	['GSM Phone 4',                  'g5', 23, \&resp_telno],
-	['GSM Phone 5',                  'g6', 23, \&resp_telno],
 	['Exit Delay',                   'l0', 2,  \&resp_hex2],
 	['Entry Delay',                  'l1', 2,  \&resp_hex2],
 	['Remote Siren Time',            'l2', 2,  \&resp_interval2],
@@ -125,6 +118,58 @@ my $simple_commands = [
 	['CMS 2 Two-way Audio',          'c4', 1,  'Enablement'],
 	['CMS 2 DTMF Data Length',       'c6', 1,  'DTMF duration'],
 	['CMS 2 GSM No',                 'tq', 99, \&resp_telno],
+];
+
+my $gsm_commands = [
+	{
+		title      => 'GSM Phone 1',
+		can_clear  => 1,
+		is_setting => 1,
+		key        => 'g0',
+		args       => [{ 'length' => 23, func => \&resp_telno, key => 'value' }],
+	},
+	{
+		title      => 'GSM Phone 2',
+		can_clear  => 1,
+		is_setting => 1,
+		key        => 'g1',
+		args       => [{ 'length' => 23, func => \&resp_telno, key => 'value' }],
+	},
+	{
+		title      => 'GSM ID',
+		can_clear  => 1,
+		is_setting => 1,
+		key        => 'g2',
+		args       => [{ 'length' => 23, func => \&resp_string, key => 'value' }],
+	},
+	{
+		title      => 'GSM PIN No',
+		can_clear  => 1,
+		is_setting => 1,
+		key        => 'g3',
+		args       => [{ 'length' => 23, func => \&resp_string, key => 'value' }],
+	},
+	{
+		title      => 'GSM Phone 3',
+		can_clear  => 1,
+		is_setting => 1,
+		key        => 'g4',
+		args       => [{ 'length' => 23, func => \&resp_telno, key => 'value' }],
+	},
+	{
+		title      => 'GSM Phone 4',
+		can_clear  => 1,
+		is_setting => 1,
+		key        => 'g5',
+		args       => [{ 'length' => 23, func => \&resp_telno, key => 'value' }],
+	},
+	{
+		title      => 'GSM Phone 5',
+		can_clear  => 1,
+		is_setting => 1,
+		key        => 'g6',
+		args       => [{ 'length' => 23, func => \&resp_telno, key => 'value' }],
+	},
 ];
 
 my $spec_commands = [
@@ -470,15 +515,18 @@ sub addCommands {
 		addCommand($hr);
 	}
 
-	foreach my $hr (@$spec_commands) {
-
-		# These commands are specified via full hashref
+	# These commands are specified via full hashref
+	foreach my $hr (@$gsm_commands) {
 		addCommand($hr);
 	}
 
-	foreach my $hr (@$learn_commands) {
+	# These commands are specified via full hashref
+	foreach my $hr (@$spec_commands) {
+		addCommand($hr);
+	}
 
-		# These commands are specified via full hashref
+	# These commands are specified via full hashref
+	foreach my $hr (@$learn_commands) {
 		addCommand($hr);
 	}
 }
