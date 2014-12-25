@@ -76,22 +76,24 @@ sub _sendCommand {
 	if ($ENV{LS30_DEBUG}) {
 		LS30::Log::timePrint("Sent: $string");
 	}
-
-	$self->{condvar} = AnyEvent->condvar;
 }
 
 
 # ---------------------------------------------------------------------------
 
-=item queueCommand($string, $cb)
+=item I<queueCommand($string)>
 
-Queue the supplied command to be sent to the device, and arrange for $cb
-to be called when a response is received (or upon a timeout).
+Queue the supplied command to be sent to the device.
+
+Return a condvar which will receive the response string
+(or undef on timeout or error).
 
 =cut
 
 sub queueCommand {
 	my ($self, $string, $cb) = @_;
+
+	my $cv = AnyEvent->condvar;
 
 	# If there's presently no command outstanding, send the command immediately
 	if (!$self->{command_queue} || !@{$self->{command_queue}}) {
@@ -100,7 +102,9 @@ sub queueCommand {
 	}
 
 	# Queue up the command and associated callback
-	push(@{$self->{command_queue}}, [$string, $cb]);
+	push(@{$self->{command_queue}}, [$string, $cv]);
+
+	return $cv;
 }
 
 
@@ -118,18 +122,14 @@ Return undef if no response was received after a timeout.
 sub sendCommand {
 	my ($self, $string) = @_;
 
-	$self->_sendCommand($string);
+	my $cv = $self->queueCommand($string);
 
-	# Now wait for the response
-	my $rc = $self->{condvar}->recv;
+	my $response = $cv->recv();
 
-	if ($rc == -1) {
+	if (!defined $response) {
 		# Timeout
-		LS30::Log::timePrint("Timeout on sendCommand wait for response");
-		return undef;
+		LS30::Log::timePrint("Timeout or error on on sendCommand wait for response");
 	}
-
-	my $response = $self->getResponse();
 
 	return $response;
 }
@@ -176,25 +176,22 @@ Store any Response string received by the poll.
 sub handleResponse {
 	my ($self, $string) = @_;
 
-	$self->{last_response} = $string;
 
 	# Call callback if any, and send next command
 	if (@{$self->{command_queue}}) {
 		my $lr = shift(@{$self->{command_queue}});
-		my ($cmd, $cb) = @$lr;
+		my ($cmd, $cv) = @$lr;
 		# $cmd was the command which is being responded-to so it is not needed
-		$cb->($string);
+		$cv->send($string);
 	}
 
 	# If there's a pending command, send it now
 	if ($self->{command_queue}->[0]) {
 		my $cmd = $self->{command_queue}->[0]->[0];
 		$self->_sendCommand($cmd);
-		# Next call to this function will run the callback for this command.
+		# Next call to this function will send the condvar for this command.
 	}
 
-	# Signal that a response is ready.
-	$self->{condvar}->send(0);
 }
 
 
@@ -270,21 +267,6 @@ sub getCONTACTID {
 	my ($self) = @_;
 
 	return $self->{last_contactid};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item getResponse()
-
-Return any saved Response string.
-
-=cut
-
-sub getResponse {
-	my ($self) = @_;
-
-	return $self->{last_response};
 }
 
 1;
