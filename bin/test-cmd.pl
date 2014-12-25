@@ -3,6 +3,8 @@
 #   Licensed under the terms of the GNU General Public License, Version 3
 #
 #   Test command generation - output command string and hashref to STDOUT
+#   Usage:
+#      test-cmd.pl [-g|-s] 'Command Name' key=value ...
 
 use strict;
 use warnings;
@@ -12,16 +14,16 @@ use Getopt::Std qw(getopts);
 
 use LS30Command qw();
 
-use vars qw($opt_q $opt_s);
+use vars qw($opt_g $opt_s);
 
-getopts('qs');
+getopts('gs');
 
-if (!$opt_q && !$opt_s) {
-	die "Need to specify either option -q or -s";
+if (!$opt_g && !$opt_s) {
+	die "Need to specify either option -g or -s";
 }
 
-if ($opt_q && $opt_s) {
-	die "Cannot specify both options -q and -s";
+if ($opt_g && $opt_s) {
+	die "Cannot specify both options -g and -s";
 }
 
 my $title = shift @ARGV || die "Need to specify title";
@@ -40,13 +42,13 @@ foreach my $arg (@ARGV) {
 
 my $cmd;
 
-if ($opt_q) {
+if ($opt_g) {
 	$cmd = LS30Command::queryCommand($cmd_hr);
 } else {
 	$cmd = LS30Command::setCommand($cmd_hr);
 }
 
 print Data::Dumper::Dumper($cmd_hr);
-print "Cmd: $cmd\n";
+print "Cmd: $cmd\n" if (defined $cmd);
 
 exit(0);
