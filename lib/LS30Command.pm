@@ -739,7 +739,8 @@ sub setCommand {
 				my $value;
 
 				if (!defined $input) {
-					warn "Needed set command key $key is missing";
+					warn "Needed set command key <$key> is missing";
+					return undef;
 				} else {
 					$value = _testValue($hr2, $input);
 				}
