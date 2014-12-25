@@ -191,7 +191,126 @@ sub handleResponse {
 		$self->_sendCommand($cmd);
 		# Next call to this function will send the condvar for this command.
 	}
+}
 
+
+# ---------------------------------------------------------------------------
+
+=item I<getSetting($setting_name, $cached)>
+
+Return a condvar which will receive
+the current value of $setting_name (which is defined in LS30Command).
+
+The received value will be undef if there's an error or timeout.
+
+The $cached parameter is ignored.
+
+=cut
+
+sub getSetting {
+	my ($self, $setting_name, $cached) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $hr = LS30Command::getCommand($setting_name);
+	if (!defined $hr || !$hr->{is_setting}) {
+		warn "Is not a setting: <$setting_name>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	my $cmd = LS30Command::queryCommand({title => $setting_name});
+
+	my $cv2 = $self->queueCommand($cmd);
+	$cv2->cb(sub {
+		my $response = $cv2->recv();
+		my $resp_obj = LS30::ResponseMessage->new($response);
+		$cv->send($resp_obj->value);
+	});
+
+	return $cv;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<setSetting($setting_name, $value)>
+
+Return a condvar associated with setting
+a new value for $setting_name (which is defined in LS30Command).
+
+Return (through the condvar) undef if there was some problem, 1 otherwise.
+
+=cut
+
+sub setSetting {
+	my ($self, $setting_name, $value) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $hr = LS30Command::getCommand($setting_name);
+	if (!defined $hr || !$hr->{is_setting}) {
+		warn "Is not a setting: <$setting_name>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	# Test if the supplied value is valid (works for enumerated types)
+	my $raw_value = LS30Command::testSettingValue($setting_name, $value);
+	if (!defined $raw_value) {
+		warn "Value <$value> is not valid for setting <$setting_name>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	my $cmd = LS30Command::setCommand({title => $setting_name, value => $value});
+
+	my $cv2 = $self->queueCommand($cmd);
+	$cv2->cb(sub {
+		my $response = $cv2->recv();
+		my $resp_obj = LS30::ResponseMessage->new($response);
+		# TODO: Test the response for validity/error
+		$cv->send(1);
+	});
+
+	return $cv;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<clearSetting($setting_name)>
+
+Return a condvar associated with clearing
+the value for $setting_name (which is defined in LS30Command).
+
+Return (through the condvar) undef if there was some problem, 1 otherwise.
+
+=cut
+
+sub clearSetting {
+	my ($self, $setting_name) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $hr = LS30Command::getCommand($setting_name);
+	if (!defined $hr || !$hr->{is_setting}) {
+		warn "Is not a setting: <$setting_name>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	my $cmd = LS30Command::clearCommand({title => $setting_name});
+
+	my $cv2 = $self->queueCommand($cmd);
+	$cv2->cb(sub {
+		my $response = $cv2->recv();
+		my $resp_obj = LS30::ResponseMessage->new($response);
+		# TODO: Test the response for validity/error
+		$cv->send(1);
+	});
+
+	return $cv;
 }
 
 
