@@ -173,8 +173,6 @@ sub setSetting {
 		return $cv;
 	}
 
-	my $key = $hr->{key};
-
 	my $upstream = $self->upstream();
 
 	if ($upstream) {
@@ -194,5 +192,55 @@ sub setSetting {
 	$cv->send(1);
 	return $cv;
 }
+
+=item I<clearSetting($setting_name)>
+
+Return a condvar associated with clearing
+the value for $setting_name (which is defined in LS30Command).
+
+Presumably this means returning the setting to a default value.
+
+If an upstream is set, the request is always first propagated to upstream.
+
+Return (through the condvar) undef if there was some problem, 1 otherwise.
+
+=cut
+
+sub clearSetting {
+	my ($self, $setting_name) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $hr = LS30Command::getCommand($setting_name);
+	if (!defined $hr || !$hr->{is_setting}) {
+		warn "Is not a setting: <$setting_name>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	my $key = $hr->{key};
+
+	my $upstream = $self->upstream();
+
+	if ($upstream) {
+		my $cv2 = $upstream->clearSetting($setting_name);
+		$cv2->cb(sub {
+			my $rc = $cv2->recv;
+			if ($rc) {
+				$self->_setting($setting_name, undef);
+			}
+			$cv->send($rc);
+		});
+		return $cv;
+	}
+
+	$self->_setting($setting_name, undef);
+	$cv->send(1);
+	return $cv;
+}
+
+=back
+
+=cut
 
 1;
