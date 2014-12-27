@@ -24,8 +24,6 @@ use warnings;
 use Carp qw(confess);
 
 use LS30Command qw();
-use LS30::EventMessage qw();
-use LS30::ResponseMessage qw();
 
 # ---------------------------------------------------------------------------
 
