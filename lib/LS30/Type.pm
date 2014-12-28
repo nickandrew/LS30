@@ -34,6 +34,7 @@ my $type_table = {
 
 	# Appears in MINPIC messages
 	'Event Code' => {
+		'Remote Siren Test' => '0a01', # Just guessing here
 		'Away mode'    => '0a10',
 		'Check Status' => '0a13',
 		'Disarm mode'  => '0a14',
