@@ -39,6 +39,7 @@ my $type_table = {
 		'Disarm mode'  => '0a14',
 		'Home mode'    => '0a18',
 		'Test'         => '0a20',
+		'Power On'     => '0a2a', # Or could be sys.reset
 		'Low Battery'  => '0a30',
 		'Open'         => '0a40',
 		'Close'        => '0a48',
