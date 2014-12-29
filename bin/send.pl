@@ -3,6 +3,9 @@
 #   Licensed under the terms of the GNU General Public License, Version 3
 #
 #   Send raw commands and print raw responses.
+#   Options:
+#      -h  host:port      Specify host/port to connect
+#      -v                 Verbose (decode response)
 
 use strict;
 use warnings;
@@ -15,9 +18,9 @@ use LS30::ResponseMessage qw();
 use LS30Command qw();
 use LS30Connection qw();
 
-use vars qw($opt_h);
+use vars qw($opt_h $opt_v);
 
-getopts('h:');
+getopts('h:v');
 
 my $ls30c = LS30Connection->new($opt_h);
 
@@ -41,7 +44,7 @@ foreach my $lr (@responses) {
 	if ($response) {
 		printf("%-40s | %s\n", $cmd, $response);
 		my $resp = LS30::ResponseMessage->new($response);
-		print Dumper($resp) if ($resp);
+		print Dumper($resp) if ($resp && $opt_v);
 	}
 }
 
