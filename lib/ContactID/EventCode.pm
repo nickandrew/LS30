@@ -82,9 +82,12 @@ my $event_codes = {
 	'157' => 'Low bottled gas level',
 	'158' => 'High temp',
 	'159' => 'Low temp',
+
 	'161' => 'Loss of air flow',
 	'162' => 'Carbon Monoxide detected',
 	'163' => 'Tank level',
+	'168' => 'High Reading Alarm',
+	'169' => 'Low Reading Alarm',
 
 	'200' => 'Fire Supervisory',
 	'201' => 'Low water pressure',
