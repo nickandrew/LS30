@@ -23,13 +23,25 @@ my $type_table = {
 
 	# Appears in MINPIC messages
 	'Device Specific Type' => {
-		'Deleted Device' => '00',
-		'Remote Control' => '10',
-		'Keypad'         => '19',
-		'Smoke Detector' => '20',
-		'Door Switch'    => '40',
-		'PIR'            => '50',
-		'Siren'          => '70',
+		'Deleted Device'       => '00',
+		'Humidity Sensor'      => '01',
+		'Temperature Sensor'   => '02',
+		'Flood Detector'       => '05',
+		'Medical Button'       => '08',
+		'Light Sensor'         => '0a',
+		'Analog Sensor'        => '0e',
+		'Remote Control'       => '10',
+		'Keypad'               => '19',
+		'Smoke Detector'       => '20',
+		'CO Detector'          => '25',
+		'Door Switch'          => '40',
+		'Vibration Sensor'     => '42',
+		'PIR'                  => '50',
+		'Glass Break Detector' => '60',
+		'Siren'                => '70',
+		'Base Unit'            => '80',
+		'RF Switch'            => 'a0',
+		'RF Siren'             => 'c0',
 	},
 
 	# Appears in MINPIC messages
