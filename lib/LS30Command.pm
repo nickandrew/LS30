@@ -239,9 +239,13 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Burglar Sensor Status',
-		key      => 'kb',
-		response => [
+		title      => 'Burglar Sensor Status',
+		key        => 'kb',
+		query_args => [
+			# devices array index starts at 00
+			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
+		],
+		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
 			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
@@ -254,9 +258,13 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Controller Status',
-		key      => 'kc',
-		response => [
+		title      => 'Controller Status',
+		key        => 'kc',
+		query_args => [
+			# devices array index starts at 00
+			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
+		],
+		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
 			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
@@ -269,9 +277,13 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Fire Status',
-		key      => 'kf',
-		response => [
+		title      => 'Fire Status',
+		key        => 'kf',
+		query_args => [
+			# devices array index starts at 00
+			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
+		],
+		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
 			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
@@ -284,9 +296,13 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Medical Sensor Status',
-		key      => 'km',
-		response => [
+		title      => 'Medical Sensor Status',
+		key        => 'km',
+		query_args => [
+			# devices array index starts at 00
+			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
+		],
+		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
 			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
@@ -299,9 +315,13 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Special Sensor Status',
-		key      => 'ke',
-		response => [
+		title      => 'Special Sensor Status',
+		key        => 'ke',
+		query_args => [
+			# devices array index starts at 00
+			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
+		],
+		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
 			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
