@@ -277,7 +277,7 @@ my $spec_commands = [
 	},
 
 	{
-		title      => 'Fire Status',
+		title      => 'Fire Sensor Status',
 		key        => 'kf',
 		query_args => [
 			# devices array index starts at 00
@@ -296,7 +296,7 @@ my $spec_commands = [
 	},
 
 	{
-		title      => 'Medical Sensor Status',
+		title      => 'Medical Button Status',
 		key        => 'km',
 		query_args => [
 			# devices array index starts at 00
