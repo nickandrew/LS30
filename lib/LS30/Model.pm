@@ -27,6 +27,9 @@ package LS30::Model;
 use strict;
 use warnings;
 
+use LS30::Device qw();
+use LS30::ResponseMessage qw();
+
 =item I<new()>
 
 Return a new instance of this class.
@@ -238,6 +241,69 @@ sub clearSetting {
 	$cv->send(1);
 	return $cv;
 }
+
+# ---------------------------------------------------------------------------
+# _initDevices: Initialise all devices by querying upstream
+# Returns a condvar which will 'send' when all is complete.
+# ---------------------------------------------------------------------------
+
+sub _initDevices {
+	my ($self) = @_;
+
+	my $upstream = $self->upstream;
+	return 0 if (!$upstream);
+
+	my $cv = AnyEvent->condvar;
+
+	$cv->begin;
+
+	# Get list of device types ('Burglar Sensor' etc)
+	my @device_types = LS30::Type::listStrings('Device Code');
+
+	foreach my $device_type (@device_types) {
+		# Get count of number of this type of device
+		my $query = {title => 'Device Count', device_type => $device_type};
+		my $cmd = LS30Command::queryCommand($query);
+		if (!$cmd) {
+			warn "Unable to query device count for type <$device_type>\n";
+			next;
+		}
+
+		$cv->begin;
+
+		my $cv2 = $upstream->queueCommand($cmd);
+		$cv2->cb(sub {
+			my $response = $cv2->recv();
+			my $resp_obj = LS30::ResponseMessage->new($response);
+			my $count = $resp_obj->value;
+
+			if ($count > 0) {
+				foreach my $device_number (0 .. $count - 1) {
+					my $cmd = LS30Command::getDeviceStatus($device_type, $device_number);
+
+					$cv->begin;
+					my $cv3 = $upstream->queueCommand($cmd);
+					$cv3->cb(sub {
+						my $resp2 = $cv3->recv();
+						my $resp2_obj = LS30::ResponseMessage->new($resp2);
+						my $device = LS30::Device->newFromResponse($resp2_obj);
+						my $device_id = $device->device_id;
+						$self->{devices}->{$device_type}->{$device_id} = $device;
+						$cv->end;
+					});
+				}
+			}
+
+			$cv->end;
+		});
+	}
+
+	$cv->end;
+
+	# Success
+	return $cv;
+}
+
 
 =back
 
