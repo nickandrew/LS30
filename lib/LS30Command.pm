@@ -480,6 +480,16 @@ my $single_char_responses = {
 	},
 };
 
+# Map device type to the title of a command (specified above) to retrieve
+# the current device status.
+my $get_device_status_commands = {
+	'Burglar Sensor' => 'Burglar Sensor Status',
+	'Controller'     => 'Controller Status',
+	'Fire Sensor'    => 'Fire Sensor Status',
+	'Medical Button' => 'Medical Button Status',
+	'Special Sensor' => 'Special Sensor Status',
+};
+
 # ---------------------------------------------------------------------------
 
 =item I<addCommand($hr)>
@@ -1398,6 +1408,27 @@ sub testSettingValue {
 	}
 
 	return _testValue($hr->{args}->[0], $value);
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeviceStatusCommand($device_type, $index)>
+
+Return a command string to retrieve the device status for a specified
+type of device.
+
+Example: getDeviceStatus('Burglar Sensor', 0);
+
+=cut
+
+sub getDeviceStatus {
+	my ($device_type, $index) = @_;
+
+	my $title = $get_device_status_commands->{$device_type} or die "Invalid device type <$device_type";
+	my $query = {title => $title, index => $index};
+	my $cmd = queryCommand($query) or die "Invalid query command <$title>";
+
+	return $cmd;
 }
 
 =back
