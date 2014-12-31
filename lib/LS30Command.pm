@@ -253,7 +253,8 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
-			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
 		],
 	},
 
@@ -272,7 +273,8 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
-			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
 		],
 	},
 
@@ -291,7 +293,8 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
-			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
 		],
 	},
 
@@ -310,7 +313,8 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
-			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
 		],
 	},
 
@@ -329,7 +333,8 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
-			{ 'length' => 4, func => \&resp_string,          key => 'rest' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
 		],
 	},
 
