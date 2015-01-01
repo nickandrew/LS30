@@ -103,21 +103,29 @@ sub _simple {
 	my ($self, $type) = @_;
 
 	my $json = {};
+	my $cv = AnyEvent->condvar;
+	$cv->begin();
+	my $model = $self->model();
 
 	foreach my $hr (@{$simple_queries->{$type}}) {
-		my $cmd = LS30Command::queryCommand($hr);
-		if (!$cmd) {
-			return $self->render(status => 500, text => "No such command $hr->{title}\n");
-		}
-		my $resp_obj = $self->sendCommand($cmd);
-
-		if ($resp_obj) {
-			my $v = $resp_obj->value;
-			$json->{$hr->{title}} = $v;
-		}
+		$cv->begin();
+		my $cv2 = $model->getSetting($hr->{title}, 1);
+		$cv2->cb(sub {
+			my $value = $cv2->recv();
+			$json->{$hr->{title}} = $value;
+			$cv->end();
+		});
 	}
 
-	$self->render(json => $json);
+	$self->render_later();
+
+	# Will call render when all values have been retrieved
+	$cv->cb(sub {
+		$cv->recv;
+		$self->render(json => $json);
+	});
+
+	$cv->end();
 }
 
 sub add_routes {
