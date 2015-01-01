@@ -243,8 +243,9 @@ sub watchdogEvent {
 
 =item handleRead()
 
-Read data from the socket. Postprocess it, and call our handler's
-serverRead() function with the result.
+Read data from the socket and postprocess it.
+
+The call chain is: handleRead -> addBuffer -> processLine -> serverRead
 
 =cut
 
