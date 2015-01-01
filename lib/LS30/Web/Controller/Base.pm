@@ -10,12 +10,14 @@ use LS30Command qw();
 use LS30Connection qw();
 use LS30::Commander qw();
 use LS30::Message qw();
+use LS30::Model qw();
 use LS30::Type qw();
 use YAML qw();
 
 my $config;
 my $ls30c;
 my $ls30cmdr;
+my $ls30model;
 
 # Bad to put it here
 LS30Command::addCommands();
@@ -48,6 +50,17 @@ sub connection {
 	}
 
 	return $ls30cmdr;
+}
+
+sub model {
+	my ($self) = @_;
+
+	if (!$ls30model) {
+		$ls30model = LS30::Model->new();
+		$ls30model->upstream($self->connection());
+	}
+
+	return $ls30model;
 }
 
 sub sendCommand {
