@@ -258,7 +258,7 @@ sub _initDevices {
 	$cv->begin;
 
 	# Get list of device types ('Burglar Sensor' etc)
-	my @device_types = LS30::Type::listStrings('Device Code');
+	my @device_types = LS30::Type::listStrings('Device Type');
 
 	foreach my $device_type (@device_types) {
 		# Get count of number of this type of device
