@@ -196,6 +196,81 @@ sub handleResponse {
 
 # ---------------------------------------------------------------------------
 
+=item handleAT($string)
+
+Store any AT string received by the poll.
+
+=cut
+
+sub handleAT {
+	my ($self, $string) = @_;
+
+	$self->{last_at} = $string;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item handleGSM($string)
+
+Store any GSM string received by the poll.
+
+=cut
+
+sub handleGSM {
+	my ($self, $string) = @_;
+
+	$self->{last_gsm} = $string;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item handleDisconnect($string)
+
+This function is called if our client socket is disconnected.
+
+=cut
+
+sub handleDisconnect {
+	my ($self) = @_;
+
+	# Nothing to do?
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item getMINPIC()
+
+Return any saved MINPIC string.
+
+=cut
+
+sub getMINPIC {
+	my ($self) = @_;
+
+	return $self->{last_minpic};
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item getCONTACTID()
+
+Return any saved CONTACTID string.
+
+=cut
+
+sub getCONTACTID {
+	my ($self) = @_;
+
+	return $self->{last_contactid};
+}
+
+
+# ---------------------------------------------------------------------------
+
 =item I<getSetting($setting_name, $cached)>
 
 Return a condvar which will receive
@@ -307,85 +382,12 @@ sub clearSetting {
 		my $response = $cv2->recv();
 		my $resp_obj = LS30::ResponseMessage->new($response);
 		# TODO: Test the response for validity/error
+		use Data::Dumper qw(Dumper);
+		print STDERR "Response: ", Dumper($resp_obj);
 		$cv->send(1);
 	});
 
 	return $cv;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item handleAT($string)
-
-Store any AT string received by the poll.
-
-=cut
-
-sub handleAT {
-	my ($self, $string) = @_;
-
-	$self->{last_at} = $string;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item handleGSM($string)
-
-Store any GSM string received by the poll.
-
-=cut
-
-sub handleGSM {
-	my ($self, $string) = @_;
-
-	$self->{last_gsm} = $string;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item handleDisconnect($string)
-
-This function is called if our client socket is disconnected.
-
-=cut
-
-sub handleDisconnect {
-	my ($self) = @_;
-
-	# Nothing to do?
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item getMINPIC()
-
-Return any saved MINPIC string.
-
-=cut
-
-sub getMINPIC {
-	my ($self) = @_;
-
-	return $self->{last_minpic};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item getCONTACTID()
-
-Return any saved CONTACTID string.
-
-=cut
-
-sub getCONTACTID {
-	my ($self) = @_;
-
-	return $self->{last_contactid};
 }
 
 1;
