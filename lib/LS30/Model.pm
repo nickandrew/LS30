@@ -242,6 +242,71 @@ sub clearSetting {
 	return $cv;
 }
 
+
+# ---------------------------------------------------------------------------
+# Return true if argument is a valid device type ('Burglar Sensor' etc)
+# ---------------------------------------------------------------------------
+
+sub _testDeviceType {
+	my ($device_type) = @_;
+
+	if (!LS30::Type::getCode('Device Type', $device_type)) {
+		return 0;
+	}
+
+	return 1;
+}
+
+=item I<getDeviceCount($device_type, $cached)>
+
+Return a condvar which will return the count of how many devices
+of the specified type are registered.
+
+If $cached == 1, a cached count may be returned.
+
+=cut
+
+sub getDeviceCount {
+	my ($self, $device_type, $cached) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	if (!_testDeviceType($device_type)) {
+		print STDERR "Invalid device type <$device_type>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	my $value = $self->{device_count}->{$device_type};
+
+	if ($cached && defined $value) {
+		$cv->send($value);
+		return $cv;
+	}
+
+	my $upstream = $self->upstream();
+
+	if ($upstream) {
+		my $cv2 = $upstream->getDeviceCount($device_type, $cached);
+		$cv2->cb(sub {
+			my $value = $cv2->recv;
+			$self->{device_count}->{$device_type} = $value;
+			$cv->send($value);
+		});
+		return $cv;
+	}
+
+	if (defined $value) {
+		$cv->send($value);
+		return $cv;
+	}
+
+	# TODO Return a default value.
+	$cv->send(0);
+	return $cv;
+}
+
+
 # ---------------------------------------------------------------------------
 # _initDevices: Initialise all devices by querying upstream
 # Returns a condvar which will 'send' when all is complete.
