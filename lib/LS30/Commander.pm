@@ -22,7 +22,9 @@ package LS30::Commander;
 use strict;
 use warnings;
 
+use LS30::Device qw();
 use LS30::Log qw();
+use LS30::ResponseMessage qw();
 
 # ---------------------------------------------------------------------------
 
@@ -390,6 +392,68 @@ sub clearSetting {
 	return $cv;
 }
 
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeviceCount($device_type, $cached)>
+
+Return a condvar which will return the count of how many devices of the
+specified type are registered.
+
+=cut
+
+sub getDeviceCount {
+	my ($self, $device_type, $cached) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $query = {title => 'Device Count', device_type => $device_type};
+	my $cmd = LS30Command::queryCommand($query);
+	if (!$cmd) {
+		# Possibly the device_type is invalid.
+		warn "Unable to query device count for type <$device_type>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	my $cv2 = $self->queueCommand($cmd);
+	$cv2->cb(sub {
+		my $response = $cv2->recv();
+		my $resp_obj = LS30::ResponseMessage->new($response);
+		$cv->send($resp_obj->value());
+	});
+
+	return $cv;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeviceStatus($device_type, $device_number)>
+
+Get the status of the specified device (specified by device_type and device_number)
+
+Return (through a condvar) an instance of LS30::Device
+
+=cut
+
+sub getDeviceStatus {
+	my ($self, $device_type, $device_number) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $cmd = LS30Command::getDeviceStatus($device_type, $device_number);
+
+	my $cv2 = $self->queueCommand($cmd);
+	$cv2->cb(sub {
+		my $resp2 = $cv2->recv();
+		my $resp2_obj = LS30::ResponseMessage->new($resp2);
+		my $device = LS30::Device->newFromResponse($resp2_obj);
+		$cv->send($device);
+	});
+
+	return $cv;
+}
 
 =back
 
