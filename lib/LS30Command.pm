@@ -704,9 +704,12 @@ sub queryCommand {
 					$value = LS30::Type::getCode($type, $input);
 				}
 
-				if (defined $value) {
-					$cmd .= $value;
+				if (!defined $value) {
+					warn "Illegal value <$input> for <$key>\n";
+					return undef;
 				}
+
+				$cmd .= $value;
 			}
 		}
 	}
