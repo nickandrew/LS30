@@ -26,7 +26,7 @@ use LS30::Log qw();
 
 # ---------------------------------------------------------------------------
 
-=item new($ls30c, $timeout)
+=item I<new($ls30c, $timeout)>
 
 Return a new LS30::Commander using the specified connection, which
 is of class LS30Connection.
@@ -91,7 +91,7 @@ Return a condvar which will receive the response string
 =cut
 
 sub queueCommand {
-	my ($self, $string, $cb) = @_;
+	my ($self, $string) = @_;
 
 	my $cv = AnyEvent->condvar;
 
@@ -110,7 +110,7 @@ sub queueCommand {
 
 # ---------------------------------------------------------------------------
 
-=item sendCommand($string)
+=item I<sendCommand($string)>
 
 Send a command to the LS30 and wait up to $self->{timeout} seconds for a
 response.  Return the first response received within this time.
@@ -137,7 +137,7 @@ sub sendCommand {
 
 # ---------------------------------------------------------------------------
 
-=item handleMINPIC($string)
+=item I<handleMINPIC($string)>
 
 Store any MINPIC string received by the poll.
 
@@ -152,7 +152,7 @@ sub handleMINPIC {
 
 # ---------------------------------------------------------------------------
 
-=item handleCONTACTID($string)
+=item I<handleCONTACTID($string)>
 
 Store any CONTACTID string received by the poll.
 
@@ -167,9 +167,9 @@ sub handleCONTACTID {
 
 # ---------------------------------------------------------------------------
 
-=item handleResponse($string)
+=item I<handleResponse($string)>
 
-Store any Response string received by the poll.
+Any response received is sent to the requestor via condvar.
 
 =cut
 
@@ -196,7 +196,7 @@ sub handleResponse {
 
 # ---------------------------------------------------------------------------
 
-=item handleAT($string)
+=item I<handleAT($string)>
 
 Store any AT string received by the poll.
 
@@ -211,7 +211,7 @@ sub handleAT {
 
 # ---------------------------------------------------------------------------
 
-=item handleGSM($string)
+=item I<handleGSM($string)>
 
 Store any GSM string received by the poll.
 
@@ -226,7 +226,7 @@ sub handleGSM {
 
 # ---------------------------------------------------------------------------
 
-=item handleDisconnect($string)
+=item I<handleDisconnect($string)>
 
 This function is called if our client socket is disconnected.
 
@@ -241,7 +241,7 @@ sub handleDisconnect {
 
 # ---------------------------------------------------------------------------
 
-=item getMINPIC()
+=item I<getMINPIC()>
 
 Return any saved MINPIC string.
 
@@ -256,7 +256,7 @@ sub getMINPIC {
 
 # ---------------------------------------------------------------------------
 
-=item getCONTACTID()
+=item I<getCONTACTID()>
 
 Return any saved CONTACTID string.
 
@@ -389,5 +389,10 @@ sub clearSetting {
 
 	return $cv;
 }
+
+
+=back
+
+=cut
 
 1;
