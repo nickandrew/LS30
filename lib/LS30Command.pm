@@ -828,6 +828,10 @@ sub clearCommand {
 		return undef;
 	}
 
+	if (!$cmd_spec->{can_clear}) {
+		die "clearCommand: <$title> is not clearable";
+	}
+
 	my $cmd = '!';
 
 	$cmd .= $cmd_spec->{key};
