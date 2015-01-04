@@ -42,6 +42,7 @@ sub new {
 	my $self = {
 		settings => {},
 		devices => {},
+		device_count => {},
 	};
 
 	bless $self, $class;
@@ -290,7 +291,7 @@ sub getDeviceCount {
 		my $cv2 = $upstream->getDeviceCount($device_type, $cached);
 		$cv2->cb(sub {
 			my $value = $cv2->recv;
-			$self->{device_count}->{$device_type} = $value;
+			$self->{device_count}->{$device_type} = $value if (defined $value);
 			$cv->send($value);
 		});
 		return $cv;
