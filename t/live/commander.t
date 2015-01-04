@@ -41,42 +41,45 @@ ok($value =~ /^!n0[012]&$/, "queueCommand response \"$value\"");
 my $value2 = $ls30cmdr->sendCommand($cmd);
 ok($value2 =~ /^!n0[012]&$/, "sendCommand response \"$value\"");
 
-# ---------------------------------------------------------------------------
-# Test setSetting
-# ---------------------------------------------------------------------------
-
-my $rc;
-
-$cv = $ls30cmdr->setSetting('Operation Mode', 'Disarm');
-isa_ok($cv, 'AnyEvent::CondVar');
-$rc = $cv->recv;
-ok($rc == 1, "setSetting Operation Mode to Disarm");
-
-# ---------------------------------------------------------------------------
-# Test getSetting
-# ---------------------------------------------------------------------------
-
-# Test first synchronous style
-$cv = $ls30cmdr->getSetting('Operation Mode');
-$value = $cv->recv;
-ok($value eq 'Disarm', "getSetting Operation Mode");
-
-# Then asynchronous
-my $cv2 = $ls30cmdr->getSetting('Operation Mode');
-$cv2->cb(sub {
-	my $value = $cv2->recv;
-	ok($value eq 'Disarm', "getSetting Operation Mode asynchronous");
-});
-
-$cv = $ls30cmdr->getSetting('Something invalid');
-$value = $cv->recv;
-ok(!defined $value, "getSetting invalid setting name");
-
+test_settings();
 test_clearsetting();
 
 test_devices();
 
 exit(0);
+
+# ---------------------------------------------------------------------------
+# Test settings
+# ---------------------------------------------------------------------------
+
+sub test_settings {
+	my ($cv, $rc, $value);
+
+	$cv = $ls30cmdr->setSetting('Operation Mode', 'Disarm');
+	isa_ok($cv, 'AnyEvent::CondVar');
+	$rc = $cv->recv;
+	ok($rc == 1, "setSetting Operation Mode to Disarm");
+
+	# ---------------------------------------------------------------------------
+	# Test getSetting
+	# ---------------------------------------------------------------------------
+
+	# Test first synchronous style
+	$cv = $ls30cmdr->getSetting('Operation Mode');
+	$value = $cv->recv;
+	ok($value eq 'Disarm', "getSetting Operation Mode");
+
+	# Then asynchronous
+	my $cv2 = $ls30cmdr->getSetting('Operation Mode');
+	$cv2->cb(sub {
+		my $value = $cv2->recv;
+		ok($value eq 'Disarm', "getSetting Operation Mode asynchronous");
+	});
+
+	$cv = $ls30cmdr->getSetting('Something invalid');
+	$value = $cv->recv;
+	ok(!defined $value, "getSetting invalid setting name");
+}
 
 # ---------------------------------------------------------------------------
 # Test clearSetting
@@ -133,9 +136,15 @@ sub test_devices {
 	ok(!defined $value2, "Device Count for an invalid type returns undef");
 
 	if ($value > 0) {
-		# Retrieve one
-		my $cv = $ls30cmdr->getDeviceStatus('Burglar Sensor', 0);
-		my $obj = $cv->recv();
-		isa_ok($obj, 'LS30::Device', "Returned object is a $obj");
+		# Retrieve all of them
+		foreach my $i (0 .. $value - 1) {
+			my $cv = $ls30cmdr->getDeviceStatus('Burglar Sensor', $i);
+			my $obj = $cv->recv();
+			my $device_id = '';
+			eval {
+				$device_id = $obj->device_id();
+			};
+			isa_ok($obj, 'LS30::Device', "Returned object index $i $device_id is a $obj");
+		}
 	}
 }
