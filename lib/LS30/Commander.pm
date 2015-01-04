@@ -433,7 +433,7 @@ sub getDeviceCount {
 
 Get the status of the specified device (specified by device_type and device_number)
 
-Return (through a condvar) an instance of LS30::Device
+Return (through a condvar) an instance of LS30::Device, or undef if error.
 
 =cut
 
