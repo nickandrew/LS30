@@ -16,35 +16,61 @@ LS30Command::addCommands();
 my $model = LS30::Model->new();
 isa_ok($model, 'LS30::Model');
 
-can_ok($model, qw(upstream getSetting setSetting));
+can_ok($model, qw(upstream getSetting setSetting clearSetting getDeviceCount));
 
-my ($cv, $rc, $value);
+test_settings();
+test_getdevicecount();
 
-$cv = $model->setSetting('Operation Mode', 'Disarm');
-isa_ok($cv, 'AnyEvent::CondVar');
-$rc = $cv->recv;
-ok($rc == 1, "setSetting valid value");
+exit(0);
 
-$cv = $model->setSetting('Operation Mode', 'Invalid');
-$rc = $cv->recv;
-ok(!defined $rc, "setSetting invalid value");
+# ---------------------------------------------------------------------------
+# Test getSetting and setSetting
+# ---------------------------------------------------------------------------
 
-$cv = $model->setSetting('Invalid Setting Name', 'Invalid');
-$rc = $cv->recv;
-ok(!defined $rc, "setSetting invalid setting name");
+sub test_settings {
+	my ($cv, $rc, $value);
 
-# Test first synchronous style
-$cv = $model->getSetting('Operation Mode');
-$value = $cv->recv;
-ok($value eq 'Disarm', "getSetting Operation Mode");
+	$cv = $model->setSetting('Operation Mode', 'Disarm');
+	isa_ok($cv, 'AnyEvent::CondVar');
+	$rc = $cv->recv;
+	ok($rc == 1, "setSetting valid value");
 
-# Then asynchronous
-$cv = $model->getSetting('Operation Mode');
-$cv->cb(sub {
+	$cv = $model->setSetting('Operation Mode', 'Invalid');
+	$rc = $cv->recv;
+	ok(!defined $rc, "setSetting invalid value");
+
+	$cv = $model->setSetting('Invalid Setting Name', 'Invalid');
+	$rc = $cv->recv;
+	ok(!defined $rc, "setSetting invalid setting name");
+
+	# Test first synchronous style
+	$cv = $model->getSetting('Operation Mode');
 	$value = $cv->recv;
-	ok($value eq 'Disarm', "getSetting Operation Mode asynchronous");
-});
+	ok($value eq 'Disarm', "getSetting Operation Mode");
 
-$cv = $model->getSetting('Something invalid');
-$value = $cv->recv;
-ok(!defined $value, "getSetting invalid setting name");
+	# Then asynchronous
+	$cv = $model->getSetting('Operation Mode');
+	$cv->cb(sub {
+		$value = $cv->recv;
+		ok($value eq 'Disarm', "getSetting Operation Mode asynchronous");
+	});
+
+	$cv = $model->getSetting('Something invalid');
+	$value = $cv->recv;
+	ok(!defined $value, "getSetting invalid setting name");
+}
+
+# ---------------------------------------------------------------------------
+# Test getDeviceCount
+# ---------------------------------------------------------------------------
+
+sub test_getdevicecount {
+
+	my $cv = $model->getDeviceCount('Burglar Sensor', 1);
+	my $value = $cv->recv();
+	ok($value == 0, "Returned device count is $value");
+
+	my $cv = $model->getDeviceCount('Invalid', 1);
+	my $value = $cv->recv();
+	ok(!defined $value, "Returned device count for invalid device is undef");
+}
