@@ -309,6 +309,82 @@ sub getDeviceCount {
 
 
 # ---------------------------------------------------------------------------
+
+=item I<getDeviceStatus($device_type, $device_number, $cached)>
+
+Get the status of the specified device (specified by device_type and device_number)
+
+Return (through a condvar) an instance of LS30::Device, or undef if error.
+
+If $cached == 1, a cached device object may be returned.
+
+=cut
+
+sub getDeviceStatus {
+	my ($self, $device_type, $device_number, $cached) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	if (!_testDeviceType($device_type)) {
+		print STDERR "Invalid device type <$device_type>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	if ($device_number < 0) {
+		print STDERR "Invalid device number <$device_number>\n";
+		$cv->send(undef);
+		return $cv;
+	}
+
+	# Grab a count of how many devices of this type
+	# Force cache this call for devices 1-n to avoid repeating it
+	my $howmany_cv = $self->getDeviceCount($device_type, $cached || ($device_number != 0));
+	$howmany_cv->cb(sub {
+		my $howmany = $howmany_cv->recv();
+
+		if ($device_number >= $howmany) {
+			# Asked for a device beyond the end of the array
+			warn "Device number beyond end of array.\n";
+			$cv->send(undef);
+			return;
+		}
+
+		my $obj = $self->{devices}->{$device_type}->[$device_number];
+
+		if ($cached && defined $obj) {
+			# Return cached object
+			$cv->send($obj);
+			return;
+		}
+
+		my $upstream = $self->upstream();
+
+		if ($upstream) {
+			my $cv2 = $upstream->getDeviceStatus($device_type, $device_number, $cached);
+			$cv2->cb(sub {
+				my $value = $cv2->recv;
+				$self->{devices}->{$device_type}->[$device_number] = $value if (defined $value);
+				$cv->send($value);
+			});
+			return;
+		}
+
+		if (defined $obj) {
+			$cv->send($obj);
+			return;
+		}
+
+		# There is no object
+		$cv->send(undef);
+	});
+
+	return $cv;
+}
+
+
+
+# ---------------------------------------------------------------------------
 # _initDevices: Initialise all devices by querying upstream
 # Returns a condvar which will 'send' when all is complete.
 # ---------------------------------------------------------------------------
