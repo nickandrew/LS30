@@ -98,7 +98,7 @@ sub queueCommand {
 	my $cv = AnyEvent->condvar;
 
 	# If there's presently no command outstanding, send the command immediately
-	if (!$self->{command_queue} || !@{$self->{command_queue}}) {
+	if (!$self->{always_queue_command} && (!$self->{command_queue} || !@{$self->{command_queue}})) {
 		$self->{command_queue} = [];
 		$self->_sendCommand($string);
 	}
@@ -184,7 +184,14 @@ sub handleResponse {
 		my $lr = shift(@{$self->{command_queue}});
 		my ($cmd, $cv) = @$lr;
 		# $cmd was the command which is being responded-to so it is not needed
+
+		# Put a guard around send(), in case there is no queued command *and*
+		# the code run by send() adds one. Without the guard, the command will
+		# be both sent and queued (and sent again just below). With the guard,
+		# the command will be queued and sent only once, below.
+		$self->{always_queue_command} = 1;
 		$cv->send($string);
+		$self->{always_queue_command} = 0;
 	}
 
 	# If there's a pending command, send it now
