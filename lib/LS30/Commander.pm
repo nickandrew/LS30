@@ -165,8 +165,6 @@ Store any MINPIC string received by the poll.
 sub handleMINPIC {
 	my ($self, $string) = @_;
 
-	$self->{last_minpic} = $string;
-
 	if ($self->{on_minpic}) {
 		$self->{on_minpic}->($string);
 	}
@@ -287,21 +285,6 @@ sub handleDisconnect {
 	my ($self) = @_;
 
 	# Nothing to do?
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<getMINPIC()>
-
-Return any saved MINPIC string.
-
-=cut
-
-sub getMINPIC {
-	my ($self) = @_;
-
-	return $self->{last_minpic};
 }
 
 
