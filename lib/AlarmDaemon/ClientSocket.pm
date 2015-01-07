@@ -140,7 +140,7 @@ sub handleRead {
 		return;
 	}
 
-	$handler->clientRead($buffer);
+	$handler->clientRead($buffer, $self);
 }
 
 1;
