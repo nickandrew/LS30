@@ -139,6 +139,23 @@ sub sendCommand {
 
 # ---------------------------------------------------------------------------
 
+=item I<onMINPIC($cb)>
+
+Callback $cb on every MINPIC received.
+
+=cut
+
+sub onMINPIC {
+	my ($self, $cb) = @_;
+
+	$self->{on_minpic} = $cb;
+
+	return $self;
+}
+
+
+# ---------------------------------------------------------------------------
+
 =item I<handleMINPIC($string)>
 
 Store any MINPIC string received by the poll.
@@ -149,6 +166,27 @@ sub handleMINPIC {
 	my ($self, $string) = @_;
 
 	$self->{last_minpic} = $string;
+
+	if ($self->{on_minpic}) {
+		$self->{on_minpic}->($string);
+	}
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<onCONTACTID($cb)>
+
+Callback $cb on every CONTACTID received.
+
+=cut
+
+sub onCONTACTID {
+	my ($self, $cb) = @_;
+
+	$self->{on_contactid} = $cb;
+
+	return $self;
 }
 
 
@@ -164,6 +202,10 @@ sub handleCONTACTID {
 	my ($self, $string) = @_;
 
 	$self->{last_contactid} = $string;
+
+	if ($self->{on_contactid}) {
+		$self->{on_contactid}->($string);
+	}
 }
 
 
