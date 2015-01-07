@@ -26,6 +26,8 @@ use warnings;
 use AlarmDaemon::ClientSocket qw();
 use AlarmDaemon::ListenSocket qw();
 use AlarmDaemon::ServerSocket qw();
+use LS30Connection qw();
+use LS30::Commander qw();
 use LS30::Log qw();
 use AnyEvent;
 
@@ -62,14 +64,28 @@ sub addListener {
 sub addServer {
 	my ($self, $peer_addr) = @_;
 
-	my $object = AlarmDaemon::ServerSocket->new($peer_addr);
+	my $object = LS30Connection->new($peer_addr);
 	if (!$object) {
-		warn "Unable to instantiate an AlarmDaemon::ServerSocket to $peer_addr\n";
+		warn "Unable to instantiate an LS30Connection to $peer_addr\n";
 		return;
 	}
 
-	$object->setHandler($self);
-	$self->{server} = $object;
+	my $ls30cmdr = LS30::Commander->new($object, 5);
+	if (!$ls30cmdr) {
+		die "Unable to instantiate a new LS30::Commander to $peer_addr";
+	}
+
+	$self->{server} = $ls30cmdr;
+
+	$ls30cmdr->onMINPIC(sub {
+		my ($line) = @_;
+		$self->_sendAllClients($line);
+	});
+
+	$ls30cmdr->onCONTACTID(sub {
+		my ($line) = @_;
+		$self->_sendAllClients($line);
+	});
 }
 
 sub addClient {
@@ -104,6 +120,15 @@ sub eventLoop {
 	$self->{condvar}->recv();
 }
 
+sub _sendAllClients {
+	my ($self, $data) = @_;
+
+	foreach my $object (values %{ $self->{client_sockets} }) {
+		$object->send($data . "\r\n");
+	}
+
+}
+
 sub serverRead {
 	my ($self, $buffer) = @_;
 
@@ -130,11 +155,29 @@ sub serverRead {
 }
 
 sub clientRead {
-	my ($self, $buffer) = @_;
+	my ($self, $data, $client) = @_;
 
-	LS30::Log::timePrint("Received: $buffer");
+	LS30::Log::timePrint("Received: $data");
 
-	$self->{server}->send($buffer);
+	# Which client sent this?
+	my $socket = $client->socket();
+	my $buffer = $self->{client}->{$socket}->{buffer};
+	$buffer .= $data;
+
+	while ($buffer =~ /^([^\r\n]*\r?\n)(.*)/) {
+		my ($line, $rest) = ($1, $2);
+
+		my $cv = $self->{server}->queueCommand($line);
+		$cv->cb(sub {
+			my $resp = $cv->recv();
+			# send this response back to the client
+			$client->send($resp . "\r\n");
+		});
+
+		$buffer = $rest;
+	}
+
+	$self->{client}->{$socket}->{buffer} = $buffer;
 }
 
 1;
