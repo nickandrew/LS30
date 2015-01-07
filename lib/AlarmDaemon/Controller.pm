@@ -129,31 +129,6 @@ sub _sendAllClients {
 
 }
 
-sub serverRead {
-	my ($self, $buffer) = @_;
-
-	if ($self->{clients} == 0) {
-		# Only MINPIC, XINPIC and CONTACTID events should be pending.
-		# Weed out responses to other clients.
-		if ($buffer !~ /^!/) {
-			LS30::Log::timePrint("Pending: $buffer");
-			$self->{pending_data} .= $buffer;
-		}
-		return;
-	}
-
-	my $rest = '';
-	if ($self->{clients} > 1) {
-		$rest = " to $self->{clients} clients";
-	}
-
-	LS30::Log::timePrint("Emitting: $buffer$rest");
-
-	foreach my $object (values %{ $self->{client_sockets} }) {
-		$object->send($buffer);
-	}
-}
-
 sub clientRead {
 	my ($self, $data, $client) = @_;
 
