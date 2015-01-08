@@ -121,7 +121,7 @@ sub processLine {
 
 	if ($line =~ /^XINPIC=([0-9a-f]+)$/) {
 		my $minpic = $1;
-		$self->runHandler('MINPIC', $minpic);
+		$self->runHandler('XINPIC', $minpic);
 		return;
 	}
 
@@ -168,9 +168,9 @@ sub processLine {
 	}
 
 	if ($line =~ /^(.+)(XINPIC=.+)/) {
-		my ($junk, $minpic) = ($1, $2);
+		my ($junk, $xinpic) = ($1, $2);
 		LS30::Log::timePrint("Skipping junk $junk");
-		$self->processLine($minpic);
+		$self->processLine($xinpic);
 		return;
 	}
 
@@ -228,6 +228,8 @@ sub runHandler {
 
 	if ($type eq 'MINPIC') {
 		$object->handleMINPIC(@_);
+	} elsif ($type eq 'XINPIC') {
+		$object->handleXINPIC(@_);
 	} elsif ($type eq 'CONTACTID') {
 		$object->handleCONTACTID(@_);
 	} elsif ($type eq 'Response') {
