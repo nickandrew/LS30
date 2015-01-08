@@ -79,7 +79,7 @@ sub addServer {
 
 	$ls30cmdr->onMINPIC(sub {
 		my ($line) = @_;
-		$self->_sendAllClients($line);
+		$self->_sendAllClients('MINPIC=' . $line);
 	});
 
 	$ls30cmdr->onCONTACTID(sub {
