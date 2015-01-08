@@ -173,6 +173,40 @@ sub handleMINPIC {
 
 # ---------------------------------------------------------------------------
 
+=item I<onXINPIC($cb)>
+
+Callback $cb on every XINPIC received.
+
+=cut
+
+sub onXINPIC {
+	my ($self, $cb) = @_;
+
+	$self->{on_xinpic} = $cb;
+
+	return $self;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<handleXINPIC($string)>
+
+Store any XINPIC string received by the poll.
+
+=cut
+
+sub handleXINPIC {
+	my ($self, $string) = @_;
+
+	if ($self->{on_xinpic}) {
+		$self->{on_xinpic}->($string);
+	}
+}
+
+
+# ---------------------------------------------------------------------------
+
 =item I<onCONTACTID($cb)>
 
 Callback $cb on every CONTACTID received.
