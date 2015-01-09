@@ -114,8 +114,8 @@ sub queueCommand {
 
 =item I<sendCommand($string)>
 
-Send a command to the LS30 and wait up to $self->{timeout} seconds for a
-response.  Return the first response received within this time.
+Send a command to the LS30 and return the associated response
+as a string.
 
 Return undef if no response was received after a timeout.
 
@@ -141,7 +141,7 @@ sub sendCommand {
 
 =item I<onMINPIC($cb)>
 
-Callback $cb on every MINPIC received.
+Set callback $cb on every MINPIC received.
 
 =cut
 
@@ -158,7 +158,7 @@ sub onMINPIC {
 
 =item I<handleMINPIC($string)>
 
-Store any MINPIC string received by the poll.
+Call optional callback function on every MINPIC received.
 
 =cut
 
@@ -175,7 +175,7 @@ sub handleMINPIC {
 
 =item I<onXINPIC($cb)>
 
-Callback $cb on every XINPIC received.
+Set callback $cb on every XINPIC received.
 
 =cut
 
@@ -192,7 +192,7 @@ sub onXINPIC {
 
 =item I<handleXINPIC($string)>
 
-Store any XINPIC string received by the poll.
+Call optional callback function on every XINPIC received.
 
 =cut
 
@@ -209,7 +209,7 @@ sub handleXINPIC {
 
 =item I<onCONTACTID($cb)>
 
-Callback $cb on every CONTACTID received.
+set callback $cb on every CONTACTID received.
 
 =cut
 
@@ -226,7 +226,7 @@ sub onCONTACTID {
 
 =item I<handleCONTACTID($string)>
 
-Store any CONTACTID string received by the poll.
+Call optional callback function on every CONTACTID received.
 
 =cut
 
@@ -251,7 +251,6 @@ Any response received is sent to the requestor via condvar.
 
 sub handleResponse {
 	my ($self, $string) = @_;
-
 
 	# Call callback if any, and send next command
 	if (@{$self->{command_queue}}) {
