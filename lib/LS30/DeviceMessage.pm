@@ -36,7 +36,7 @@ use LS30::Type qw();
 
 # ---------------------------------------------------------------------------
 
-=item new($string)
+=item I<new($string)>
 
 Parse $string and return a new LS30::DeviceMessage.
 
@@ -157,5 +157,9 @@ sub getError {
 
 	return $self->{error};
 }
+
+=back
+
+=cut
 
 1;

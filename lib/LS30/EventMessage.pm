@@ -39,7 +39,7 @@ my $this_month;
 
 # ---------------------------------------------------------------------------
 
-=item new($string)
+=item I<new($string)>
 
 Parse $string and return a new LS30::EventMessage.
 
@@ -132,7 +132,7 @@ sub _parseDateTime {
 
 # ---------------------------------------------------------------------------
 
-=item getHighestEvent()
+=item I<getHighestEvent()>
 
 Return the number of the last event written. This value is between 1 and
 512; after 512 it will loop to 1.
@@ -148,7 +148,7 @@ sub getHighestEvent {
 
 # ---------------------------------------------------------------------------
 
-=item getEventType()
+=item I<getEventType()>
 
 Return the 1-character type code of the event. Values:
 
@@ -167,7 +167,7 @@ sub getEventType {
 
 # ---------------------------------------------------------------------------
 
-=item getEventCode()
+=item I<getEventCode()>
 
 Return the 3-character code of this event. The codes are based on ContactID.
 The type and code concatenated (4 chars) determines the message shown on
@@ -184,7 +184,7 @@ sub getEventCode {
 
 # ---------------------------------------------------------------------------
 
-=item getDisplayString()
+=item I<getDisplayString()>
 
 Return the display string, i.e. close to the message shown on the LS-30 LCD
 display.

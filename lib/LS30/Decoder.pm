@@ -35,7 +35,7 @@ use ContactID::EventMessage qw();
 
 # ---------------------------------------------------------------------------
 
-=item new($handler_obj)
+=item I<new($handler_obj)>
 
 Instantiate one LS30::Decoder.
 
@@ -59,7 +59,7 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item handleMINPIC($string)
+=item I<handleMINPIC($string)>
 
 Process 'MINPIC' strings. Turn them into an instance of LS30::DeviceMessage.
 
@@ -83,7 +83,7 @@ sub handleMINPIC {
 
 # ---------------------------------------------------------------------------
 
-=item handleCONTACTID($string)
+=item I<handleCONTACTID($string)>
 
 Process strings in the Contact ID format.
 Turn them into an instance of ContactID::EventMessage.
@@ -101,7 +101,7 @@ sub handleCONTACTID {
 
 # ---------------------------------------------------------------------------
 
-=item handleResponse($string)
+=item I<handleResponse($string)>
 
 Process strings which are responses to commands sent by a client to the LS30.
 Turn them into an instance of LS30::ResponseMessage.
@@ -121,7 +121,7 @@ sub handleResponse {
 
 # ---------------------------------------------------------------------------
 
-=item handleAT($string)
+=item I<handleAT($string)>
 
 Process the 'AT' message. Print it and ignore.
 
@@ -138,7 +138,7 @@ sub handleAT {
 
 # ---------------------------------------------------------------------------
 
-=item handleGSM($string)
+=item I<handleGSM($string)>
 
 Process the 'GSM' message. Print it and ignore.
 
@@ -155,7 +155,7 @@ sub handleGSM {
 
 # ---------------------------------------------------------------------------
 
-=item handleDisconnect()
+=item I<handleDisconnect()>
 
 Handle a disconnection. Pass to above.
 
@@ -167,5 +167,9 @@ sub handleDisconnect {
 	LS30::Log::timePrint("Disconnected");
 	$self->{handler}->handleDisconnect();
 }
+
+=back
+
+=cut
 
 1;

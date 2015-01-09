@@ -322,7 +322,7 @@ my $reverse_table = {};
 
 # ---------------------------------------------------------------------------
 
-=item getCode($table, $string)
+=item I<getCode($table, $string)>
 
 Return the code associated with string $string in the specified table.
 
@@ -350,7 +350,7 @@ sub getCode {
 
 # ---------------------------------------------------------------------------
 
-=item getString($table, $code)
+=item I<getString($table, $code)>
 
 Return the string associated with code $code in the specified table.
 
@@ -383,7 +383,7 @@ sub getString {
 
 # ---------------------------------------------------------------------------
 
-=item listStrings($table)
+=item I<listStrings($table)>
 
 Return a sorted list of the strings associated with the specified table.
 
@@ -405,5 +405,9 @@ sub listStrings {
 
 	return sort(keys %$hr);
 }
+
+=back
+
+=cut
 
 1;

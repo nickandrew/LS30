@@ -27,7 +27,7 @@ use LS30Command qw();
 
 # ---------------------------------------------------------------------------
 
-=item parse($string)
+=item I<parse($string)>
 
 Parse $string and return a new LS30::ResponseMessage or LS30::EventMessage.
 
@@ -105,5 +105,9 @@ sub get {
 
 	return $self->{$key};
 }
+
+=back
+
+=cut
 
 1;

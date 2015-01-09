@@ -26,7 +26,7 @@ use Date::Format qw(time2str);
 
 # ---------------------------------------------------------------------------
 
-=item logFormat($string)
+=item I<logFormat($string)>
 
 Format a supplied string:
 
@@ -52,7 +52,7 @@ sub logFormat {
 
 # ---------------------------------------------------------------------------
 
-=item timePrint($string)
+=item I<timePrint($string)>
 
 Format the supplied string in the logging format then print to STDOUT.
 
@@ -63,5 +63,9 @@ sub timePrint {
 
 	print logFormat($string);
 }
+
+=back
+
+=cut
 
 1;

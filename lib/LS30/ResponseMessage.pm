@@ -31,7 +31,7 @@ use LS30Command qw();
 
 # ---------------------------------------------------------------------------
 
-=item new($string)
+=item I<new($string)>
 
 Parse $string and return a new LS30::ResponseMessage.
 
@@ -100,5 +100,9 @@ sub get {
 
 	return $self->{$key};
 }
+
+=back
+
+=cut
 
 1;

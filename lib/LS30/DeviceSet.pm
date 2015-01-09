@@ -27,7 +27,7 @@ use YAML qw();
 
 # ---------------------------------------------------------------------------
 
-=item new($device_file)
+=item I<new($device_file)>
 
 Construct a new LS30::DeviceSet, read the list of devices from a YAML
 file and return the newly constructed object.
@@ -69,7 +69,7 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item saveDevices()
+=item I<saveDevices()>
 
 Write the known devices to the device_file in YAML format.
 
@@ -97,7 +97,7 @@ sub saveDevices {
 
 # ---------------------------------------------------------------------------
 
-=item findDeviceByCode($device_code)
+=item I<findDeviceByCode($device_code)>
 
 Find the specified device in our device set, and return a reference
 to it. The reference is expected to be blessed into the class LS30::Device.
@@ -114,5 +114,9 @@ sub findDeviceByCode {
 
 	return $self->{devices}->{$device_code};
 }
+
+=back
+
+=cut
 
 1;

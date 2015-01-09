@@ -26,7 +26,7 @@ use warnings;
 
 # ---------------------------------------------------------------------------
 
-=item new(%args)
+=item I<new(%args)>
 
 Instantiate a new Timer object. Arguments are:
 
@@ -73,7 +73,7 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item watchdogTime()
+=item I<watchdogTime()>
 
 Return a time_t value of the desired triggering time. 'undef' means never.
 A value in the past is acceptable.
@@ -90,7 +90,7 @@ sub watchdogTime {
 
 # ---------------------------------------------------------------------------
 
-=item getNextTime()
+=item I<getNextTime()>
 
 Return the current value of next_time.
 
@@ -105,7 +105,7 @@ sub getNextTime {
 
 # ---------------------------------------------------------------------------
 
-=item setNextTime($time_t)
+=item I<setNextTime($time_t)>
 
 Set next_time to $time_t.
 
@@ -133,7 +133,7 @@ sub setNextTime {
 
 # ---------------------------------------------------------------------------
 
-=item setDelay($interval)
+=item I<setDelay($interval)>
 
 Set next_time to the current time plus $interval.
 
@@ -154,7 +154,7 @@ sub setDelay {
 
 # ---------------------------------------------------------------------------
 
-=item getArgs()
+=item I<getArgs()>
 
 Return the current value of arg_ref.
 
@@ -169,7 +169,7 @@ sub getArgs {
 
 # ---------------------------------------------------------------------------
 
-=item setArgs($arg_ref)
+=item I<setArgs($arg_ref)>
 
 Set arg_ref.
 
@@ -184,7 +184,7 @@ sub setArgs {
 
 # ---------------------------------------------------------------------------
 
-=item setFunction($func_ref)
+=item I<setFunction($func_ref)>
 
 Set func_ref.
 
@@ -199,7 +199,7 @@ sub setFunction {
 
 # ---------------------------------------------------------------------------
 
-=item stop()
+=item I<stop()>
 
 Set next_time to undef. This will stop the timer triggering.
 
@@ -214,7 +214,7 @@ sub stop {
 
 # ---------------------------------------------------------------------------
 
-=item watchdogEvent()
+=item I<watchdogEvent()>
 
 Called upon the triggering of this timer.
 
@@ -243,5 +243,9 @@ sub watchdogEvent {
 		&$func_ref($ref);
 	}
 }
+
+=back
+
+=cut
 
 1;
