@@ -323,21 +323,6 @@ sub handleDisconnect {
 
 # ---------------------------------------------------------------------------
 
-=item I<getCONTACTID()>
-
-Return any saved CONTACTID string.
-
-=cut
-
-sub getCONTACTID {
-	my ($self) = @_;
-
-	return $self->{last_contactid};
-}
-
-
-# ---------------------------------------------------------------------------
-
 =item I<getSetting($setting_name, $cached)>
 
 Return a condvar which will receive
