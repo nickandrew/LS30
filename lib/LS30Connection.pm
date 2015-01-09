@@ -32,7 +32,7 @@ use base qw(AlarmDaemon::ServerSocket);
 
 # ---------------------------------------------------------------------------
 
-=item new($server_address)
+=item I<new($server_address)>
 
 Return a new LS30Connection. At this time, the socket is not connected.
 
@@ -58,7 +58,7 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item disconnect($self)
+=item I<disconnect($self)>
 
 There was an Error or EOF on our socket connection. Remove us from the
 specified selector, close our socket (disconnect) and run the Disconnect
@@ -76,7 +76,7 @@ sub disconnect {
 
 # ---------------------------------------------------------------------------
 
-=item sendCommand($string)
+=item I<sendCommand($string)>
 
 Send a command to the connected socket.
 
@@ -100,7 +100,7 @@ sub sendCommand {
 
 # ---------------------------------------------------------------------------
 
-=item processLine($line)
+=item I<processLine($line)>
 
 Process one full line of received data. Run an appropriate handler.
 
@@ -208,7 +208,7 @@ sub processLine {
 
 # ---------------------------------------------------------------------------
 
-=item runHandler($type, @args)
+=item I<runHandler($type, @args)>
 
 Run the handler function appropriate to the specified type $type.
 Further arguments depend on the value of $type.
@@ -244,5 +244,9 @@ sub runHandler {
 		LS30::Log::timePrint("No handler function defined for $type");
 	}
 }
+
+=back
+
+=cut
 
 1;
