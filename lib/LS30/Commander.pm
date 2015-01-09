@@ -233,8 +233,6 @@ Call optional callback function on every CONTACTID received.
 sub handleCONTACTID {
 	my ($self, $string) = @_;
 
-	$self->{last_contactid} = $string;
-
 	if ($self->{on_contactid}) {
 		$self->{on_contactid}->($string);
 	}
