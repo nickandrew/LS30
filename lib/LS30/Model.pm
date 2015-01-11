@@ -40,9 +40,10 @@ sub new {
 	my ($class) = @_;
 
 	my $self = {
-		settings => {},
-		devices => {},
+		settings     => {},
+		devices      => {},
 		device_count => {},
+		upstream     => undef,
 	};
 
 	bless $self, $class;
@@ -62,6 +63,9 @@ sub upstream {
 
 	if (scalar @_) {
 		$self->{upstream} = shift;
+		if ($self->{upstream}) {
+			$self->{upstream}->onMINPIC(sub { $self->handleMINPIC(@_) });
+		}
 		return $self;
 	}
 
@@ -446,6 +450,45 @@ sub _initDevices {
 	return $cv;
 }
 
+
+# ---------------------------------------------------------------------------
+
+=item I<onMINPIC($cb)>
+
+Set callback $cb on every MINPIC received.
+
+Will propagate upstream.
+
+=cut
+
+sub onMINPIC {
+	my $self = shift;
+
+	if (scalar @_) {
+		$self->{on_minpic} = shift;
+		return $self;
+	}
+
+
+	return $self->{on_minpic};
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<handleMINPIC($string)>
+
+Handle a received MINPIC. Do whatever local processing is required, then
+hand the string off to our callback function, if any.
+
+=cut
+
+sub handleMINPIC {
+	my ($self, $string) = @_;
+
+	if ($self->{on_minpic}) {
+		$self->{on_minpic}->($string);
+	}
+}
 
 =back
 
