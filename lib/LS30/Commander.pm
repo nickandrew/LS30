@@ -141,16 +141,19 @@ sub sendCommand {
 
 =item I<onMINPIC($cb)>
 
-Set callback $cb on every MINPIC received.
+SetGet callback $cb on every MINPIC received.
 
 =cut
 
 sub onMINPIC {
-	my ($self, $cb) = @_;
+	my $self = shift;
 
-	$self->{on_minpic} = $cb;
+	if (scalar @_) {
+		$self->{on_minpic} = shift;
+		return $self;
+	}
 
-	return $self;
+	return $self->{on_minpic};
 }
 
 
