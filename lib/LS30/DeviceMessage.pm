@@ -14,7 +14,7 @@ It looks like these two examples:
   MINPIC=0a201912345600305e6473
   XINPIC=0a204012345600108b6473
 
-'MINPIC' is used for a known device, 'XINPIC' for an unknown device.
+'MINPIC' is used for a registered device, 'XINPIC' for an unregistered device.
 
 The objects of this class represent the above strings decoded.
 
@@ -78,7 +78,6 @@ sub _parseString {
 
 	my $unknown = '';
 
-	my $signal_int = hex($signal) - 32;
 	my $type_name = LS30::Type::getString('Event Code', $type);
 
 	if (!$type_name) {
@@ -87,6 +86,17 @@ sub _parseString {
 	}
 
 	my $dev_type_name = LS30::Type::getString('Device Specific Type', $dev_type) || 'Unknown';
+
+	my $signal_int = hex($signal) - 32;
+
+	if ($dev_type_name eq 'Door Switch') {
+		$self->{door_closed} = $signal_int & 1;
+	}
+
+	if ($signal_int > 99) {
+		# 99 dBm limit for RSSI
+		$signal_int = 99;
+	}
 
 	if ($unk1 !~ /^(0000|0010|0030|0130)$/) {
 		$unknown .= " unk1($unk1)";
