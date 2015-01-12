@@ -78,18 +78,18 @@ sub addServer {
 	$self->{server} = $ls30cmdr;
 
 	$ls30cmdr->onMINPIC(sub {
-		my ($line) = @_;
-		$self->_sendAllClients('MINPIC=' . $line);
+		my ($minpic_string) = @_;
+		$self->_sendAllClients('MINPIC=' . $minpic_string);
 	});
 
 	$ls30cmdr->onXINPIC(sub {
-		my ($line) = @_;
-		$self->_sendAllClients('XINPIC=' . $line);
+		my ($xinpic_string) = @_;
+		$self->_sendAllClients('XINPIC=' . $xinpic_string);
 	});
 
 	$ls30cmdr->onCONTACTID(sub {
-		my ($line) = @_;
-		$self->_sendAllClients($line);
+		my ($contactid_string) = @_;
+		$self->_sendAllClients('(' . $contactid_string . ')');
 	});
 }
 
