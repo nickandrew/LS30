@@ -26,7 +26,7 @@ package AlarmDaemon::CommonSocket;
 
 # ---------------------------------------------------------------------------
 
-=item socket()
+=item I<socket()>
 
 Return a reference to our socket.
 
@@ -41,7 +41,7 @@ sub socket {
 
 # ---------------------------------------------------------------------------
 
-=item send($buffer)
+=item I<send($buffer)>
 
 If connected, send data to our socket.
 
@@ -53,6 +53,25 @@ sub send {
 	if ($self->{socket}) {
 		$self->{socket}->send($buffer);
 	}
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<peerhost()>
+
+Return the text representation of the peer host address.
+
+=cut
+
+sub peerhost {
+	my $self = shift;
+
+	if ($self->{socket}) {
+		return $self->{socket}->peerhost();
+	}
+
+	return undef;
 }
 
 =back
