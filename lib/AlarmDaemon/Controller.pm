@@ -53,7 +53,7 @@ sub addListener {
 
 	my $listener = AlarmDaemon::ListenSocket->new($socket, $self);
 	if (!$listener) {
-		warn "Unable to add listener\n";
+		LS30::Log::timePrint("Unable to add listener");
 		return;
 	}
 
@@ -66,7 +66,7 @@ sub addServer {
 
 	my $object = LS30Connection->new($peer_addr);
 	if (!$object) {
-		warn "Unable to instantiate an LS30Connection to $peer_addr\n";
+		LS30::Log::timePrint("Unable to instantiate an LS30Connection to $peer_addr");
 		return;
 	}
 
@@ -96,10 +96,11 @@ sub addServer {
 sub addClient {
 	my ($self, $socket) = @_;
 
-	LS30::Log::timePrint("New client");
 	my $client = AlarmDaemon::ClientSocket->new($socket, $self);
 	$self->{client_sockets}->{$socket} = $client;
 	$self->{clients}++;
+
+	LS30::Log::timePrint("New client " . $client->peerhost());
 
 	if (defined $self->{pending_data}) {
 		LS30::Log::timePrint("Sent pending: $self->{pending_data}");
@@ -115,7 +116,7 @@ sub removeClient {
 	if (exists $self->{client_sockets}->{$socket}) {
 		delete $self->{client_sockets}->{$socket};
 		$self->{clients}--;
-		LS30::Log::timePrint("Removed client");
+		LS30::Log::timePrint("Removed client " . $client->peerhost());
 	}
 }
 
@@ -128,10 +129,15 @@ sub eventLoop {
 sub _sendAllClients {
 	my ($self, $data) = @_;
 
+	if ($self->{clients}) {
+		LS30::Log::timePrint("Broadcast: $data");
+	} else {
+		LS30::Log::timePrint("Ignoring (no clients): $data");
+	}
+
 	foreach my $object (values %{ $self->{client_sockets} }) {
 		$object->send($data . "\r\n");
 	}
-
 }
 
 sub clientRead {
@@ -151,6 +157,8 @@ sub clientRead {
 		$cv->cb(sub {
 			my $resp = $cv->recv();
 			# send this response back to the client
+
+			LS30::Log::timePrint("Response: $resp");
 			$client->send($resp . "\r\n");
 		});
 
