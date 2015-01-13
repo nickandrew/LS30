@@ -16,6 +16,10 @@ from the server is forwarded to all clients. There is also a set
 of listening sockets; connections on any of them are accepted and
 become new clients.
 
+=head1 METHODS
+
+=over
+
 =cut
 
 package AlarmDaemon::Controller;
@@ -30,6 +34,13 @@ use LS30Connection qw();
 use LS30::Commander qw();
 use LS30::Log qw();
 use AnyEvent;
+
+
+=item I<new()>
+
+Return a new instance of this controller class.
+
+=cut
 
 sub new {
 	my ($class) = @_;
@@ -48,6 +59,13 @@ sub new {
 	return $self;
 }
 
+=item I<addListener($socket)>
+
+Listen on the specified socket for incoming connections. The controller
+can listen on several sockets.
+
+=cut
+
 sub addListener {
 	my ($self, $socket) = @_;
 
@@ -60,6 +78,14 @@ sub addListener {
 	$self->{listeners}->{$socket} = $listener;
 	return $self;
 }
+
+=item I<addServer($peer_addr)>
+
+Connect to the specified peer address, which is our server device.
+
+Only a single server may be used at one time.
+
+=cut
 
 sub addServer {
 	my ($self, $peer_addr) = @_;
@@ -93,6 +119,13 @@ sub addServer {
 	});
 }
 
+=item I<addClient($socket)>
+
+This function is called by the listening socket whenever a new
+client connects.
+
+=cut
+
 sub addClient {
 	my ($self, $socket) = @_;
 
@@ -109,6 +142,13 @@ sub addClient {
 	}
 }
 
+=item I<removeClient($client)>
+
+This function is called by the client AlarmDaemon::ClientSocket
+when the peer disconnects.
+
+=cut
+
 sub removeClient {
 	my ($self, $client) = @_;
 
@@ -120,11 +160,22 @@ sub removeClient {
 	}
 }
 
+=item I<eventLoop()>
+
+Run the event loop. Since the daemon is expected to run forever, this
+function never returns.
+
+=cut
+
 sub eventLoop {
 	my ($self) = @_;
 
 	$self->{condvar}->recv();
 }
+
+# ---------------------------------------------------------------------------
+# Broadcast a string (followed by \r\n) to all connected clients
+# ---------------------------------------------------------------------------
 
 sub _sendAllClients {
 	my ($self, $data) = @_;
@@ -139,6 +190,22 @@ sub _sendAllClients {
 		$object->send($data . "\r\n");
 	}
 }
+
+=item I<clientRead($data, $client)>
+
+This function is called by a client object whenever data has been
+received on that connection.
+
+The received data is accumulated in a buffer. All complete lines in the
+buffer are treated as commands: the command is queued to the server,
+and when a response is received, the response is sent back to the client.
+
+That means responses are sent only to the client that requested it.
+
+It also means requests can be queued for some time pending all other
+requests being sent and responses received.
+
+=cut
 
 sub clientRead {
 	my ($self, $data, $client) = @_;
@@ -167,5 +234,9 @@ sub clientRead {
 
 	$self->{client}->{$socket}->{buffer} = $buffer;
 }
+
+=back
+
+=cut
 
 1;
