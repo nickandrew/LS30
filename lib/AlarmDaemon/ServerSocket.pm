@@ -36,7 +36,7 @@ use base qw(AlarmDaemon::CommonSocket Timer);
 
 # ---------------------------------------------------------------------------
 
-=item new($peer_addr)
+=item I<new($peer_addr)>
 
 Connect to the server (identified as host:port) and return the newly
 instantiated AlarmDaemon::ServerSocket object. If unable to connect,
@@ -67,7 +67,22 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item connect()
+=item I<isConnected()>
+
+Return 1 if this socket is presently connected to a server, else 0.
+
+=cut
+
+sub isConnected {
+	my ($self) = @_;
+
+	return 1 if ($self->{current_state} eq 'connected');
+	return 0;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<connect()>
 
 Connect to our server. Set SO_KEEPALIVE so we detect a broken connection
 eventually (many minutes). Also set our last_rcvd_time to the current
@@ -78,7 +93,7 @@ time to detect quicker if the server has gone away.
 sub connect {
 	my ($self) = @_;
 
-	if ($self->{current_state} eq 'connected') {
+	if ($self->isConnected()) {
 		# Nothing to do
 		return 1;
 	}
@@ -120,7 +135,7 @@ sub connect {
 
 # ---------------------------------------------------------------------------
 
-=item disconnect()
+=item I<disconnect()>
 
 If the socket is currently open, then close it and forget it.
 
@@ -145,7 +160,7 @@ sub disconnect {
 
 # ---------------------------------------------------------------------------
 
-=item tryConnect()
+=item I<tryConnect()>
 
 Try to connect again.
 Log success or failure.
@@ -165,7 +180,7 @@ sub tryConnect {
 
 # ---------------------------------------------------------------------------
 
-=item setHandler($object)
+=item I<setHandler($object)>
 
 Keep a reference to the object which will process all our emitted events.
 
@@ -180,7 +195,7 @@ sub setHandler {
 
 # ---------------------------------------------------------------------------
 
-=item watchdogTime()
+=item I<watchdogTime()>
 
 Returns a time_t value representing at what time this object will detect
 a timeout, if no recent data has been received from the server.
@@ -207,7 +222,7 @@ sub watchdogTime {
 
 # ---------------------------------------------------------------------------
 
-=item watchdogEvent()
+=item I<watchdogEvent()>
 
 Called when the watchdog timer expires.
 
@@ -241,7 +256,7 @@ sub watchdogEvent {
 
 # ------------------------------------------------------------------------
 
-=item handleRead()
+=item I<handleRead()>
 
 Read data from the socket and postprocess it.
 
@@ -276,7 +291,7 @@ sub handleRead {
 
 # ---------------------------------------------------------------------------
 
-=item addBuffer($buffer)
+=item I<addBuffer($buffer)>
 
 Filter data received from the LS30 to clean up the protocol.
 
@@ -333,7 +348,7 @@ sub addBuffer {
 
 # ---------------------------------------------------------------------------
 
-=item processLine($line)
+=item I<processLine($line)>
 
 Process one full line of received data. Run an appropriate handler.
 
