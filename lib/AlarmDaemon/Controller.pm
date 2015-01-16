@@ -50,7 +50,6 @@ sub new {
 		client_sockets => {},
 		condvar        => AnyEvent->condvar,
 		listeners      => {},
-		pending_data   => undef,
 		server         => undef,
 	};
 
@@ -134,12 +133,6 @@ sub addClient {
 	$self->{clients}++;
 
 	LS30::Log::timePrint("New client " . $client->peerhost());
-
-	if (defined $self->{pending_data}) {
-		LS30::Log::timePrint("Sent pending: $self->{pending_data}");
-		$client->send($self->{pending_data});
-		$self->{pending_data} = undef;
-	}
 }
 
 =item I<removeClient($client)>
