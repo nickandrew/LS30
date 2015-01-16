@@ -111,6 +111,7 @@ sub connect {
 	$self->{socket}         = $socket;
 	$self->{last_rcvd_time} = time();
 	$self->{current_state}  = 'connected';
+	$self->{retry_interval} = 5;
 
 	# Setting SO_KEEPALIVE will eventually cause a client socket error if
 	# connection is broken
@@ -150,10 +151,6 @@ sub disconnect {
 		close($self->{socket});
 		undef $self->{socket};
 		$self->{current_state} = 'disconnected';
-		my $now = time();
-		$self->{retry_base}     = $now;
-		$self->{retry_when}     = $now + 2;
-		$self->{retry_interval} = 4;
 	}
 }
 
@@ -219,6 +216,24 @@ sub watchdogTime {
 	return undef;
 }
 
+# ---------------------------------------------------------------------------
+# Return retry interval with exponential backoff (up to 64 seconds)
+# Initial value returned is whatever is set elsewhere in this class.
+# ---------------------------------------------------------------------------
+
+sub _retryInterval {
+	my ($self) = @_;
+
+	my $retry_interval = $self->{retry_interval};
+
+	if ($retry_interval >= 32) {
+		$self->{retry_interval} = 64;
+	} else {
+		$self->{retry_interval} = $retry_interval * 2;
+	}
+
+	return $retry_interval;
+}
 
 # ---------------------------------------------------------------------------
 
@@ -243,11 +258,7 @@ sub watchdogEvent {
 		return;
 	}
 
-	my $retry_interval = $self->{retry_interval};
-	if ($retry_interval < 64) {
-		$retry_interval *= 2;
-		$self->{retry_interval} = $retry_interval;
-	}
+	my $retry_interval = $self->_retryInterval();
 	$self->{retry_when} += $retry_interval;
 
 	$self->tryConnect();
