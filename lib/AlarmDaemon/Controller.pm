@@ -95,6 +95,16 @@ sub addServer {
 		return;
 	}
 
+	$object->onConnectFail(sub {
+		LS30::Log::timePrint("Controller: Connection to $peer_addr failed, retrying");
+		shift->retryConnect();
+	});
+
+	$object->onDisconnect(sub {
+		LS30::Log::timePrint("Controller: Disconnected from $peer_addr, retrying");
+		shift->retryConnect();
+	});
+
 	my $ls30cmdr = LS30::Commander->new($object, 5);
 	if (!$ls30cmdr) {
 		die "Unable to instantiate a new LS30::Commander to $peer_addr";

@@ -53,12 +53,17 @@ sub new {
 		handler           => undef,
 		watchdog_interval => 320,
 		pending           => '',
+		retry_default     => 5,
 	};
 
 	bless $self, $class;
 
-	if (!$self->connect()) {
-		return undef;
+	# This is a bit crappy; try to connect synchronously and before any
+	# establishment of onConnectFail or onDisconnect subs.
+	if ($self->connect()) {
+		LS30::Log::timePrint("Connected to $peer_addr");
+	} else {
+		LS30::Log::timePrint("Initial connection to $peer_addr failed");
 	}
 
 	return $self;
@@ -78,6 +83,65 @@ sub isConnected {
 
 	return 1 if ($self->{current_state} eq 'connected');
 	return 0;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<onConnectFail(sub)>
+
+Get/set a subroutine to be called on any connect failure.
+The subroutine is called with $self as its argument.
+
+=cut
+
+sub onConnectFail {
+	my $self = shift;
+
+	if (scalar @_) {
+		$self->{on_connect_fail} = shift;
+
+		# Try to bootstrap connection here; call it now
+		if (!$self->isConnected()) {
+			$self->{on_connect_fail}->($self);
+		}
+
+		return $self;
+	}
+	return $self->{on_connect_fail};
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<onDisconnect(sub)>
+
+Get/set a subroutine to be called on disconnection.
+The subroutine is called with $self as its argument.
+
+=cut
+
+sub onDisconnect {
+	my $self = shift;
+
+	if (scalar @_) {
+		$self->{on_disconnect} = shift;
+		return $self;
+	}
+	return $self->{on_disconnect};
+}
+
+
+# ---------------------------------------------------------------------------
+# Process the disconnection action.
+# ---------------------------------------------------------------------------
+
+sub _disconnected {
+	my $self = shift;
+
+	if ($self->{on_disconnect}) {
+		$self->{on_disconnect}->($self);
+	}
 }
 
 # ---------------------------------------------------------------------------
@@ -104,14 +168,17 @@ sub connect {
 	);
 
 	if (!$socket) {
-		warn "Unable to create a new socket to $self->{peer_addr}";
+		LS30::Log::timePrint("Cannot create a new socket to $self->{peer_addr}");
+		if ($self->{on_connect_fail}) {
+			$self->{on_connect_fail}->($self);
+		}
 		return 0;
 	}
 
 	$self->{socket}         = $socket;
 	$self->{last_rcvd_time} = time();
 	$self->{current_state}  = 'connected';
-	$self->{retry_interval} = 5;
+	$self->{retry_interval} = $self->{retry_default};
 
 	# Setting SO_KEEPALIVE will eventually cause a client socket error if
 	# connection is broken
@@ -157,21 +224,41 @@ sub disconnect {
 
 # ---------------------------------------------------------------------------
 
-=item I<tryConnect()>
+=item I<retryConnect()>
 
-Try to connect again.
-Log success or failure.
+Wait, then try to connect asynchronously.
+Use exponential backoff.
+Recursion may be enabled by calling this function in onConnectFail and
+onDisconnect subs.
 
 =cut
 
-sub tryConnect {
+sub retryConnect {
 	my ($self) = @_;
 
-	if ($self->connect()) {
-		LS30::Log::timePrint("Reconnected");
-	} else {
-		LS30::Log::timePrint("Reconnect failed");
-	}
+	my $cv = AnyEvent->condvar;
+
+	# Try again after an exponential backoff delay
+	my $retry_interval = $self->_retryInterval();
+	LS30::Log::timePrint("Attempt connect after $retry_interval");
+
+	my $timer;
+	$timer = AnyEvent->timer(
+		after => $retry_interval,
+		cb    => sub {
+			undef $timer;
+
+			if ($self->connect()) {
+				LS30::Log::timePrint("(Re)connected");
+				$cv->send(1);
+			}
+			else {
+				$cv->send(0);
+			}
+		},
+	);
+
+	return $cv;
 }
 
 
@@ -224,7 +311,7 @@ sub watchdogTime {
 sub _retryInterval {
 	my ($self) = @_;
 
-	my $retry_interval = $self->{retry_interval};
+	my $retry_interval = $self->{retry_interval} || $self->{retry_default};
 
 	if ($retry_interval >= 32) {
 		$self->{retry_interval} = 64;
@@ -282,10 +369,12 @@ sub handleRead {
 	$self->{last_rcvd_time} = time();
 
 	my $n = $self->{socket}->recv($buffer, 128);
+
 	if (!defined $n) {
 
 		# Error on the socket
 		$self->disconnect();
+		$self->_disconnected();
 		return;
 	}
 
@@ -293,6 +382,7 @@ sub handleRead {
 
 		# EOF: Other end closed the connection
 		$self->disconnect();
+		$self->_disconnected();
 		return;
 	}
 
