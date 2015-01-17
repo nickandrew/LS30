@@ -48,6 +48,7 @@ sub new {
 	my ($class, $peer_addr) = @_;
 
 	my $self = {
+		connect_sub       => [],  # Array of subs to call after connected
 		current_state     => 'disconnected',
 		peer_addr         => $peer_addr,
 		handler           => undef,
@@ -196,6 +197,11 @@ sub connect {
 	);
 
 	$self->{poller} = $w;
+
+	# Call all functions waiting for connection
+	while (my $sub = shift @{$self->{connect_sub}}) {
+		$sub->($self);
+	}
 
 	return 1;
 }
@@ -459,6 +465,30 @@ sub processLine {
 	my ($self, $line) = @_;
 
 	$self->{handler}->serverRead($line . "\r\n");
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<send($buffer)>
+
+If not connected, wait until connected. Then send data to our socket.
+
+=cut
+
+sub send {
+	my ($self, $buffer) = @_;
+
+	if (!$self->isConnected()) {
+		# Queue this send until we are connected
+		push(@{$self->{connect_sub}}, sub {
+			$self->SUPER::send($buffer)
+		});
+		return;
+	}
+
+	$self->SUPER::send($buffer);
+	return;
 }
 
 
