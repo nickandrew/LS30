@@ -45,20 +45,18 @@ my $cmds_n = [
 
 my $cmds = ($opt_y) ? $cmds_y : $cmds_n;
 
+LS30Command::addCommands();
+
 # Connect and send commands
 
 my $ls30c = LS30Connection->new($opt_h);
 
 $ls30c->connect();
 
-LS30Command::addCommands();
-
 my $ls30cmdr = LS30::Commander->new($ls30c, 5);
 my @output;
 
 foreach my $hr (@$cmds) {
-	my $cmd_spec = LS30Command::getCommand($hr->{title});
-
 	my $cmd      = LS30Command::setCommand($hr);
 	my $response = $ls30cmdr->sendCommand($cmd);
 
