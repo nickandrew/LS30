@@ -207,16 +207,6 @@ sub runCommands {
 	}
 }
 
-
-sub handleDisconnect {
-	my ($self) = @_;
-
-	$self->{timer2}->{arg_ref}->[3] = 4;
-	my $when = time() + 4;
-	$self->{timer2}->{arg_ref}->[2] = $when;
-	$self->{timer2}->setNextTime($when);
-}
-
 sub handleResponse {
 	my ($self, $line) = @_;
 

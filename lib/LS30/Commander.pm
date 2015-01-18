@@ -319,21 +319,6 @@ sub handleGSM {
 
 # ---------------------------------------------------------------------------
 
-=item I<handleDisconnect($string)>
-
-This function is called if our client socket is disconnected.
-
-=cut
-
-sub handleDisconnect {
-	my ($self) = @_;
-
-	# Nothing to do?
-}
-
-
-# ---------------------------------------------------------------------------
-
 =item I<getSetting($setting_name, $cached)>
 
 Return a condvar which will receive

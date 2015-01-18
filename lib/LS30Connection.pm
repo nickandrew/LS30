@@ -58,24 +58,6 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item I<disconnect($self)>
-
-There was an Error or EOF on our socket connection. Remove us from the
-specified selector, close our socket (disconnect) and run the Disconnect
-event handler.
-
-=cut
-
-sub disconnect {
-	my ($self) = @_;
-
-	$self->SUPER::disconnect();
-	$self->runHandler('Disconnect');
-}
-
-
-# ---------------------------------------------------------------------------
-
 =item I<sendCommand($string)>
 
 Send a command to the connected socket.
@@ -238,8 +220,6 @@ sub runHandler {
 		$object->handleAT(@_);
 	} elsif ($type eq 'GSM') {
 		$object->handleGSM(@_);
-	} elsif ($type eq 'Disconnect') {
-		$object->handleDisconnect(@_);
 	} else {
 		LS30::Log::timePrint("No handler function defined for $type");
 	}

@@ -152,22 +152,6 @@ sub handleGSM {
 	}
 }
 
-
-# ---------------------------------------------------------------------------
-
-=item I<handleDisconnect()>
-
-Handle a disconnection. Pass to above.
-
-=cut
-
-sub handleDisconnect {
-	my ($self) = @_;
-
-	LS30::Log::timePrint("Disconnected");
-	$self->{handler}->handleDisconnect();
-}
-
 =back
 
 =cut
