@@ -41,6 +41,17 @@ sub new {
 	bless $self, $class;
 
 	my $ls30c = $self->{ls30c};
+
+	$ls30c->onConnectFail(sub {
+		LS30::Log::timePrint("Watch2: Connection to $server_address failed, retrying");
+		shift->retryConnect();
+	});
+
+	$ls30c->onDisconnect(sub {
+		LS30::Log::timePrint("Watch2: Disconnected from $server_address, retrying");
+		shift->retryConnect();
+	});
+
 	if (!$ls30c->connect()) {
 		die "Unable to connect to server socket";
 	}
