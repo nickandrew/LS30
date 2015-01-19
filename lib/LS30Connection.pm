@@ -32,14 +32,16 @@ use base qw(AlarmDaemon::ServerSocket);
 
 # ---------------------------------------------------------------------------
 
-=item I<new($server_address)>
+=item I<new($server_address, %args)>
 
-Return a new LS30Connection. At this time, the socket is not connected.
+Return a new LS30Connection. The server address defaults to env LS30_SERVER.
+
+Optional args hashref:  See perldoc for AlarmDaemon::ServerSocket
 
 =cut
 
 sub new {
-	my ($class, $server_address) = @_;
+	my ($class, $server_address, %args) = @_;
 
 	if (!defined $server_address) {
 		$server_address = $ENV{'LS30_SERVER'};
@@ -49,7 +51,7 @@ sub new {
 		}
 	}
 
-	my $self = $class->SUPER::new($server_address);
+	my $self = $class->SUPER::new($server_address, %args);
 	bless $self, $class;
 
 	return $self;

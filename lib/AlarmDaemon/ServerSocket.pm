@@ -36,16 +36,24 @@ use base qw(AlarmDaemon::CommonSocket Timer);
 
 # ---------------------------------------------------------------------------
 
-=item I<new($peer_addr)>
+=item I<new($peer_addr, %args)>
 
 Connect to the server (identified as host:port) and return the newly
 instantiated AlarmDaemon::ServerSocket object. If unable to connect,
 return undef.
 
+Optional args hashref:
+
+  no_connect                 Do not try to connect automatically
+
+  on_connect_fail            Sub to be called when a connect fails
+
+  on_disconnect              Sub to be called after a disconnection
+
 =cut
 
 sub new {
-	my ($class, $peer_addr) = @_;
+	my ($class, $peer_addr, %args) = @_;
 
 	my $self = {
 		connect_sub       => [],  # Array of subs to call after connected
@@ -59,12 +67,25 @@ sub new {
 
 	bless $self, $class;
 
+	# Set function to be called on connect failure
+	if ($args{on_connect_fail}) {
+		$self->{on_connect_fail} = $args{on_connect_fail};
+	}
+
+	# Set function to be called after a disconnection
+	if ($args{on_disconnect}) {
+		$self->{on_disconnect} = $args{on_disconnect};
+	}
+
 	# This is a bit crappy; try to connect synchronously and before any
 	# establishment of onConnectFail or onDisconnect subs.
-	if ($self->connect()) {
-		LS30::Log::timePrint("Connected to $peer_addr");
-	} else {
-		LS30::Log::timePrint("Initial connection to $peer_addr failed");
+	# Changed: Now optional
+	if (!$args{no_connect}) {
+		if ($self->connect()) {
+			LS30::Log::timePrint("Connected to $peer_addr");
+		} else {
+			LS30::Log::timePrint("Initial connection to $peer_addr failed");
+		}
 	}
 
 	return $self;
