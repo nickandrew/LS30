@@ -89,21 +89,11 @@ Only a single server may be used at one time.
 sub addServer {
 	my ($self, $peer_addr) = @_;
 
-	my $object = LS30Connection->new($peer_addr);
+	my $object = LS30Connection->new($peer_addr, reconnect => 1);
 	if (!$object) {
 		LS30::Log::timePrint("Unable to instantiate an LS30Connection to $peer_addr");
 		return;
 	}
-
-	$object->onConnectFail(sub {
-		LS30::Log::timePrint("Controller: Connection to $peer_addr failed, retrying");
-		shift->retryConnect();
-	});
-
-	$object->onDisconnect(sub {
-		LS30::Log::timePrint("Controller: Disconnected from $peer_addr, retrying");
-		shift->retryConnect();
-	});
 
 	my $ls30cmdr = LS30::Commander->new($object, 5);
 	if (!$ls30cmdr) {

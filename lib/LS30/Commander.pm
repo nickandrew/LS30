@@ -46,16 +46,6 @@ sub new {
 		ls30c         => $ls30c,  # Connection to LS30 device
 	};
 
-	$ls30c->onConnectFail(sub {
-		LS30::Log::timePrint("Commander: Connection failed, retrying");
-		shift->retryConnect();
-	});
-
-	$ls30c->onDisconnect(sub {
-		LS30::Log::timePrint("Commander: Disconnected, retrying");
-		shift->retryConnect();
-	});
-
 	if (defined $timeout && $timeout > 0) {
 		$self->{timeout} = $timeout;
 	} else {
