@@ -56,7 +56,6 @@ sub new {
 	my ($class, $peer_addr, %args) = @_;
 
 	my $self = {
-		connect_sub       => [],  # Array of subs to call after connected
 		current_state     => 'disconnected',
 		peer_addr         => $peer_addr,
 		handler           => undef,
@@ -243,11 +242,6 @@ sub connect {
 
 	if ($self->{on_connect}) {
 		$self->{on_connect}->($self);
-	}
-
-	# Call all functions waiting for connection
-	while (my $sub = shift @{$self->{connect_sub}}) {
-		$sub->($self);
 	}
 
 	return 1;
@@ -527,11 +521,7 @@ sub send {
 	my ($self, $buffer) = @_;
 
 	if (!$self->isConnected()) {
-		# Queue this send until we are connected
-		push(@{$self->{connect_sub}}, sub {
-			$self->SUPER::send($buffer)
-		});
-		return;
+		die "Cannot send() to a non-connected AlarmDaemon::ServerSocket";
 	}
 
 	$self->SUPER::send($buffer);
