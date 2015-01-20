@@ -155,6 +155,28 @@ sub onDisconnect {
 
 
 # ---------------------------------------------------------------------------
+
+=item I<onConnect($sub)>
+
+Call the supplied sub immediately after every successful connection.
+
+Calling onConnect() while connected won't run the sub (unlike onConnectFail).
+
+=cut
+
+sub onConnect {
+	my $self = shift;
+
+	if (scalar @_) {
+		$self->{on_connect} = shift;
+
+		return $self;
+	}
+	return $self->{on_connect};
+}
+
+
+# ---------------------------------------------------------------------------
 # Process the disconnection action.
 # ---------------------------------------------------------------------------
 
@@ -218,6 +240,10 @@ sub connect {
 	);
 
 	$self->{poller} = $w;
+
+	if ($self->{on_connect}) {
+		$self->{on_connect}->($self);
+	}
 
 	# Call all functions waiting for connection
 	while (my $sub = shift @{$self->{connect_sub}}) {
