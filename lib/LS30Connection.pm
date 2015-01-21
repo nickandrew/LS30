@@ -38,6 +38,8 @@ Return a new LS30Connection. The server address defaults to env LS30_SERVER.
 
 Optional args hashref:  See perldoc for AlarmDaemon::ServerSocket
 
+  reconnect                  Set default reconnection functions (boolean)
+
 =cut
 
 sub new {
@@ -49,6 +51,19 @@ sub new {
 		if (!$server_address) {
 			die "Environment LS30_SERVER must be set to host:port of LS30 server";
 		}
+	}
+
+	if ($args{reconnect}) {
+
+		$args{on_connect_fail} = sub {
+			LS30::Log::timePrint("LS30Connection: Connection to $server_address failed, retrying");
+			shift->retryConnect();
+		};
+
+		$args{on_disconnect} = sub {
+			LS30::Log::timePrint("LS30Connection: Disconnected from $server_address, retrying");
+			shift->retryConnect();
+		};
 	}
 
 	my $self = $class->SUPER::new($server_address, %args);
