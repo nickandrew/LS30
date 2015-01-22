@@ -56,6 +56,16 @@ sub new {
 
 	$ls30c->setHandler($self);
 
+	$ls30c->onConnect(sub {
+
+		# Send a pending command, if any
+		if ($self->{command_queue}->[0]) {
+			my $lr = $self->{command_queue}->[0];
+			my ($cmd, $cv, $timeout) = @$lr;
+			$self->_sendCommand($cmd, $timeout);
+		}
+	});
+
 	return $self;
 }
 
@@ -65,19 +75,22 @@ sub new {
 # ---------------------------------------------------------------------------
 
 sub _sendCommand {
-	my ($self, $string) = @_;
+	my ($self, $string, $timeout) = @_;
 
 	my $ls30c  = $self->{ls30c};
-	my $socket = $ls30c->socket();
 
-	if (!$socket) {
-		die "Unable to _sendCommand(): Not connected";
-	}
-
-	$socket->send($string);
 	if ($ENV{LS30_DEBUG}) {
 		LS30::Log::timePrint("Sent: $string");
 	}
+
+	$ls30c->send($string . "\r\n");
+
+	$self->{response_timer} = AnyEvent->timer(
+		after => $timeout,
+		cb    => sub {
+			$self->handleResponse(undef);
+		},
+	);
 }
 
 
@@ -93,18 +106,24 @@ Return a condvar which will receive the response string
 =cut
 
 sub queueCommand {
-	my ($self, $string) = @_;
+	my ($self, $string, $timeout) = @_;
+
+	$timeout ||= $self->{timeout};
 
 	my $cv = AnyEvent->condvar;
 
-	# If there's presently no command outstanding, send the command immediately
-	if (!$self->{always_queue_command} && (!$self->{command_queue} || !@{$self->{command_queue}})) {
+	# If:
+	#   presently connected
+	#   not required to always queue the command
+	#   no command outstanding
+	# Then: send the command immediately
+	if ($self->{ls30c}->isConnected() && !$self->{always_queue_command} && (!$self->{command_queue} || !@{$self->{command_queue}})) {
 		$self->{command_queue} = [];
-		$self->_sendCommand($string);
+		$self->_sendCommand($string, $timeout);
 	}
 
 	# Queue up the command and associated callback
-	push(@{$self->{command_queue}}, [$string, $cv]);
+	push(@{$self->{command_queue}}, [$string, $cv, $timeout]);
 
 	return $cv;
 }
@@ -122,15 +141,15 @@ Return undef if no response was received after a timeout.
 =cut
 
 sub sendCommand {
-	my ($self, $string) = @_;
+	my ($self, $string, $timeout) = @_;
 
-	my $cv = $self->queueCommand($string);
+	my $cv = $self->queueCommand($string, $timeout);
 
 	my $response = $cv->recv();
 
 	if (!defined $response) {
 		# Timeout
-		LS30::Log::timePrint("Timeout or error on on sendCommand wait for response");
+		LS30::Log::timePrint("Timeout or error on sendCommand wait for response");
 	}
 
 	return $response;
@@ -252,6 +271,10 @@ Any response received is sent to the requestor via condvar.
 
 sub handleResponse {
 	my ($self, $string) = @_;
+
+	# Delete timer which catches no response
+	# (As this is obviously a response to the only possible outstanding command)
+	delete $self->{response_timer};
 
 	# Call callback if any, and send next command
 	if (@{$self->{command_queue}}) {
