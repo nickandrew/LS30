@@ -79,18 +79,14 @@ sub new {
 
 Send a command to the connected socket.
 
+Dies if not presently connected.
+
 =cut
 
 sub sendCommand {
 	my ($self, $string) = @_;
 
-	my $socket = $self->{socket};
-
-	if (!$socket) {
-		die "Unable to sendCommand(): Not connected";
-	}
-
-	$socket->send($string);
+	$self->send($string);
 	if ($ENV{LS30_DEBUG}) {
 		LS30::Log::timePrint("Sent: $string");
 	}
