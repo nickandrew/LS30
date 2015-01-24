@@ -95,6 +95,8 @@ sub addServer {
 		return;
 	}
 
+	$object->connect();
+
 	my $ls30cmdr = LS30::Commander->new($object, 5);
 	if (!$ls30cmdr) {
 		die "Unable to instantiate a new LS30::Commander to $peer_addr";

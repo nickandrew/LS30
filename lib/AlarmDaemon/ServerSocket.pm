@@ -76,17 +76,6 @@ sub new {
 		$self->{on_disconnect} = $args{on_disconnect};
 	}
 
-	# This is a bit crappy; try to connect synchronously and before any
-	# establishment of onConnectFail or onDisconnect subs.
-	# Changed: Now optional
-	if (!$args{no_connect}) {
-		if ($self->connect()) {
-			LS30::Log::timePrint("Connected to $peer_addr");
-		} else {
-			LS30::Log::timePrint("Initial connection to $peer_addr failed");
-		}
-	}
-
 	return $self;
 }
 
