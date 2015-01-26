@@ -41,12 +41,12 @@ sub new {
 	my $ls30c = $self->{ls30c};
 
 	$ls30c->onConnectFail(sub {
-		LS30::Log::timePrint("Watch: Connection to $server_address failed, retrying");
+		LS30::Log::error("Watch: Connection to $server_address failed, retrying");
 		shift->retryConnect();
 	});
 
 	$ls30c->onDisconnect(sub {
-		LS30::Log::timePrint("Watch: Disconnected from $server_address, retrying");
+		LS30::Log::error("Watch: Disconnected from $server_address, retrying");
 		shift->retryConnect();
 	});
 
@@ -76,7 +76,7 @@ sub new {
 sub disc_timer_event {
 	my ($ref) = @_;
 
-	LS30::Log::timePrint("Disconnected, retrying connect");
+	LS30::Log::error("Disconnected, retrying connect");
 	my $self  = $ref->[1];
 	my $ls30c = $self->{ls30c};
 	my $timer = $self->{timer2};
@@ -137,7 +137,7 @@ sub handleResponse {
 	my $resp_hr = LS30Command::parseResponse($line);
 
 	if (!$resp_hr) {
-		LS30::Log::timePrint("Received unexpected response $line");
+		LS30::Log::error("Received unexpected response $line");
 		return;
 	}
 
@@ -149,7 +149,7 @@ sub handleResponseMessage {
 	my ($self, $response_obj) = @_;
 
 	if (!$response_obj) {
-		LS30::Log::timePrint("Received unexpected response");
+		LS30::Log::error("Received unexpected response");
 		return;
 	}
 

@@ -44,12 +44,12 @@ sub new {
 	my $ls30c = $self->{ls30c};
 
 	$ls30c->onConnectFail(sub {
-		LS30::Log::timePrint("RunScripts: Connection to $server_address failed, retrying");
+		LS30::Log::error("RunScripts: Connection to $server_address failed, retrying");
 		shift->retryConnect();
 	});
 
 	$ls30c->onDisconnect(sub {
-		LS30::Log::timePrint("RunScripts: Disconnected from $server_address, retrying");
+		LS30::Log::error("RunScripts: Disconnected from $server_address, retrying");
 		shift->retryConnect();
 	});
 
@@ -89,7 +89,7 @@ sub addSelector {
 sub disc_timer_event {
 	my ($ref, $selector) = @_;
 
-	LS30::Log::timePrint("Disconnected, retrying connect");
+	LS30::Log::error("Disconnected, retrying connect");
 	my $self  = $ref->[1];
 	my $ls30c = $self->{ls30c};
 	my $timer = $self->{timer2};
@@ -102,7 +102,7 @@ sub disc_timer_event {
 		}
 
 		$ref->[2] += $ref->[3];
-		LS30::Log::timePrint(sprintf("Connect failed, retry in %d sec", $ref->[3]));
+		LS30::Log::error(sprintf("Connect failed, retry in %d sec", $ref->[3]));
 		$timer->setNextTime($ref->[2]);
 	} else {
 		LS30::Log::timePrint("Connected");
@@ -224,7 +224,7 @@ sub handleResponse {
 	my $resp_hr = LS30Command::parseResponse($line);
 
 	if (!$resp_hr) {
-		LS30::Log::timePrint("Received unexpected response $line");
+		LS30::Log::error("Received unexpected response $line");
 		return;
 	}
 
@@ -236,7 +236,7 @@ sub handleResponseMessage {
 	my ($self, $response_obj) = @_;
 
 	if (!$response_obj) {
-		LS30::Log::timePrint("Received unexpected response");
+		LS30::Log::error("Received unexpected response");
 		return;
 	}
 

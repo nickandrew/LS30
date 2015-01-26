@@ -200,7 +200,7 @@ sub connect {
 	);
 
 	if (!$socket) {
-		LS30::Log::timePrint("Cannot create a new socket to $self->{peer_addr}");
+		LS30::Log::error("Cannot create a new socket to $self->{peer_addr}");
 		if ($self->{on_connect_fail}) {
 			$self->{on_connect_fail}->($self);
 		}

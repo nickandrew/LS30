@@ -124,7 +124,7 @@ sub handleRead {
 	if (!defined $n) {
 
 		# Error on the socket
-		LS30::Log::timePrint("Client socket error");
+		LS30::Log::error("Client socket error");
 		$handler->removeClient($self);
 		$self->disconnect();
 		return;

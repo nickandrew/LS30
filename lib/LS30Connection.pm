@@ -56,12 +56,12 @@ sub new {
 	if ($args{reconnect}) {
 
 		$args{on_connect_fail} = sub {
-			LS30::Log::timePrint("LS30Connection: Connection to $server_address failed, retrying");
+			LS30::Log::error("LS30Connection: Connection to $server_address failed, retrying");
 			shift->retryConnect();
 		};
 
 		$args{on_disconnect} = sub {
-			LS30::Log::timePrint("LS30Connection: Disconnected from $server_address, retrying");
+			LS30::Log::error("LS30Connection: Disconnected from $server_address, retrying");
 			shift->retryConnect();
 		};
 	}
@@ -217,7 +217,7 @@ sub runHandler {
 	my $object = $self->{handler};
 
 	if (!defined $object) {
-		LS30::Log::timePrint("Cannot run handler for $type");
+		LS30::Log::error("Cannot run handler for $type");
 		return;
 	}
 
@@ -234,7 +234,7 @@ sub runHandler {
 	} elsif ($type eq 'GSM') {
 		$object->handleGSM(@_);
 	} else {
-		LS30::Log::timePrint("No handler function defined for $type");
+		LS30::Log::error("No handler function defined for $type");
 	}
 }
 

@@ -70,7 +70,7 @@ sub addListener {
 
 	my $listener = AlarmDaemon::ListenSocket->new($socket, $self);
 	if (!$listener) {
-		LS30::Log::timePrint("Unable to add listener");
+		LS30::Log::error("Unable to add listener");
 		return;
 	}
 
@@ -91,7 +91,7 @@ sub addServer {
 
 	my $object = LS30Connection->new($peer_addr, reconnect => 1);
 	if (!$object) {
-		LS30::Log::timePrint("Unable to instantiate an LS30Connection to $peer_addr");
+		LS30::Log::error("Unable to instantiate an LS30Connection to $peer_addr");
 		return;
 	}
 
