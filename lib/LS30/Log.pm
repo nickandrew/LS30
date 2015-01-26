@@ -54,14 +54,48 @@ sub logFormat {
 
 =item I<timePrint($string)>
 
-Format the supplied string in the logging format then print to STDOUT.
+Format the supplied string in the logging format then print to STDERR.
 
 =cut
 
 sub timePrint {
 	my ($string) = @_;
 
-	print logFormat($string);
+	print STDERR logFormat($string);
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<debug($string)>
+
+If debugging is enabled, then format and print the string.
+
+=cut
+
+sub debug {
+	my ($string) = @_;
+
+	if ($ENV{LS30_DEBUG} && defined $string) {
+		print STDERR logFormat($string);
+	}
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<error($string)>
+
+Format and print an error string.
+
+=cut
+
+sub error {
+	my ($string) = @_;
+
+	if (defined $string) {
+		print STDERR logFormat('Error: ' . $string);
+	}
 }
 
 =back
