@@ -79,9 +79,7 @@ sub _sendCommand {
 
 	my $ls30c  = $self->{ls30c};
 
-	if ($ENV{LS30_DEBUG}) {
-		LS30::Log::timePrint("Sent: $string");
-	}
+	LS30::Log::debug("Sent: $string");
 
 	$ls30c->send($string . "\r\n");
 
@@ -149,7 +147,7 @@ sub sendCommand {
 
 	if (!defined $response) {
 		# Timeout
-		LS30::Log::timePrint("Timeout or error on sendCommand wait for response");
+		LS30::Log::debug("Timeout or error on sendCommand wait for response");
 	}
 
 	return $response;

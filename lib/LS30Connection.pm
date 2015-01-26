@@ -87,9 +87,7 @@ sub sendCommand {
 	my ($self, $string) = @_;
 
 	$self->send($string);
-	if ($ENV{LS30_DEBUG}) {
-		LS30::Log::timePrint("Sent: $string");
-	}
+	LS30::Log::debug("Sent: $string");
 }
 
 
