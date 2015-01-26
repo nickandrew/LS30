@@ -28,6 +28,7 @@ use strict;
 use warnings;
 
 use LS30::Device qw();
+use LS30::Log qw();
 use LS30::ResponseMessage qw();
 
 =item I<new()>
@@ -116,7 +117,7 @@ sub getSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		print STDERR "Is not a setting: <$setting_name>\n";
+		LS30::Log::error("Is not a setting: <$setting_name>");
 		$cv->send(undef);
 		return $cv;
 	}
@@ -277,7 +278,7 @@ sub getDeviceCount {
 	my $cv = AnyEvent->condvar;
 
 	if (!_testDeviceType($device_type)) {
-		print STDERR "Invalid device type <$device_type>\n";
+		LS30::Log::error("Invalid device type <$device_type>");
 		$cv->send(undef);
 		return $cv;
 	}
@@ -330,13 +331,13 @@ sub getDeviceStatus {
 	my $cv = AnyEvent->condvar;
 
 	if (!_testDeviceType($device_type)) {
-		print STDERR "Invalid device type <$device_type>\n";
+		LS30::Log::error("Invalid device type <$device_type>");
 		$cv->send(undef);
 		return $cv;
 	}
 
 	if ($device_number < 0) {
-		print STDERR "Invalid device number <$device_number>\n";
+		LS30::Log::error("Invalid device number <$device_number>");
 		$cv->send(undef);
 		return $cv;
 	}
@@ -349,7 +350,7 @@ sub getDeviceStatus {
 
 		if ($device_number >= $howmany) {
 			# Asked for a device beyond the end of the array
-			warn "Device number beyond end of array.\n";
+			LS30::Log::error("Device number beyond end of array.");
 			$cv->send(undef);
 			return;
 		}
@@ -411,7 +412,7 @@ sub _initDevices {
 		my $query = {title => 'Device Count', device_type => $device_type};
 		my $cmd = LS30Command::queryCommand($query);
 		if (!$cmd) {
-			warn "Unable to query device count for type <$device_type>\n";
+			LS30::Log::error("Unable to query device count for type <$device_type>");
 			next;
 		}
 

@@ -361,7 +361,7 @@ sub getSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		warn "Is not a setting: <$setting_name>\n";
+		LS30::Log::error("Is not a setting: <$setting_name>");
 		$cv->send(undef);
 		return $cv;
 	}
@@ -397,7 +397,7 @@ sub setSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		warn "Is not a setting: <$setting_name>\n";
+		LS30::Log::error("Is not a setting: <$setting_name>");
 		$cv->send(undef);
 		return $cv;
 	}
@@ -405,7 +405,7 @@ sub setSetting {
 	# Test if the supplied value is valid (works for enumerated types)
 	my $raw_value = LS30Command::testSettingValue($setting_name, $value);
 	if (!defined $raw_value) {
-		warn "Value <$value> is not valid for setting <$setting_name>\n";
+		LS30::Log::error("Value <$value> is not valid for setting <$setting_name>");
 		$cv->send(undef);
 		return $cv;
 	}
@@ -442,7 +442,7 @@ sub clearSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		warn "Is not a setting: <$setting_name>\n";
+		LS30::Log::error("Is not a setting: <$setting_name>");
 		$cv->send(undef);
 		return $cv;
 	}
@@ -454,8 +454,6 @@ sub clearSetting {
 		my $response = $cv2->recv();
 		my $resp_obj = LS30::ResponseMessage->new($response);
 		# TODO: Test the response for validity/error
-		use Data::Dumper qw(Dumper);
-		print STDERR "Response: ", Dumper($resp_obj);
 		$cv->send(1);
 	});
 
@@ -481,7 +479,7 @@ sub getDeviceCount {
 	my $cmd = LS30Command::queryCommand($query);
 	if (!$cmd) {
 		# Possibly the device_type is invalid.
-		warn "Unable to query device count for type <$device_type>\n";
+		LS30::Log::error("Unable to query device count for type <$device_type>");
 		$cv->send(undef);
 		return $cv;
 	}
