@@ -32,6 +32,7 @@ use warnings;
 
 use Carp qw(carp confess);
 
+use LS30::Log qw();
 use LS30::Type qw();
 
 my $commands      = {};
@@ -510,11 +511,11 @@ sub addCommand {
 	my $key   = $hr->{key};
 
 	if (exists $commands->{$title}) {
-		warn "Command re-added: $title\n";
+		LS30::Log::error("Command re-added: $title");
 	}
 
 	if (exists $command_bykey->{$key}) {
-		warn "Command key re-added: $title, $key\n";
+		LS30::Log::error("Command key re-added: $title, $key");
 	}
 
 	$commands->{$title}    = $hr;
@@ -692,7 +693,7 @@ sub queryCommand {
 						"Args for %s is missing key %s (%s)",
 						$title, $key, ($type ? "code table $type" : "function"),
 					);
-					warn $s;
+					LS30::Log::error($s);
 				}
 
 				my $input = $args->{$key};
@@ -705,7 +706,7 @@ sub queryCommand {
 				}
 
 				if (!defined $value) {
-					warn "Illegal value <$input> for <$key>\n";
+					LS30::Log::error("Illegal value <$input> for <$key>");
 					return undef;
 				}
 
@@ -777,7 +778,7 @@ sub setCommand {
 				my $value;
 
 				if (!defined $input) {
-					warn "Needed set command key <$key> is missing";
+					LS30::Log::error("Needed set command key <$key> is missing");
 					return undef;
 				} else {
 					$value = _testValue($hr2, $input);
@@ -1008,7 +1009,7 @@ sub resp_boolean {
 				return 0;
 			}
 		} else {
-			warn "Invalid boolean string: $string\n";
+			LS30::Log::error("Invalid boolean string: $string");
 			return 0;
 		}
 	}
@@ -1138,7 +1139,7 @@ sub resp_decimal_time {
 		} elsif ($string =~ /^(\d\d):(\d\d)$/) {
 			return "$1$2";
 		} else {
-			warn "Incorrect decimal_time $string";
+			LS30::Log::error("Incorrect decimal_time $string");
 			return '????';
 		}
 	}
@@ -1382,7 +1383,7 @@ sub _testValue {
 			my $type = $hr->{type};
 			my $ok = LS30::Type::getCode($type, $input);
 			if (!defined $ok) {
-				warn "Incorrect value <$input> for table <$type>\n";
+				LS30::Log::error("Incorrect value <$input> for table <$type>");
 			}
 			return $ok;
 		}
@@ -1410,12 +1411,12 @@ sub testSettingValue {
 	my $hr = getCommand($title);
 
 	if (!defined $hr || !$hr->{is_setting}) {
-		warn "No setting <$title>\n";
+		LS30::Log::error("No setting <$title>");
 		return 0;
 	}
 
 	if (!$hr->{args} || !$hr->{args}->[0]) {
-		warn "Setting <$title> has no defined arguments\n";
+		LS30::Log::error("Setting <$title> has no defined arguments");
 		return 0;
 	}
 
