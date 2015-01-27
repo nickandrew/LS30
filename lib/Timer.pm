@@ -231,6 +231,7 @@ If func_ref is set, then call the function like this:
 sub watchdogEvent {
 	my ($self) = @_;
 
+	LS30::Log::debug("Calling watchdogEvent");
 	my $func_ref = $self->{func_ref};
 	my $ref      = $self->{arg_ref};
 
@@ -241,6 +242,7 @@ sub watchdogEvent {
 	}
 
 	if ($func_ref) {
+		LS30::Log::debug("Calling func_ref");
 		&$func_ref($ref);
 	}
 }

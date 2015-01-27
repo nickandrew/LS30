@@ -62,7 +62,11 @@ sub new {
 		if ($self->{command_queue}->[0]) {
 			my $lr = $self->{command_queue}->[0];
 			my ($cmd, $cv, $timeout) = @$lr;
+			LS30::Log::debug("Connect callback: sending queued command $cmd");
 			$self->_sendCommand($cmd, $timeout);
+		}
+		else {
+			LS30::Log::debug("Connect callback: nothing to send");
 		}
 	});
 
@@ -83,9 +87,11 @@ sub _sendCommand {
 
 	$ls30c->send($string . "\r\n");
 
+	LS30::Log::debug("Setting up timer");
 	$self->{response_timer} = AnyEvent->timer(
 		after => $timeout,
 		cb    => sub {
+			LS30::Log::debug("Timer callback");
 			$self->handleResponse(undef);
 		},
 	);
@@ -141,6 +147,7 @@ Return undef if no response was received after a timeout.
 sub sendCommand {
 	my ($self, $string, $timeout) = @_;
 
+	LS30::Log::debug("Commander: sendCommand($string)");
 	my $cv = $self->queueCommand($string, $timeout);
 
 	my $response = $cv->recv();
@@ -292,6 +299,12 @@ Any response received is sent to the requestor via condvar.
 
 sub handleResponse {
 	my ($self, $string) = @_;
+
+	if (defined $string) {
+		LS30::Log::debug("Got a response: $string");
+	} else {
+		LS30::Log::debug("No response");
+	}
 
 	# Delete timer which catches no response
 	# (As this is obviously a response to the only possible outstanding command)
