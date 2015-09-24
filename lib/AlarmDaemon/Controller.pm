@@ -192,8 +192,9 @@ This function is called by a client object whenever data has been
 received on that connection.
 
 The received data is accumulated in a buffer. All complete lines in the
-buffer are treated as commands: the command is queued to the server,
-and when a response is received, the response is sent back to the client.
+buffer are treated as commands: the command (sans terminating newline)
+is queued to the server, and when a response is received, the response
+is sent back to the client.
 
 That means responses are sent only to the client that requested it.
 
@@ -212,7 +213,7 @@ sub clientRead {
 	my $buffer = $self->{client}->{$socket}->{buffer};
 	$buffer .= $data;
 
-	while ($buffer =~ /^([^\r\n]*\r?\n)(.*)/) {
+	while ($buffer =~ /^([^\r\n]*)\r?\n(.*)/) {
 		my ($line, $rest) = ($1, $2);
 
 		my $cv = $self->{server}->queueCommand($line);
