@@ -201,6 +201,21 @@ sub processLine {
 
 # ---------------------------------------------------------------------------
 
+=item I<setHandler($object)>
+
+Keep a reference to the object which will process all our emitted events.
+
+=cut
+
+sub setHandler {
+	my ($self, $object) = @_;
+
+	$self->{handler} = $object;
+}
+
+
+# ---------------------------------------------------------------------------
+
 =item I<runHandler($type, @args)>
 
 Run the handler function appropriate to the specified type $type.

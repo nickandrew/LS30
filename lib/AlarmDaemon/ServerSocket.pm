@@ -58,7 +58,6 @@ sub new {
 	my $self = {
 		current_state     => 'disconnected',
 		peer_addr         => $peer_addr,
-		handler           => undef,
 		watchdog_interval => 320,
 		pending           => '',
 		retry_default     => 5,
@@ -300,21 +299,6 @@ sub retryConnect {
 
 # ---------------------------------------------------------------------------
 
-=item I<setHandler($object)>
-
-Keep a reference to the object which will process all our emitted events.
-
-=cut
-
-sub setHandler {
-	my ($self, $object) = @_;
-
-	$self->{handler} = $object;
-}
-
-
-# ---------------------------------------------------------------------------
-
 =item I<watchdogTime()>
 
 Returns a time_t value representing at what time this object will detect
@@ -394,7 +378,7 @@ sub watchdogEvent {
 
 Read data from the socket and postprocess it.
 
-The call chain is: handleRead -> addBuffer -> processLine -> serverRead
+The call chain is: handleRead -> addBuffer -> processLine
 
 =cut
 
@@ -494,7 +478,7 @@ Process one full line of received data. Run an appropriate handler.
 sub processLine {
 	my ($self, $line) = @_;
 
-	$self->{handler}->serverRead($line . "\r\n");
+	die "AlarmDaemon::ServerSocket::processLine() needs to be implemented by a subclass.";
 }
 
 
