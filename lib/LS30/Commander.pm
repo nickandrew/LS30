@@ -100,7 +100,7 @@ sub _sendCommand {
 
 # ---------------------------------------------------------------------------
 
-=item I<queueCommand($string)>
+=item I<queueCommand($string [, $timeout])>
 
 Queue the supplied command to be sent to the device.
 
@@ -135,7 +135,9 @@ sub queueCommand {
 
 # ---------------------------------------------------------------------------
 
-=item I<sendCommand($string)>
+=item I<sendCommand($string [, $timeout])>
+
+Deprecated method, as it is synchronous.
 
 Send a command to the LS30 and return the associated response
 as a string.
@@ -318,8 +320,9 @@ sub handleResponse {
 
 	# If there's a pending command, send it now
 	if ($self->{command_queue}->[0]) {
-		my $cmd = $self->{command_queue}->[0]->[0];
-		$self->_sendCommand($cmd);
+		my $lr = $self->{command_queue}->[0];
+		my ($cmd, $cv, $timeout) = @$lr;
+		$self->_sendCommand($cmd, $timeout);
 	}
 }
 
