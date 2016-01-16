@@ -33,7 +33,7 @@ foreach my $setting_name (@ARGV) {
 		if (defined $value) {
 			printf("%-20s | %s\n", $setting_name, $value);
 		} else {
-			print STDERR "No value for '$setting_name'";
+			print STDERR "No value for '$setting_name'\n";
 		}
 		$guard->end();
 	});
