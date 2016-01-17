@@ -66,7 +66,8 @@ foreach my $device_name (@device_code_list) {
 
 			my $dev_type_string = LS30::Type::getString('Device Specific Type', $dev_type);
 
-			$s .= sprintf("%s %s %s-%s ID is %s\n",
+			$s .= sprintf("%s type %s %s %s-%s ID is %s\n",
+				$device_number,
 				$device_name,
 				$dev_type_string,
 				$z,
@@ -79,13 +80,16 @@ foreach my $device_name (@device_code_list) {
 				# Add a template to the device list
 				my $hr = {
 					name => 'Sample',
+					number => $device_number,
 					type => $dev_type_string,
 					zone => sprintf("%s-%s", $z, $c),
 				};
 				bless $hr, 'LS30::Device';
 
 				$devs->{$dev_id} = $hr;
-				printf("Added device %s type %s\n", $dev_id, $dev_type_string);
+				printf("Added device number %s id %s type %s\n", $device_number, $dev_id, $dev_type_string);
+			} else {
+				$devs->{$dev_id}->{number} = $device_number;
 			}
 
 			$dev_seen->{$dev_id} = 1;
