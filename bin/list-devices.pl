@@ -6,6 +6,7 @@
 #
 #   Options:
 #     -h host:port       Override the server hostname and port
+#     -v                 Verbose (additional info about each enrolled device)
 #     -y                 Create/Modify etc/devices.yaml file
 
 use strict;
@@ -20,9 +21,9 @@ use LS30::Type qw();
 use LS30Command qw();
 use LS30Connection qw();
 
-use vars qw($opt_h $opt_y);
+use vars qw($opt_h $opt_v $opt_y);
 
-getopts('h:y');
+getopts('h:vy');
 
 my $devices_file = "etc/devices.yaml";
 
@@ -61,6 +62,7 @@ foreach my $device_name (@device_code_list) {
 
 		if ($response =~ /!k.(..)(......)(....)(..)(..)(..)(........)(.+)&/) {
 			my ($dev_type, $dev_id, $junk2, $junk3, $z, $c, $config, $rest) = ($1, $2, $3, $4, $5, $6, $7, $8);
+			$s2 .= join(' ', $1, $2, $3, $4, $5, $6, $7, $8) . "\n";
 
 			my $dev_type_string = LS30::Type::getString('Device Specific Type', $dev_type);
 
@@ -83,16 +85,15 @@ foreach my $device_name (@device_code_list) {
 				bless $hr, 'LS30::Device';
 
 				$devs->{$dev_id} = $hr;
+				printf("Added device %s type %s\n", $dev_id, $dev_type_string);
 			}
 
 			$dev_seen->{$dev_id} = 1;
 
 			my $hr = LS30Command::parseDeviceConfig($config);
-			if ($hr) {
+			if ($hr && $opt_v) {
 				$s .= Data::Dumper::Dumper($hr);
 			}
-
-			$s2 .= join(' ', $1, $2, $3, $4, $5, $6, $7, $8) . "\n";
 		}
 	}
 }
@@ -107,9 +108,9 @@ if ($opt_y) {
 	}
 
 	YAML::DumpFile($devices_file, $devs);
-} else {
-	print $s;
-	print $s2;
 }
+
+print $s;
+print $s2;
 
 exit(0);
