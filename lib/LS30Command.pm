@@ -444,11 +444,43 @@ my $learn_commands = [
 my $delete_commands = [
 
 	{
-		title    => 'Delete Burglar Sensor',
-		key      => 'ibk',
-		no_query => 1,
-		no_set   => 1,
-		args     => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
+		title      => 'Delete Burglar Sensor',
+		key        => 'ibk',
+		no_query   => 1,
+		no_set     => 1,
+		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
+	},
+
+	{
+		title      => 'Delete Controller',
+		key        => 'ick',
+		no_query   => 1,
+		no_set     => 1,
+		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
+	},
+
+	{
+		title      => 'Delete Fire Sensor',
+		key        => 'ifk',
+		no_query   => 1,
+		no_set     => 1,
+		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
+	},
+
+	{
+		title      => 'Delete Medical Button',
+		key        => 'imk',
+		no_query   => 1,
+		no_set     => 1,
+		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
+	},
+
+	{
+		title      => 'Delete Special Sensor',
+		key        => 'iek',
+		no_query   => 1,
+		no_set     => 1,
+		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
 ];
@@ -643,6 +675,50 @@ sub _password {
 }
 
 # ---------------------------------------------------------------------------
+# Iterate through 'query_args' array to build strings to append to a command.
+# 'query_args' is for mandatory arguments to provide to a parameterised command.
+# 'args' is for providing values to a 'set' command, and for interpreting responses.
+# Return undef if there's an error, else appended string.
+# ---------------------------------------------------------------------------
+
+sub _addArguments {
+	my ($cmd, $args, $lr, $title) = @_;
+
+	foreach my $hr2 (@$lr) {
+		my $key  = $hr2->{key};
+		my $type = $hr2->{type};
+		if ($key) {
+			if (!exists $args->{$key}) {
+				my $s = sprintf(
+					"Args for %s is missing key %s (%s)",
+					$title, $key, ($type ? "code table $type" : "function"),
+				);
+				LS30::Log::error($s);
+				return undef;
+			}
+
+			my $input = $args->{$key};
+			my $value;
+			if ($hr2->{func}) {
+				my $func = $hr2->{func};
+				$value = &$func($input, 'encode');
+			} elsif ($type) {
+				$value = LS30::Type::getCode($type, $input);
+			}
+
+			if (!defined $value) {
+				LS30::Log::error("Illegal value <$input> for <$key>");
+				return undef;
+			}
+
+			$cmd .= $value;
+		}
+	}
+
+	return $cmd;
+}
+
+# ---------------------------------------------------------------------------
 
 =item I<queryCommand($args)>
 
@@ -683,36 +759,8 @@ sub queryCommand {
 
 	if ($cmd_spec->{query_args}) {
 		my $lr = $cmd_spec->{query_args};
-
-		foreach my $hr2 (@$lr) {
-			my $key  = $hr2->{key};
-			my $type = $hr2->{type};
-			if ($key) {
-				if (!exists $args->{$key}) {
-					my $s = sprintf(
-						"Args for %s is missing key %s (%s)",
-						$title, $key, ($type ? "code table $type" : "function"),
-					);
-					LS30::Log::error($s);
-				}
-
-				my $input = $args->{$key};
-				my $value;
-				if ($hr2->{func}) {
-					my $func = $hr2->{func};
-					$value = &$func($input, 'encode');
-				} elsif ($type) {
-					$value = LS30::Type::getCode($type, $input);
-				}
-
-				if (!defined $value) {
-					LS30::Log::error("Illegal value <$input> for <$key>");
-					return undef;
-				}
-
-				$cmd .= $value;
-			}
-		}
+		$cmd = _addArguments($cmd, $args, $lr, $title);
+		return undef if (!defined $cmd);
 	}
 
 	# Add an optional password
@@ -881,6 +929,53 @@ sub formatLearnCommand {
 	my $cmd_spec = getLearnCommandSpec($args->{title});
 	my $cmd      = '!';
 	$cmd .= $cmd_spec->{key};
+
+	$cmd .= _password($cmd_spec, $args);
+
+	$cmd .= '&';
+
+	return $cmd;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeleteCommandSpec($title)>
+
+Return the hashref specifying a specific device deletion command.
+
+=cut
+
+sub getDeleteCommandSpec {
+	my ($title) = @_;
+
+	foreach my $hr (@$delete_commands) {
+		if ($hr->{title} eq $title) {
+			return $hr;
+		}
+	}
+
+	return undef;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<formatDeleteCommand($args)>
+
+Create a delete command string, specified by the supplied $args hashref.
+
+=cut
+
+sub formatDeleteCommand {
+	my ($args) = @_;
+
+	my $cmd_spec = getDeleteCommandSpec($args->{title});
+	my $cmd      = '!';
+	$cmd .= $cmd_spec->{key};
+
+	if ($cmd_spec->{query_args}) {
+		$cmd = _addArguments($cmd, $args, $cmd_spec->{query_args}, $args->{title});
+		return undef if (!defined $cmd);
+	}
 
 	$cmd .= _password($cmd_spec, $args);
 
