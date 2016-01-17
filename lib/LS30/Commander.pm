@@ -85,7 +85,7 @@ sub _sendCommand {
 
 	LS30::Log::debug("Sent: $string");
 
-	$ls30c->send($string . "\r\n");
+	$ls30c->send($string);
 
 	LS30::Log::debug("Setting up timer");
 	$self->{response_timer} = AnyEvent->timer(
