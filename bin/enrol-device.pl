@@ -66,11 +66,11 @@ if (!$cmd) {
 
 print "Sending: $cmd\n";
 
-my $cv = $ls30cmdr->queueCommand($cmd, 180);
+my $cv = $ls30cmdr->queueCommand($cmd, 5);
 my $response = $cv->recv();
 
 if (!$response) {
-	print "No response after 180 seconds.\n";
+	print "No response after 5 seconds.\n";
 	exit(8);
 }
 
