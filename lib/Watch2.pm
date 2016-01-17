@@ -65,6 +65,8 @@ sub new {
 
 	$ls30c->setHandler($decoder);
 
+	$ls30c->onMINPIC(sub { $decoder->handleMINPIC(@_); });
+
 	# Setup a disconnection retry timer, initially disabled
 	$self->{timer2} = Timer->new(
 		func_ref  => \&disc_timer_event,

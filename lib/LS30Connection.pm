@@ -108,7 +108,7 @@ sub processLine {
 
 	if ($line =~ /^MINPIC=([0-9a-f]+)$/) {
 		my $minpic = $1;
-		$self->runHandler('MINPIC', $minpic);
+		$self->_runonfunc('MINPIC', $minpic);
 		return;
 	}
 
@@ -198,6 +198,45 @@ sub processLine {
 	LS30::Log::timePrint("Ignoring: $line");
 }
 
+# ---------------------------------------------------------------------------
+# Set/Get and/or run a function
+# ---------------------------------------------------------------------------
+
+sub _onfunc {
+	my $self = shift;
+	my $name = shift;
+
+	if (scalar @_) {
+		$self->{on_func}->{$name} = shift;
+		return $self;
+	}
+
+	return $self->{on_func}->{$name};
+}
+
+sub _runonfunc {
+	my $self = shift;
+	my $name = shift;
+
+	my $sub = $self->{on_func}->{$name};
+	if (defined $sub) {
+		$sub->(@_);
+	}
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<onMINPIC($sub)>
+
+Set or clear or get sub to be called when a MINPIC line is received.
+
+=cut
+
+sub onMINPIC {
+	my $self = shift;
+
+	return $self->_onfunc('MINPIC', @_);
+}
 
 # ---------------------------------------------------------------------------
 
@@ -235,7 +274,7 @@ sub runHandler {
 	}
 
 	if ($type eq 'MINPIC') {
-		$object->handleMINPIC(@_);
+		die "Obsolete";
 	} elsif ($type eq 'XINPIC') {
 		$object->handleXINPIC(@_);
 	} elsif ($type eq 'CONTACTID') {

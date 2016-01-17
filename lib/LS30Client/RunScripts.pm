@@ -66,6 +66,8 @@ sub new {
 
 	$ls30c->setHandler($decoder);
 
+	$ls30c->onMINPIC(sub { $decoder->handleMINPIC(@_); });
+
 	return $self;
 }
 

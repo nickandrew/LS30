@@ -486,7 +486,7 @@ sub processLine {
 
 =item I<send($buffer)>
 
-If not connected, wait until connected. Then send data to our socket.
+If not connected, die. Then send data to our socket.
 
 =cut
 

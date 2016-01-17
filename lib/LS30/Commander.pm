@@ -70,6 +70,14 @@ sub new {
 		}
 	});
 
+	$ls30c->onMINPIC(sub {
+		my ($string) = @_;
+
+		if ($self->{on_minpic}) {
+			$self->{on_minpic}->($string);
+		}
+	});
+
 	return $self;
 }
 
@@ -180,23 +188,6 @@ sub onMINPIC {
 	}
 
 	return $self->{on_minpic};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<handleMINPIC($string)>
-
-Call optional callback function on every MINPIC received.
-
-=cut
-
-sub handleMINPIC {
-	my ($self, $string) = @_;
-
-	if ($self->{on_minpic}) {
-		$self->{on_minpic}->($string);
-	}
 }
 
 
