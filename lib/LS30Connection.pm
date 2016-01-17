@@ -132,7 +132,7 @@ sub processLine {
 
 	if ($line =~ /^(!.+&)$/) {
 		my $response = $1;
-		$self->runHandler('Response', $response);
+		$self->_runonfunc('response', $response);
 		return;
 	}
 
@@ -240,6 +240,20 @@ sub onMINPIC {
 
 # ---------------------------------------------------------------------------
 
+=item I<onResponse($sub)>
+
+Set or clear or get sub to be called when a response line is received.
+
+=cut
+
+sub onResponse {
+	my $self = shift;
+
+	return $self->_onfunc('response', @_);
+}
+
+# ---------------------------------------------------------------------------
+
 =item I<setHandler($object)>
 
 Keep a reference to the object which will process all our emitted events.
@@ -280,7 +294,7 @@ sub runHandler {
 	} elsif ($type eq 'CONTACTID') {
 		$object->handleCONTACTID(@_);
 	} elsif ($type eq 'Response') {
-		$object->handleResponse(@_);
+		die "Obsolete runHandler Response";
 	} elsif ($type eq 'AT') {
 		$object->handleAT(@_);
 	} elsif ($type eq 'GSM') {

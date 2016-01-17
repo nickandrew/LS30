@@ -78,6 +78,8 @@ sub new {
 		}
 	});
 
+	$ls30c->onResponse(sub { $self->handleResponse(@_); });
+
 	return $self;
 }
 
