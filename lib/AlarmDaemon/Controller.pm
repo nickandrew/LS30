@@ -97,6 +97,9 @@ sub addServer {
 
 	$object->connect();
 
+	# Broadcast all added_device events to all clients
+	$object->onAddedDevice(sub { $self->_sendAllClients(@_); });
+
 	my $ls30cmdr = LS30::Commander->new($object, 5);
 	if (!$ls30cmdr) {
 		die "Unable to instantiate a new LS30::Commander to $peer_addr";

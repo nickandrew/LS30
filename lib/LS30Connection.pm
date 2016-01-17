@@ -132,6 +132,15 @@ sub processLine {
 
 	if ($line =~ /^(!.+&)$/) {
 		my $response = $1;
+
+		# Special handling for 'new device enrolled' messages which are not
+		# a response to a command, but are sent at the time the device is
+		# enrolled.
+		if ($response =~ /^!i[bcefm]l[0-9a-f]{14}&$/) {
+			$self->_runonfunc('added_device', $response);
+			return;
+		}
+
 		$self->_runonfunc('response', $response);
 		return;
 	}
@@ -250,6 +259,21 @@ sub onResponse {
 	my $self = shift;
 
 	return $self->_onfunc('response', @_);
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<onAddedDevice($sub)>
+
+Set or clear or get sub to be called when a specific line indicating an
+added device has been received.
+
+=cut
+
+sub onAddedDevice {
+	my $self = shift;
+
+	return $self->_onfunc('added_device', @_);
 }
 
 # ---------------------------------------------------------------------------
