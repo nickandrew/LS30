@@ -143,6 +143,7 @@ sub processLine {
 
 		if ($response =~ /^!i[bcefm]lno&$/) {
 			# Time limit expired; no device added
+			# The time delay is a *maximum* of 60 seconds; may be less.
 			$self->_runonfunc('added_device', $response);
 			return;
 		}
