@@ -33,8 +33,9 @@ my $ls30cmdr = LS30::Commander->new($ls30c);
 my @responses;
 
 foreach my $cmd (@ARGV) {
-	my $response = $ls30cmdr->sendCommand($cmd);
+	my $cv = $ls30cmdr->queueCommand($cmd);
 
+	my $response = $cv->recv();
 	push(@responses, [$cmd, $response]);
 }
 
