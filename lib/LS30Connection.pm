@@ -141,6 +141,12 @@ sub processLine {
 			return;
 		}
 
+		if ($response =~ /^!i[bcefm]lno&$/) {
+			# Time limit expired; no device added
+			$self->_runonfunc('added_device', $response);
+			return;
+		}
+
 		$self->_runonfunc('response', $response);
 		return;
 	}
