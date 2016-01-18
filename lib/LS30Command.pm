@@ -417,26 +417,76 @@ my $learn_commands = [
 	{
 		title => 'Learn Burglar Sensor',
 		key   => 'ibl',
+		async_response => {
+			title    => 'Added Burglar Sensor',
+			length   => 14,
+			response => [
+				{ length => 2, func => \&resp_hex2, key => 'index' },
+				{ length => 2, func => \&resp_string, key => 'zone' },
+				{ length => 2, func => \&resp_string, key => 'id' },
+				{ length => 8, func => \&resp_string, key => 'config' },
+			],
+		},
 	},
 
 	{
 		title => 'Learn Fire Sensor',
 		key   => 'ifl',
+		async_response => {
+			title    => 'Added Fire Sensor',
+			length   => 14,
+			response => [
+				{ length => 2, func => \&resp_hex2, key => 'index' },
+				{ length => 2, func => \&resp_string, key => 'zone' },
+				{ length => 2, func => \&resp_string, key => 'id' },
+				{ length => 8, func => \&resp_string, key => 'config' },
+			],
+		},
 	},
 
 	{
 		title => 'Learn Controller',
 		key   => 'icl',
+		async_response => {
+			title    => 'Added Controller',
+			length   => 14,
+			response => [
+				{ length => 2, func => \&resp_hex2, key => 'index' },
+				{ length => 2, func => \&resp_string, key => 'zone' },
+				{ length => 2, func => \&resp_string, key => 'id' },
+				{ length => 8, func => \&resp_string, key => 'config' },
+			],
+		},
 	},
 
 	{
 		title => 'Learn Medical Button',
 		key   => 'iml',
+		async_response => {
+			title    => 'Added Medical Button',
+			length   => 14,
+			response => [
+				{ length => 2, func => \&resp_hex2, key => 'index' },
+				{ length => 2, func => \&resp_string, key => 'zone' },
+				{ length => 2, func => \&resp_string, key => 'id' },
+				{ length => 8, func => \&resp_string, key => 'config' },
+			],
+		},
 	},
 
 	{
 		title => 'Learn Special Sensor',
 		key   => 'iel',
+		async_response => {
+			title    => 'Added Special Sensor',
+			length   => 14,
+			response => [
+				{ length => 2, func => \&resp_hex2, key => 'index' },
+				{ length => 2, func => \&resp_string, key => 'zone' },
+				{ length => 2, func => \&resp_string, key => 'id' },
+				{ length => 8, func => \&resp_string, key => 'config' },
+			],
+		},
 	},
 
 ];
