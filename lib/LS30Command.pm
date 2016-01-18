@@ -1072,25 +1072,31 @@ sub parseResponse {
 		return _parseFormat(substr($meat, 1), $hr, $return);
 	}
 
-	my $key = substr($meat, 0, 2);
-
+	my $key = substr($meat, 0, 3);
 	$hr = getCommandByKey($key);
+
+	if (!$hr) {
+		# Try 2-char key
+		$key = substr($meat, 0, 2);
+		$hr = getCommandByKey($key);
+	}
+
 	if ($hr) {
-		if (substr($meat, 2, 1) eq 's') {
+		$meat = substr($meat, length($key));
+		if (substr($meat, 0, 1) eq 's') {
 
 			# It's a response to a set command
 			$return->{action} = 'set';
-			$meat = substr($meat, 3);
-		} elsif (substr($meat, 2, 1) eq 'k') {
+			$meat = substr($meat, 1);
+		} elsif (substr($meat, 0, 1) eq 'k') {
 
 			# It's a response to a clear command
 			$return->{action} = 'clear';
-			$meat = substr($meat, 3);
+			$meat = substr($meat, 1);
 		} else {
 
 			# It's a response to a query command
 			$return->{action} = 'query';
-			$meat = substr($meat, 2);
 		}
 
 		return _parseFormat($meat, $hr, $return);
