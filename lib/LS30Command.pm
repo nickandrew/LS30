@@ -1054,15 +1054,16 @@ Return a detailed hashref.
 sub parseResponse {
 	my ($response) = @_;
 
+	my $return = { string => $response, };
+
 	if ($response !~ /^!(.+)&$/) {
 
 		# Doesn't look like a response
-		return undef;
+		$return->{error} = "Not in response format";
+		return $return;
 	}
 
 	my $meat = $1;
-
-	my $return = { string => $response, };
 
 	my $skey = substr($meat, 0, 1);
 
@@ -1099,11 +1100,18 @@ sub parseResponse {
 			$return->{action} = 'query';
 		}
 
-		return _parseFormat($meat, $hr, $return);
+		my $p_hr = $hr;
+
+		# Test if this is an asynchronous response to a learn command
+		if ($hr->{async_response} && length($meat) == $hr->{async_response}->{length}) {
+			$p_hr = $hr->{async_response};
+			# Fall through to parse it according to async_response
+		}
+
+		return _parseFormat($meat, $p_hr, $return);
 	}
 
 	$return->{error} = "Unparseable response";
-	$return->{key}   = $key;
 
 	return $return;
 }
@@ -1404,10 +1412,10 @@ sub _parseFormat {
 	$return->{title} = $hr->{title};
 
 	# Use responses if defined, otherwise use argument definition
-	my $response_hr = $hr->{response} || $hr->{args};
+	my $response_lr = $hr->{response} || $hr->{args};
 
-	if ($response_hr) {
-		foreach my $hr2 (@$response_hr) {
+	if ($response_lr) {
+		foreach my $hr2 (@$response_lr) {
 			$string = _parseArg($string, $return, $hr2);
 		}
 	}
@@ -1424,14 +1432,14 @@ sub _parseArg {
 	my ($string, $return, $arg_hr) = @_;
 
 	if (!defined $string) {
-		confess "_parseArg: string is not defined\n";
+		confess "_parseArg: input string is not defined\n";
 		return undef;
 	}
 
 	my $length = $arg_hr->{'length'};
 
 	if (!$length) {
-		die "Need to specify length";
+		die "Command spec: Need to specify length";
 	}
 
 	my $input = substr($string, 0, $length);
