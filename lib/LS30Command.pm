@@ -647,6 +647,11 @@ sub addCommands {
 	foreach my $hr (@$learn_commands) {
 		addCommand($hr);
 	}
+
+	# These commands are specified via full hashref
+	foreach my $hr (@$delete_commands) {
+		addCommand($hr);
+	}
 }
 
 # ---------------------------------------------------------------------------
