@@ -1349,6 +1349,61 @@ sub resp_password {
 }
 
 # ---------------------------------------------------------------------------
+# Parse/encode a date: yyyy-mm-dd <-> yymmdd
+# ---------------------------------------------------------------------------
+
+sub resp_date1 {
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
+			return "$2$3$4";
+		}
+
+		die "Invalid format date string: $string";
+	}
+
+	if ($string =~ /^(\d\d)(\d\d)(\d\d)$/) {
+		my $now = time();
+		my $year = Date::Format::time2str('%Y', $now);
+
+		if ($1 > ($year % 100)) {
+
+			# It's a date from last century
+			$year = $1 + $year - $year % 100 - 100;
+		} else {
+			$year = $1 + $year - $year % 100;
+		}
+
+		return sprintf("%04d-%02d-%02d", $year, $2, $3);
+	}
+
+	die "Invalid format date string: $string";
+}
+
+# ---------------------------------------------------------------------------
+# Parse/create a time string: hh:mm:ss <-> hhm
+# ---------------------------------------------------------------------------
+
+sub resp_date2 {
+	my ($string, $op) = @_;
+
+	if ($op && $op eq 'encode') {
+		if ($string =~ /^(\d\d):(\d\d)/) {
+			return "$1$2";
+		}
+
+		die "Invalid format time string: $string";
+	}
+
+	if ($string =~ /^(\d\d)(\d\d)$/) {
+		return "$1:$2:00";
+	}
+
+	die "Invalid format time string: $string";
+}
+
+# ---------------------------------------------------------------------------
 
 =item I<parseDeviceConfig($string)>
 
@@ -1459,61 +1514,6 @@ sub _parseArg {
 	}
 
 	return $rest;
-}
-
-# ---------------------------------------------------------------------------
-# Parse/encode a date: yyyy-mm-dd <-> yymmdd
-# ---------------------------------------------------------------------------
-
-sub resp_date1 {
-	my ($string, $op) = @_;
-
-	if ($op && $op eq 'encode') {
-		if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
-			return "$2$3$4";
-		}
-
-		die "Invalid format date string: $string";
-	}
-
-	if ($string =~ /^(\d\d)(\d\d)(\d\d)$/) {
-		my $now = time();
-		my $year = Date::Format::time2str('%Y', $now);
-
-		if ($1 > ($year % 100)) {
-
-			# It's a date from last century
-			$year = $1 + $year - $year % 100 - 100;
-		} else {
-			$year = $1 + $year - $year % 100;
-		}
-
-		return sprintf("%04d-%02d-%02d", $year, $2, $3);
-	}
-
-	die "Invalid format date string: $string";
-}
-
-# ---------------------------------------------------------------------------
-# Parse/create a time string: hh:mm:ss <-> hhm
-# ---------------------------------------------------------------------------
-
-sub resp_date2 {
-	my ($string, $op) = @_;
-
-	if ($op && $op eq 'encode') {
-		if ($string =~ /^(\d\d):(\d\d)/) {
-			return "$1$2";
-		}
-
-		die "Invalid format time string: $string";
-	}
-
-	if ($string =~ /^(\d\d)(\d\d)$/) {
-		return "$1:$2:00";
-	}
-
-	die "Invalid format time string: $string";
 }
 
 # ---------------------------------------------------------------------------
