@@ -683,6 +683,21 @@ sub getCommand {
 
 # ---------------------------------------------------------------------------
 
+=item I<isSetting($title)>
+
+Return 1 if the given title is a setting, else zero.
+
+=cut
+
+sub isSetting {
+	my ($title) = @_;
+
+	return 1 if ($commands->{$title} && $commands->{$title}->{is_setting});
+	return 0;
+}
+
+# ---------------------------------------------------------------------------
+
 =item I<getCommandByKey($key)>
 
 Return the title of the command which has the given (1 or 2 char) key.
