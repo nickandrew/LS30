@@ -1151,7 +1151,7 @@ sub hexn {
 }
 
 # ---------------------------------------------------------------------------
-# Response date: yymmddhhmm
+# Response date: yymmddWhhmm
 # Turn it into yy-mm-dd hh:mm
 # ---------------------------------------------------------------------------
 
@@ -1167,7 +1167,24 @@ sub resp_date {
 		return undef;
 	}
 
-	die "TODO";
+	# Client and server encoding are the same
+	if (defined $string && $string =~ /^(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d) (\S+)$/) {
+		my $dows = {
+			'Sun' => 0,
+			'Mon' => 1,
+			'Tue' => 2,
+			'Wed' => 3,
+			'Thu' => 4,
+			'Fri' => 5,
+			'Sat' => 6,
+		};
+		my $dow_int = $dows->{$6} || 0;
+		return "$1$2$3$dow_int$4$5";
+	}
+
+	# Fallthrough; return the current date/time
+	my $now = time();
+	return Date::Format::time2str('%y%m%d%w%H%M', $now);
 }
 
 # ---------------------------------------------------------------------------
@@ -1181,7 +1198,18 @@ sub resp_hex1 {
 		return hexn($string, 1);
 	}
 
-	die "TODO";
+	if (!defined $string) {
+		carp "Missing string in resp_hex1";
+		return undef;
+	}
+
+	my $hex = sprintf("%1x", $string);
+
+	if ($op eq 'client_encode') {
+		$hex =~ tr/abcdef/:;<=>?/;
+	}
+
+	return $hex;
 }
 
 # ---------------------------------------------------------------------------
@@ -1212,7 +1240,9 @@ sub resp_boolean {
 		}
 	}
 
-	die "TODO";
+	# This doesn't seem exactly the opposite of client_encode due to
+	# all the synonyms
+	return ($string ? 1 : 0);
 }
 
 # ---------------------------------------------------------------------------
@@ -1237,7 +1267,7 @@ sub resp_hex2 {
 		return $hex;
 	}
 
-	die "TODO";
+	return sprintf("%03x", $string);
 }
 
 # ---------------------------------------------------------------------------
@@ -1257,7 +1287,7 @@ sub resp_hex3 {
 		return $hex;
 	}
 
-	die "TODO";
+	return sprintf("%02x", $string);
 }
 
 # ---------------------------------------------------------------------------
@@ -1276,8 +1306,8 @@ sub resp_telno {
 		return $string;
 	}
 
-
-	die "TODO";
+	return 'no' if (!defined $string || $string eq '');
+	return $string;
 }
 
 # ---------------------------------------------------------------------------
@@ -1297,7 +1327,21 @@ sub resp_delay {
 		return sprintf("%d seconds", $value);
 	}
 
-	die "TODO";
+	my $hex;
+
+	if ($string =~ /(\d+) minutes/) {
+		$hex = sprintf("%02x", $1 + 128);
+	}
+
+	if ($string =~ /(\d+) seconds/) {
+		$hex = sprintf("%02x", $1);
+	}
+
+	if ($op eq 'client_encode') {
+		$hex =~ tr/abcdef/:;<=>?/;
+	}
+
+	return $hex;
 }
 
 # ---------------------------------------------------------------------------
@@ -1317,31 +1361,31 @@ sub resp_interval2 {
 		return sprintf("%d seconds", $value);
 	}
 
-	if ($op eq 'client_encode') {
-		my $duration;
+	my $duration;
 
-		if ($string =~ /^(\d+) minutes/) {
-			$duration = $1 * 60;
-		} elsif ($string =~ /^(\d+) seconds/) {
-			$duration = $1;
-		} elsif ($string =~ /^(\d+)$/) {
-			$duration = $1;
-		}
-
-		my $value;
-
-		if ($duration < 60) {
-			$value = $duration;
-		} else {
-			$value = 64 + int($duration / 60);
-		}
-
-		my $hex = sprintf("%02x", $value);
-		$hex =~ tr/abcdef/:;<=>?/;
-		return $hex;
+	if ($string =~ /^(\d+) minutes/) {
+		$duration = $1 * 60;
+	} elsif ($string =~ /^(\d+) seconds/) {
+		$duration = $1;
+	} elsif ($string =~ /^(\d+)$/) {
+		$duration = $1;
 	}
 
-	die "TODO";
+	my $value;
+
+	if ($duration < 60) {
+		$value = $duration;
+	} else {
+		$value = 64 + int($duration / 60);
+	}
+
+	my $hex = sprintf("%02x", $value);
+
+	if ($op eq 'client_encode') {
+		$hex =~ tr/abcdef/:;<=>?/;
+	}
+
+	return $hex;
 }
 
 # ---------------------------------------------------------------------------
@@ -1359,18 +1403,14 @@ sub resp_decimal_time {
 		return "$1:$2";
 	}
 
-	if ($op eq 'client_encode') {
-		if (!$string) {
-			return '????';
-		} elsif ($string =~ /^(\d\d):(\d\d)$/) {
-			return "$1$2";
-		} else {
-			LS30::Log::error("Incorrect decimal_time $string");
-			return '????';
-		}
+	if (!$string) {
+		return '????';
+	} elsif ($string =~ /^(\d\d):(\d\d)$/) {
+		return "$1$2";
+	} else {
+		LS30::Log::error("Incorrect decimal_time $string");
+		return '????';
 	}
-
-	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1402,13 +1442,13 @@ sub resp_password {
 		return $string;
 	}
 
-	if ($op eq 'client_encode') {
-
-		# No change or padding required
-		return $string;
+	# Client and server encoding are identical
+	if ($string eq '') {
+		$string = 'no';
 	}
 
-	die "TODO";
+	# No change or padding required
+	return $string;
 }
 
 # ---------------------------------------------------------------------------
@@ -1437,15 +1477,12 @@ sub resp_date1 {
 		die "Invalid format date string: $string";
 	}
 
-	if ($op eq 'client_encode') {
-		if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
-			return "$2$3$4";
-		}
-
-		die "Invalid format date string: $string";
+	if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
+		return "$2$3$4";
 	}
 
-	die "TODO";
+	warn "Invalid format date string: $string";
+	return undef;
 }
 
 # ---------------------------------------------------------------------------
@@ -1463,15 +1500,12 @@ sub resp_date2 {
 		die "Invalid format time string: $string";
 	}
 
-	if ($op eq 'client_encode') {
-		if ($string =~ /^(\d\d):(\d\d)/) {
-			return "$1$2";
-		}
-
-		die "Invalid format time string: $string";
+	if ($string =~ /^(\d\d):(\d\d)/) {
+		return "$1$2";
 	}
 
-	die "TODO";
+	warn "Invalid format time string: $string";
+	return undef;
 }
 
 # ---------------------------------------------------------------------------
