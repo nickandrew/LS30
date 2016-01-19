@@ -381,6 +381,7 @@ my $spec_commands = [
 	},
 
 	{
+		is_setting => 1,
 		title => 'Inner Siren Time',
 		key   => 'l4',
 		args  => [{ 'length' => 2, func => \&resp_hex2, key => 'value' },],
