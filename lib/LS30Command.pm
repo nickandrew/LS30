@@ -756,7 +756,7 @@ sub _addArguments {
 			my $value;
 			if ($hr2->{func}) {
 				my $func = $hr2->{func};
-				$value = &$func($input, 'encode');
+				$value = &$func($input, 'client_encode');
 			} elsif ($type) {
 				$value = LS30::Type::getCode($type, $input);
 			}
@@ -1161,7 +1161,7 @@ sub resp_hex1 {
 sub resp_boolean {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 		if ($string =~ /^(on|true|yes)$/i) {
 			return 1;
 		} elsif ($string =~ /^(off|false|no)$/i) {
@@ -1188,7 +1188,7 @@ sub resp_boolean {
 sub resp_hex2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 		if (!defined $string) {
 			carp "Missing string in resp_hex2";
 			return undef;
@@ -1209,7 +1209,7 @@ sub resp_hex2 {
 sub resp_hex3 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 		my $hex = sprintf("%03x", $string);
 		$hex =~ tr/abcdef/:;<=>?/;
 		return $hex;
@@ -1257,7 +1257,7 @@ sub resp_delay {
 sub resp_interval2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 		my $duration;
 
 		if ($string =~ /^(\d+) minutes/) {
@@ -1297,7 +1297,7 @@ sub resp_interval2 {
 sub resp_decimal_time {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 		if (!$string) {
 			return '????';
 		} elsif ($string =~ /^(\d\d):(\d\d)$/) {
@@ -1332,7 +1332,7 @@ sub resp_string {
 sub resp_password {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 
 		# No change or padding required
 		return $string;
@@ -1355,7 +1355,7 @@ sub resp_password {
 sub resp_date1 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 		if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
 			return "$2$3$4";
 		}
@@ -1388,7 +1388,7 @@ sub resp_date1 {
 sub resp_date2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op && $op eq 'client_encode') {
 		if ($string =~ /^(\d\d):(\d\d)/) {
 			return "$1$2";
 		}
@@ -1529,7 +1529,7 @@ sub _testValue {
 
 	if ($func) {
 		# Input is defined in terms of a function
-		my $ok = &$func($input, 'encode');
+		my $ok = &$func($input, 'client_encode');
 		if (!defined $ok) {
 			# Assume it's bad
 			return undef;
