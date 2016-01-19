@@ -753,11 +753,12 @@ sub _password {
 # ---------------------------------------------------------------------------
 
 sub _addArguments {
-	my ($cmd, $args, $lr, $title) = @_;
+	my ($cmd, $args, $lr, $title, $encoding) = @_;
 
 	foreach my $hr2 (@$lr) {
 		my $key  = $hr2->{key};
 		my $type = $hr2->{type};
+
 		if ($key) {
 			if (!exists $args->{$key}) {
 				my $s = sprintf(
@@ -772,8 +773,13 @@ sub _addArguments {
 			my $value;
 			if ($hr2->{func}) {
 				my $func = $hr2->{func};
-				$value = &$func($input, 'client_encode');
-			} elsif ($type) {
+				$value = &$func($input, $encoding);
+			} elsif (!$type) {
+				LS30::Log::error("No type defined in $title for <$key>");
+				return undef;
+			} elsif ($encoding eq 'decode') {
+				$value = LS30::Type::getString($type, $input);
+			} else {
 				$value = LS30::Type::getCode($type, $input);
 			}
 
@@ -830,7 +836,7 @@ sub queryCommand {
 
 	if ($cmd_spec->{query_args}) {
 		my $lr = $cmd_spec->{query_args};
-		$cmd = _addArguments($cmd, $args, $lr, $title);
+		$cmd = _addArguments($cmd, $args, $lr, $title, 'client_encode');
 		return undef if (!defined $cmd);
 	}
 
@@ -1044,7 +1050,7 @@ sub formatDeleteCommand {
 	$cmd .= $cmd_spec->{key};
 
 	if ($cmd_spec->{query_args}) {
-		$cmd = _addArguments($cmd, $args, $cmd_spec->{query_args}, $args->{title});
+		$cmd = _addArguments($cmd, $args, $cmd_spec->{query_args}, $args->{title}, 'client_encode');
 		return undef if (!defined $cmd);
 	}
 
