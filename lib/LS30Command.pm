@@ -1679,6 +1679,48 @@ sub getDeviceStatus {
 	return $cmd;
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<formatResponse($args)>
+
+Format a response message from the server to a client. Return it as a string,
+or undef if there was some error.
+
+=cut
+
+sub formatResponse {
+	my ($args) = @_;
+
+	if (!defined $args || ref($args) ne 'HASH') {
+		die "formatResponse: args must be a hashref";
+	}
+
+	my $title = $args->{title};
+
+	if (!$title) {
+		die "formatResponse: args requires a title";
+	}
+
+	my $cmd_spec = getCommand($title);
+	if (!$cmd_spec) {
+
+		# Unknown title
+		return undef;
+	}
+
+	my $string = '!';
+
+	$string .= $cmd_spec->{key};
+
+	my $lr = $cmd_spec->{response} || $cmd_spec->{args};
+	$string = _addArguments($string, $args, $lr, $title, 'server_encode');
+	return undef if (!defined $string);
+
+	$string .= '&';
+
+	return $string;
+}
+
 =back
 
 =cut
