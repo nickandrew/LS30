@@ -1295,7 +1295,7 @@ sub resp_hex2 {
 		return $hex;
 	}
 
-	return sprintf("%03x", $string);
+	return sprintf("%02x", $string);
 }
 
 # ---------------------------------------------------------------------------
@@ -1315,7 +1315,7 @@ sub resp_hex3 {
 		return $hex;
 	}
 
-	return sprintf("%02x", $string);
+	return sprintf("%03x", $string);
 }
 
 # ---------------------------------------------------------------------------
