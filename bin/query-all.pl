@@ -38,7 +38,7 @@ LS30Command::addCommands();
 
 my $ls30cmdr = LS30::Commander->new($ls30c);
 
-my @data;
+my $data = {};
 
 foreach my $title (sort (LS30Command::listCommands())) {
 
@@ -54,35 +54,38 @@ foreach my $title (sort (LS30Command::listCommands())) {
 		title => $title,
 	};
 
+	next unless ($cmd_spec->{is_setting});
 	if ($cmd_spec->{query_args}) {
+		next;
 		permuteArgs($cmd_spec->{query_args}, $cmd_ref, $title);
 	} else {
 		my $query    = LS30Command::queryCommand($cmd_ref);
 		my $response = $ls30cmdr->sendCommand($query);
+		my $resp = LS30Command::parseResponse($response);
+		print Dumper($resp) if ($resp);
 
 		my $hr = {
-			title    => $title,
 			query    => $query,
 			response => $response,
+			value    => $resp->{value},
 		};
 
-		push(@data, $hr);
+		$data->{$title} = $hr;
 	}
 }
 
-foreach my $hr (@data) {
+foreach my $title (sort (keys %$data)) {
 
+	my $hr = $data->{$title};
 	my $response = $hr->{response};
 
 	if ($response) {
-		printf("%-40s | %s\n", $hr->{title}, $response);
-		my $resp = LS30::ResponseMessage->new($response);
-		print Dumper($resp) if ($resp);
+		printf("%-40s | %s\n", $title, $response);
 	}
 }
 
 if ($opt_s) {
-	YAML::DumpFile($opt_s, \@data);
+	YAML::DumpFile($opt_s, $data);
 }
 
 exit(0);
@@ -101,16 +104,18 @@ sub permuteArgs {
 
 		# Recursion has finished; issue command
 		my $cmd  = LS30Command::queryCommand($cmd_ref);
-		my $resp = $ls30cmdr->sendCommand($cmd);
+		my $response = $ls30cmdr->sendCommand($cmd);
+		my $resp = LS30Command::parseResponse($response);
+		print Dumper($resp) if ($resp);
 
 		# Save response
 		my $hr = {
 			title    => $title,
 			query    => $cmd,
-			response => $resp,
+			response => $response,
 		};
 
-		push(@data, $hr);
+		$data->{$title} = $hr;
 		return;
 	}
 
