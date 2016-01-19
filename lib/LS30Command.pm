@@ -1117,22 +1117,6 @@ sub parseResponse {
 }
 
 # ---------------------------------------------------------------------------
-# Response date: yymmddhhmm
-# Turn it into yy-mm-dd hh:mm
-# ---------------------------------------------------------------------------
-
-sub resp_date {
-	my ($string) = @_;
-
-	if ($string =~ m/^(\d\d)(\d\d)(\d\d)(\d)(\d\d)(\d\d)$/) {
-		my $dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']->[$4];
-		return "$1-$2-$3 $5:$6 $dow";
-	}
-
-	return undef;
-}
-
-# ---------------------------------------------------------------------------
 # Turn n hex digits into decimal
 # ---------------------------------------------------------------------------
 
@@ -1145,13 +1129,37 @@ sub hexn {
 }
 
 # ---------------------------------------------------------------------------
+# Response date: yymmddhhmm
+# Turn it into yy-mm-dd hh:mm
+# ---------------------------------------------------------------------------
+
+sub resp_date {
+	my ($string, $op) = @_;
+
+	if ($op eq 'decode') {
+		if ($string =~ m/^(\d\d)(\d\d)(\d\d)(\d)(\d\d)(\d\d)$/) {
+			my $dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']->[$4];
+			return "$1-$2-$3 $5:$6 $dow";
+		}
+
+		return undef;
+	}
+
+	die "TODO";
+}
+
+# ---------------------------------------------------------------------------
 # Turn 1 hex digit into decimal
 # ---------------------------------------------------------------------------
 
 sub resp_hex1 {
-	my ($string) = @_;
+	my ($string, $op) = @_;
 
-	return hexn($string, 1);
+	if ($op eq 'decode') {
+		return hexn($string, 1);
+	}
+
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1161,7 +1169,11 @@ sub resp_hex1 {
 sub resp_boolean {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+		return ($string eq '0' ? 0 : 1);
+	}
+
+	if ($op eq 'client_encode') {
 		if ($string =~ /^(on|true|yes)$/i) {
 			return 1;
 		} elsif ($string =~ /^(off|false|no)$/i) {
@@ -1178,7 +1190,7 @@ sub resp_boolean {
 		}
 	}
 
-	return ($string eq '0' ? 0 : 1);
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1188,7 +1200,11 @@ sub resp_boolean {
 sub resp_hex2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+		return hexn($string, 2);
+	}
+
+	if ($op eq 'client_encode') {
 		if (!defined $string) {
 			carp "Missing string in resp_hex2";
 			return undef;
@@ -1199,7 +1215,7 @@ sub resp_hex2 {
 		return $hex;
 	}
 
-	return hexn($string, 2);
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1209,13 +1225,17 @@ sub resp_hex2 {
 sub resp_hex3 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+		return hexn($string, 3);
+	}
+
+	if ($op eq 'client_encode') {
 		my $hex = sprintf("%03x", $string);
 		$hex =~ tr/abcdef/:;<=>?/;
 		return $hex;
 	}
 
-	return hexn($string, 3);
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1223,15 +1243,19 @@ sub resp_hex3 {
 # ---------------------------------------------------------------------------
 
 sub resp_telno {
-	my ($string) = @_;
+	my ($string, $op) = @_;
 
-	if ($string eq 'no') {
+	if ($op eq 'decode') {
+		if ($string eq 'no') {
 
-		# Can mean no number, or permission denied
-		return '';
+			# Can mean no number, or permission denied
+			return '';
+		}
+		return $string;
 	}
 
-	return $string;
+
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1239,15 +1263,19 @@ sub resp_telno {
 # ---------------------------------------------------------------------------
 
 sub resp_delay {
-	my ($string) = @_;
+	my ($string, $op) = @_;
 
-	my $value = hex($string);
+	if ($op eq 'decode') {
+		my $value = hex($string);
 
-	if ($value > 128) {
-		return sprintf("%d minutes", $value - 128);
+		if ($value > 128) {
+			return sprintf("%d minutes", $value - 128);
+		}
+
+		return sprintf("%d seconds", $value);
 	}
 
-	return sprintf("%d seconds", $value);
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1257,7 +1285,17 @@ sub resp_delay {
 sub resp_interval2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+		my $value = hex($string);
+
+		if ($value > 64) {
+			return sprintf("%d minutes", $value - 64);
+		}
+
+		return sprintf("%d seconds", $value);
+	}
+
+	if ($op eq 'client_encode') {
 		my $duration;
 
 		if ($string =~ /^(\d+) minutes/) {
@@ -1281,13 +1319,7 @@ sub resp_interval2 {
 		return $hex;
 	}
 
-	my $value = hex($string);
-
-	if ($value > 64) {
-		return sprintf("%d minutes", $value - 64);
-	}
-
-	return sprintf("%d seconds", $value);
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1297,7 +1329,15 @@ sub resp_interval2 {
 sub resp_decimal_time {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+		if ($string !~ /^(\d\d)(\d\d)$/) {
+			return undef;
+		}
+
+		return "$1:$2";
+	}
+
+	if ($op eq 'client_encode') {
 		if (!$string) {
 			return '????';
 		} elsif ($string =~ /^(\d\d):(\d\d)$/) {
@@ -1308,11 +1348,7 @@ sub resp_decimal_time {
 		}
 	}
 
-	if ($string !~ /^(\d\d)(\d\d)$/) {
-		return undef;
-	}
-
-	return "$1:$2";
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1332,20 +1368,25 @@ sub resp_string {
 sub resp_password {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+
+		if ($string eq 'no') {
+			return '';
+		}
+
+		# Remove padding
+		$string =~ s/\?+$//;
+
+		return $string;
+	}
+
+	if ($op eq 'client_encode') {
 
 		# No change or padding required
 		return $string;
 	}
 
-	if ($string eq 'no') {
-		return '';
-	}
-
-	# Remove padding
-	$string =~ s/\?+$//;
-
-	return $string;
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1355,7 +1396,26 @@ sub resp_password {
 sub resp_date1 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+		if ($string =~ /^(\d\d)(\d\d)(\d\d)$/) {
+			my $now = time();
+			my $year = Date::Format::time2str('%Y', $now);
+
+			if ($1 > ($year % 100)) {
+
+				# It's a date from last century
+				$year = $1 + $year - $year % 100 - 100;
+			} else {
+				$year = $1 + $year - $year % 100;
+			}
+
+			return sprintf("%04d-%02d-%02d", $year, $2, $3);
+		}
+
+		die "Invalid format date string: $string";
+	}
+
+	if ($op eq 'client_encode') {
 		if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
 			return "$2$3$4";
 		}
@@ -1363,22 +1423,7 @@ sub resp_date1 {
 		die "Invalid format date string: $string";
 	}
 
-	if ($string =~ /^(\d\d)(\d\d)(\d\d)$/) {
-		my $now = time();
-		my $year = Date::Format::time2str('%Y', $now);
-
-		if ($1 > ($year % 100)) {
-
-			# It's a date from last century
-			$year = $1 + $year - $year % 100 - 100;
-		} else {
-			$year = $1 + $year - $year % 100;
-		}
-
-		return sprintf("%04d-%02d-%02d", $year, $2, $3);
-	}
-
-	die "Invalid format date string: $string";
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
@@ -1388,7 +1433,15 @@ sub resp_date1 {
 sub resp_date2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'client_encode') {
+	if ($op eq 'decode') {
+		if ($string =~ /^(\d\d)(\d\d)$/) {
+			return "$1:$2:00";
+		}
+
+		die "Invalid format time string: $string";
+	}
+
+	if ($op eq 'client_encode') {
 		if ($string =~ /^(\d\d):(\d\d)/) {
 			return "$1$2";
 		}
@@ -1396,11 +1449,7 @@ sub resp_date2 {
 		die "Invalid format time string: $string";
 	}
 
-	if ($string =~ /^(\d\d)(\d\d)$/) {
-		return "$1:$2:00";
-	}
-
-	die "Invalid format time string: $string";
+	die "TODO";
 }
 
 # ---------------------------------------------------------------------------
