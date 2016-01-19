@@ -909,9 +909,12 @@ sub setCommand {
 					$value = _testValue($hr2, $input);
 				}
 
-				if (defined $value) {
-					$cmd .= $value;
+				if (!defined $value) {
+					LS30::Log::error("Illegal value <$input> for <$key>");
+					return undef;
 				}
+
+				$cmd .= $value;
 			}
 		}
 	}
@@ -1092,7 +1095,7 @@ sub parseResponse {
 	# Test if it's a single character response
 	my $hr = $single_char_responses->{$skey};
 	if ($hr) {
-		return _parseFormat(substr($meat, 1), $hr, $return);
+		return _parseFormat(substr($meat, 1), $return, $hr->{args});
 	}
 
 	my $key = substr($meat, 0, 3);
@@ -1105,6 +1108,8 @@ sub parseResponse {
 	}
 
 	if ($hr) {
+		$return->{title} = $hr->{title};
+
 		$meat = substr($meat, length($key));
 		if (substr($meat, 0, 1) eq 's') {
 
@@ -1116,10 +1121,32 @@ sub parseResponse {
 			# It's a response to a clear command
 			$return->{action} = 'clear';
 			$meat = substr($meat, 1);
+			# Command should finish here
+			if ($meat ne '&') {
+				LS30::Log::debug("Extra chars after clear command: <$meat>");
+			}
+		} elsif (substr($meat, 0, 1) eq '?') {
+			# It's a query command
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
 		} else {
 
 			# It's a response to a query command
-			$return->{action} = 'query';
+			$return->{action} = 'value';
+		}
+
+		if ($return->{action} eq 'clear') {
+			# Nothing further
+			return $return;
+		}
+
+		if ($return->{action} eq 'query') {
+			if ($hr->{query_args}) {
+				# Parse further arguments
+				return _parseFormat($meat, $return, $hr->{query_args});
+			}
+			# Nothing further
+			return $return;
 		}
 
 		my $p_hr = $hr;
@@ -1130,7 +1157,8 @@ sub parseResponse {
 			# Fall through to parse it according to async_response
 		}
 
-		return _parseFormat($meat, $p_hr, $return);
+		# Use responses if defined, otherwise use argument definition
+		return _parseFormat($meat, $return, $p_hr->{response} || $p_hr->{args});
 	}
 
 	$return->{error} = "Unparseable response";
@@ -1567,13 +1595,9 @@ sub parseDeviceConfig {
 # ---------------------------------------------------------------------------
 
 sub _parseFormat {
-	my ($string, $hr, $return) = @_;
-
-	$return->{title} = $hr->{title};
+	my ($string, $return, $response_lr) = @_;
 
 	# Use responses if defined, otherwise use argument definition
-	my $response_lr = $hr->{response} || $hr->{args};
-
 	if ($response_lr) {
 		foreach my $hr2 (@$response_lr) {
 			$string = _parseArg($string, $return, $hr2);
