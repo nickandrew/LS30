@@ -403,6 +403,7 @@ my $spec_commands = [
 		title => 'Switch/Operation Scene',
 
 		# Note 1-char key
+		is_setting => 1,
 		key        => 'u',
 		query_args => [
 
