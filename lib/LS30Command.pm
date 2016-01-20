@@ -1183,6 +1183,171 @@ sub parseResponse {
 }
 
 # ---------------------------------------------------------------------------
+# Special parsing for 'p' password request
+# Formats:
+#   Set:   'p' 's' <id> <new-password> <master-password>
+#   Query: 'p' '?' <id> <master-password>
+# ---------------------------------------------------------------------------
+
+sub _parsePasswordRequest {
+	my ($string, $return) = @_;
+
+	if ($string !~ /^p([s?])(.)/) {
+		$return->{error} = "Password not a set or query action";
+		return $return;
+	}
+
+	my($a, $id) = ($1, $2);
+	$string = substr($string, 3);
+
+	if ($a eq 's') {
+		$return->{action} = 'set-password';
+		$return->{password_id} = LS30::Type::getString('Password', $id);
+
+		my $l = length($string);
+		if ($l < 8) {
+			# Set command with no master password
+			$return->{new_password} = $string;
+		}
+		elsif ($l == 8) {
+			# Clear command
+			$return->{new_password} = '';
+			$return->{password} = $string;
+		}
+		else {
+			# Variable length new_password; fixed-length password.
+			$return->{new_password} = substr($string, 0, $l - 8);
+			$return->{password} = substr($string, -8, 8);
+		}
+	}
+	else {
+		$return->{action} = 'query-password';
+		$return->{password_id} = LS30::Type::getString('Password', $id);
+
+		if ($string eq '') {
+			return $return;
+		}
+
+		if (length($string) != 8) {
+			# This can't be a password
+			$return->{error} = "Password query isn't suffixed with valid password <$string>";
+		} else {
+			$return->{password} = $string;
+		}
+	}
+
+	return $return;
+}
+
+=item I<parseRequest($string)>
+
+Parse the request string received from a client. Requests are very similar
+to responses, but knowing a string is a request may help with the parsing.
+
+Also requests may have a trailing password, whereas responses do not.
+
+Request strings start with '!' and end with '&'.
+
+Return a detailed hashref.
+
+=cut
+
+sub parseRequest {
+	my ($request) = @_;
+
+	my $return = { string => $request, };
+
+	if ($request !~ /^!(.+)&$/) {
+
+		# Doesn't look like a request
+		$return->{error} = "Not in request format";
+		return $return;
+	}
+
+	my $meat = $1;
+
+	# Special parser handling
+	if (substr($meat, 0, 1) eq 'p') {
+		# Password set/retrieval
+		return _parsePasswordRequest($meat, $return);
+	}
+
+	my $key = substr($meat, 0, 3);
+	my $hr = getCommandByKey($key);
+
+	if (!$hr) {
+		# Try 2-char key
+		$key = substr($meat, 0, 2);
+		$hr = getCommandByKey($key);
+	}
+
+	if (!$hr) {
+		$key = substr($meat, 0, 1);
+		$hr = getCommandByKey($key);
+	}
+
+	if ($hr) {
+		$return->{title} = $hr->{title};
+
+		$meat = substr($meat, length($key));
+
+		if ($hr->{is_setting}) {
+			if (substr($meat, 0, 1) eq 's') {
+
+				# It's a set request
+				$return->{action} = 'set';
+				$meat = substr($meat, 1);
+			} elsif (substr($meat, 0, 1) eq 'k') {
+
+				# It's a clear request
+				$return->{action} = 'clear';
+				$meat = substr($meat, 1);
+				# Command should finish here
+				if ($meat ne '&') {
+					LS30::Log::debug("Extra chars after clear command: <$meat>");
+				}
+			} elsif (substr($meat, 0, 1) eq '?') {
+				# It's a query request
+				$return->{action} = 'query';
+				$meat = substr($meat, 1);
+			} else {
+
+				# It's something else
+				$return->{error} = "Expected s/k/? after setting name <$key>";
+				return $return;
+			}
+		}
+
+
+		if ($return->{action} eq 'clear') {
+			# Nothing further
+			# TODO: parse password
+			return $return;
+		}
+
+		if ($return->{action} eq 'query') {
+			if ($hr->{query_args}) {
+				# Parse further arguments
+				# TODO: parse password
+				return _parseFormat($meat, $return, $hr->{query_args});
+			}
+			# Nothing further
+			# TODO: parse password
+			return $return;
+		}
+
+		my $p_hr = $hr;
+
+		# Use argument definition
+		return _parseFormat($meat, $return, $p_hr->{args});
+	}
+
+	$return->{error} = "Unparseable request";
+
+	return $return;
+}
+
+# ---------------------------------------------------------------------------
 # Turn n hex digits into decimal
 # ---------------------------------------------------------------------------
 

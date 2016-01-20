@@ -237,8 +237,8 @@ response. Return the response (sans CR LF).
 sub simulateCommand {
 	my ($self, $input) = @_;
 
-	# This should be good enough to parse most commands, too
-	my $cmd = LS30Command::parseResponse($input);
+	# Parse request string
+	my $cmd = LS30Command::parseRequest($input);
 
 	if (!$cmd) {
 		# Oops
