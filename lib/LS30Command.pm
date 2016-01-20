@@ -388,18 +388,6 @@ my $spec_commands = [
 	},
 
 	{
-		title => 'Password',
-
-		# Note 1-char key
-		key        => 'p',
-		query_args => [{ 'length' => 1, type => 'Password', key => 'password_no' },],
-		args       => [
-			{ 'length' => 1, type => 'Password',      key => 'password_no' },
-			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
-		],
-	},
-
-	{
 		title => 'Switch/Operation Scene',
 
 		# Note 1-char key
@@ -1078,6 +1066,76 @@ sub formatDeleteCommand {
 	$cmd .= '&';
 
 	return $cmd;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<setPassword($password_id, $new_password, $master_password)>
+
+Return a command string to set the specified password.
+
+    password_id is a string of type 'Password' (See LS30::Type)
+
+    new_password is 0-8 characters long
+
+    master_password is 1-8 characters long (if shorter than 8, it will be padded with ?).
+
+Any errors cause a return value of undef and a message in $@
+
+=cut
+
+sub setPassword {
+	my ($password_id, $new_password, $master_password) = @_;
+
+	my $string = '!ps';
+
+	my $id = LS30::Type::getCode('Password', $password_id);
+	if (!defined $id) {
+		$@ = "Invalid password id $password_id";
+		return undef;
+	}
+
+	$string .= $id;
+
+	if (length($new_password) > 8) {
+		$@ = "New password too long";
+		return undef;
+	}
+
+	# Acceptable chars for new_password: hex digits
+	if ($new_password !~ /^[0-9a-f]{0,8}$/) {
+		$@ = "New password contains unacceptable characters";
+		return undef;
+	}
+
+	# Acceptable chars for master_password: hex digits
+	if ($master_password !~ /^[0-9a-f]{0,8}$/) {
+		$@ = "Master password contains unacceptable characters";
+		return undef;
+	}
+
+	$new_password =~ tr/abcdef/:;<=>?/;
+	$master_password =~ tr/abcdef/:;<=>?/;
+
+	$string .= $new_password;
+
+	my $l = length($master_password);
+	if ($l == 0) {
+		# Not supplied
+	}
+	elsif ($l < 8) {
+		$string .= $master_password;
+		# Pad to 8 chars
+		$string .= '?' x (8 - $l);
+	}
+	elsif ($l > 8) {
+		$@ = "Master password too long";
+		return undef;
+	}
+
+	$string .= '&';
+
+	return $string;
 }
 
 # ---------------------------------------------------------------------------
