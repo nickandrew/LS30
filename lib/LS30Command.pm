@@ -698,6 +698,21 @@ sub isSetting {
 
 # ---------------------------------------------------------------------------
 
+=item I<canClear($title)>
+
+Return 1 if the given title is a clearable setting, else zero.
+
+=cut
+
+sub canClear {
+	my ($title) = @_;
+
+	return 1 if ($commands->{$title} && $commands->{$title}->{can_clear});
+	return 0;
+}
+
+# ---------------------------------------------------------------------------
+
 =item I<getCommandByKey($key)>
 
 Return the title of the command which has the given (1 or 2 char) key.
@@ -1090,21 +1105,22 @@ sub parseResponse {
 
 	my $meat = $1;
 
-	my $skey = substr($meat, 0, 1);
-
-	# Test if it's a single character response
-	my $hr = $single_char_responses->{$skey};
-	if ($hr) {
-		return _parseFormat(substr($meat, 1), $return, $hr->{args});
-	}
-
 	my $key = substr($meat, 0, 3);
-	$hr = getCommandByKey($key);
+	my $hr = getCommandByKey($key);
 
 	if (!$hr) {
 		# Try 2-char key
 		$key = substr($meat, 0, 2);
 		$hr = getCommandByKey($key);
+	}
+
+	if (!$hr) {
+		$key = substr($meat, 0, 1);
+		# Test if it's a single character response
+		my $hr = $single_char_responses->{$key};
+		if ($hr) {
+			return _parseFormat(substr($meat, 1), $return, $hr->{args});
+		}
 	}
 
 	if ($hr) {
@@ -1635,11 +1651,21 @@ sub _parseArg {
 
 	if ($arg_hr->{func}) {
 		my $func_ref = $arg_hr->{func};
-		$return->{$key} = &$func_ref($input, 'decode');
+		my $value = &$func_ref($input, 'decode');
+		if (!defined $value) {
+			$return->{error} = "Unable to decode argument <$key>: <$input>";
+		} else {
+			$return->{$key} = $value;
+		}
 	} elsif ($arg_hr->{type}) {
 		my $type = $arg_hr->{type};
 		my $value = LS30::Type::getString($type, $input);
 		$return->{$key} = $value;
+		if (!defined $value) {
+			$return->{error} = "Invalid value of type <$type>: <$input>";
+		} else {
+			$return->{$key} = $value;
+		}
 	}
 
 	return $rest;

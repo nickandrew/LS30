@@ -242,11 +242,14 @@ sub simulateCommand {
 
 	if (!$cmd) {
 		# Oops
+		LS30::Log::error("Unparseable command: <$input>");
 		return undef;
 	}
 
 	if ($cmd->{error}) {
 		# Oops
+		my $error = $cmd->{error};
+		LS30::Log::error("Unparseable command: <$input> error: $error");
 		return undef;
 	}
 
@@ -254,7 +257,8 @@ sub simulateCommand {
 		if ($cmd->{action} eq 'query') {
 			my $variable = $cmd->{title};
 			if (!LS30Command::isSetting($variable)) {
-				return undef;
+				LS30::Log::error("Not a setting: $variable");
+				return $input;
 			}
 			my $value = $self->{settings}->{$variable}->{value};
 			$value = '' if (!defined $value);
@@ -271,8 +275,26 @@ sub simulateCommand {
 			return $string;
 		}
 		elsif ($cmd->{action} eq 'set') {
-			# TODO extract value, modify settings
-			# TODO format a response
+			my $variable = $cmd->{title};
+			if (!LS30Command::isSetting($variable)) {
+				LS30::Log::error("Not a setting: $variable");
+				return $input;
+			}
+
+			$self->{settings}->{$variable}->{value} = $cmd->{value};
+			# Cheat a bit and make the response the same as the request
+			return $input;
+		}
+		elsif ($cmd->{action} eq 'clear') {
+			my $variable = $cmd->{title};
+			if (!LS30Command::canClear($variable)) {
+				LS30::Log::error("Not clearable: $variable");
+				return $input;
+			}
+
+			$self->{settings}->{$variable}->{value} = '';
+			# Cheat a bit and make the response the same as the request
+			return $input;
 		}
 		else {
 			# TODO what?
@@ -280,6 +302,9 @@ sub simulateCommand {
 	} else {
 		# TODO what?
 	}
+
+	# No response is the best response
+	return undef;
 }
 
 =back
