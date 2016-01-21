@@ -100,6 +100,48 @@ sub addListener {
 	return $self;
 }
 
+# ---------------------------------------------------------------------------
+
+=item I<addRemoteClient($remote_addr)>
+
+Add a new connection to a remote client. This process will initiate
+the connection, and retry connect with exponential backoff upon
+connection failure and accidental disconnection.
+
+The other end is a client, not a server, so it's added to client_sockets.
+
+=cut
+
+sub addRemoteClient {
+	my ($self, $remote_addr) = @_;
+
+	my $client = AlarmDaemon::ServerSocket->new($remote_addr);
+
+	$client->onConnectFail(sub { $client->retryConnect(); });
+	$client->onRead(sub { $self->clientRead(shift, $client); });
+
+	$client->onConnect(sub {
+		LS30::Log::timePrint("Connected to " . $client->peerhost());
+		$self->{client_sockets}->{$client} = $client;
+		$self->{clients}++;
+	});
+
+	$client->onDisconnect(sub {
+		LS30::Log::timePrint("Disconnected");
+		if (exists $self->{client_sockets}->{$client}) {
+			delete $self->{client_sockets}->{$client};
+			$self->{clients}--;
+		}
+
+		$client->retryConnect();
+	});
+
+	# Try initial connection
+	$client->connect();
+}
+
+# ---------------------------------------------------------------------------
+
 =item I<addClient($socket)>
 
 This function is called by the listening socket whenever a new

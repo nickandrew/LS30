@@ -78,6 +78,11 @@ foreach my $local_addr (@listen_addrs) {
 
 # TODO: Make all outbound connections
 
+foreach my $peer_addr (@connect_addrs) {
+	LS30::Log::timePrint("Adding remote client: $peer_addr");
+	$as->addRemoteClient($peer_addr);
+}
+
 $as->eventLoop();
 
 exit(0);

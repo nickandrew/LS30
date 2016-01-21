@@ -205,7 +205,6 @@ sub disconnect {
 	my ($self) = @_;
 
 	if ($self->{socket}) {
-		LS30::Log::timePrint("Disconnecting");
 		delete $self->{poller};
 		close($self->{socket});
 		undef $self->{socket};
@@ -317,7 +316,7 @@ sub watchdogEvent {
 	if ($current_state eq 'connected') {
 
 		# Disconnect and wait before reconnecting.
-		LS30::Log::timePrint("Timeout: disconnecting from server");
+		LS30::Log::timePrint("Timeout: disconnecting from " . $self->peerhost());
 		$self->disconnect();
 		return;
 	}
@@ -350,6 +349,7 @@ sub handleRead {
 	if (!defined $n) {
 
 		# Error on the socket
+		LS30::Log::timePrint("Socket error from " . $self->peerhost());
 		$self->disconnect();
 		$self->_disconnected();
 		return;
@@ -358,6 +358,7 @@ sub handleRead {
 	if (length($buffer) == 0) {
 
 		# EOF: Other end closed the connection
+		LS30::Log::timePrint("Disconnect from " . $self->peerhost());
 		$self->disconnect();
 		$self->_disconnected();
 		return;
