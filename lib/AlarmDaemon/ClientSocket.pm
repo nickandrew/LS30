@@ -25,6 +25,8 @@ use AlarmDaemon::CommonSocket qw();
 
 use base qw(AlarmDaemon::CommonSocket);
 
+__PACKAGE__->_defineonfunc('Disconnect');
+__PACKAGE__->_defineonfunc('Read');
 
 # ---------------------------------------------------------------------------
 
@@ -42,9 +44,6 @@ sub new {
 	};
 
 	bless $self, $class;
-
-	$self->_defineonfunc('Disconnect');
-	$self->_defineonfunc('Read');
 
 	$self->{poller} = AnyEvent->io(
 		fh   => $socket,

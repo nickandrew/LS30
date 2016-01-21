@@ -33,6 +33,11 @@ use Timer qw();
 
 use base qw(AlarmDaemon::CommonSocket Timer);
 
+__PACKAGE__->_defineonfunc('Connect');
+__PACKAGE__->_defineonfunc('ConnectFail');
+__PACKAGE__->_defineonfunc('Disconnect');
+__PACKAGE__->_defineonfunc('Read');
+
 
 # ---------------------------------------------------------------------------
 
@@ -67,12 +72,12 @@ sub new {
 
 	# Set function to be called on connect failure
 	if ($args{on_connect_fail}) {
-		$self->{on_connect_fail} = $args{on_connect_fail};
+		$self->onConnectFail($args{on_connect_fail});
 	}
 
 	# Set function to be called after a disconnection
 	if ($args{on_disconnect}) {
-		$self->{on_disconnect} = $args{on_disconnect};
+		$self->onDisconnect($args{on_disconnect});
 	}
 
 	return $self;
@@ -104,62 +109,20 @@ The subroutine is called with $self as its argument.
 
 =cut
 
-sub onConnectFail {
+sub xxonConnectFailxx {
 	my $self = shift;
 
 	if (scalar @_) {
-		$self->{on_connect_fail} = shift;
+		$self->_onfunc('ConnectFail', shift);
 
 		# Try to bootstrap connection here; call it now
 		if (!$self->isConnected()) {
-			$self->{on_connect_fail}->($self);
+			$self->_runonfunc('ConnectFail');
 		}
 
 		return $self;
 	}
-	return $self->{on_connect_fail};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<onDisconnect(sub)>
-
-Get/set a subroutine to be called on disconnection.
-The subroutine is called with $self as its argument.
-
-=cut
-
-sub onDisconnect {
-	my $self = shift;
-
-	if (scalar @_) {
-		$self->{on_disconnect} = shift;
-		return $self;
-	}
-	return $self->{on_disconnect};
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<onConnect($sub)>
-
-Call the supplied sub immediately after every successful connection.
-
-Calling onConnect() while connected won't run the sub (unlike onConnectFail).
-
-=cut
-
-sub onConnect {
-	my $self = shift;
-
-	if (scalar @_) {
-		$self->{on_connect} = shift;
-
-		return $self;
-	}
-	return $self->{on_connect};
+	return $self->_onfunc('ConnectFail');
 }
 
 
@@ -170,9 +133,7 @@ sub onConnect {
 sub _disconnected {
 	my $self = shift;
 
-	if ($self->{on_disconnect}) {
-		$self->{on_disconnect}->($self);
-	}
+	$self->_runonfunc('Disconnect');
 }
 
 # ---------------------------------------------------------------------------
@@ -200,9 +161,7 @@ sub connect {
 
 	if (!$socket) {
 		LS30::Log::error("Cannot create a new socket to $self->{peer_addr}");
-		if ($self->{on_connect_fail}) {
-			$self->{on_connect_fail}->($self);
-		}
+		$self->_runonfunc('ConnectFail');
 		return 0;
 	}
 
@@ -228,9 +187,7 @@ sub connect {
 
 	$self->{poller} = $w;
 
-	if ($self->{on_connect}) {
-		$self->{on_connect}->($self);
-	}
+	$self->_runonfunc('Connect');
 
 	return 1;
 }
@@ -406,79 +363,7 @@ sub handleRead {
 		return;
 	}
 
-	$self->addBuffer($buffer);
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<addBuffer($buffer)>
-
-Filter data received from the LS30 to clean up the protocol.
-
-The LS30 output is pretty unclean, with varying numbers of \r and \n
-at times. Examples:
-
-  Received: (1688181602005009)\r\n
-  Received: \nMINPIC=0a585012345600108b6173\r\n
-  Received: (1688181602005009)\r\nATE0\r\nATS0=3\r\nAT&G7\r\n
-  Received: \nMINPIC=0a14101234560000846173\r\n\r\n\n(16881814000100
-  Received: 2f)\r\n
-
-Add $buffer to our queue of data pending processing. Any complete lines
-(lines ending in CR or LF) are passed to processLine().
-
-=cut
-
-sub addBuffer {
-	my ($self, $buffer) = @_;
-
-	$self->{pending} .= $buffer;
-	my $pending = $self->{pending};
-
-	while ($pending ne '') {
-
-		if (substr($pending, 0, 1) eq "\r") {
-
-			# Skip leading \r
-			$pending = substr($pending, 1);
-			next;
-		}
-
-		if (substr($pending, 0, 1) eq "\n") {
-
-			# Skip leading \n
-			$pending = substr($pending, 1);
-			next;
-		}
-
-		if ($pending =~ /^([^\r\n]+)[\r\n]+(.*)/s) {
-
-			# Here's a full line to process
-			my $line = $1;
-			$pending = $2;
-			$self->processLine($line);
-		} else {
-			last;
-		}
-	}
-
-	$self->{pending} = $pending;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<processLine($line)>
-
-Process one full line of received data. Run an appropriate handler.
-
-=cut
-
-sub processLine {
-	my ($self, $line) = @_;
-
-	die "AlarmDaemon::ServerSocket::processLine() needs to be implemented by a subclass.";
+	$self->_runonfunc('Read', $buffer);
 }
 
 

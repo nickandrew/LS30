@@ -30,6 +30,14 @@ use AnyEvent qw();
 
 use base qw(AlarmDaemon::ServerSocket);
 
+__PACKAGE__->_defineonfunc('AddedDevice');
+__PACKAGE__->_defineonfunc('AT');
+__PACKAGE__->_defineonfunc('CONTACTID');
+__PACKAGE__->_defineonfunc('GSM');
+__PACKAGE__->_defineonfunc('MINPIC');
+__PACKAGE__->_defineonfunc('Response');
+__PACKAGE__->_defineonfunc('XINPIC');
+
 # ---------------------------------------------------------------------------
 
 =item I<new($server_address, %args)>
@@ -69,6 +77,8 @@ sub new {
 	my $self = $class->SUPER::new($server_address, %args);
 	bless $self, $class;
 
+	$self->onRead(sub { $self->_addBuffer(shift); });
+
 	return $self;
 }
 
@@ -93,9 +103,66 @@ sub sendCommand {
 
 # ---------------------------------------------------------------------------
 
+=item I<_addBuffer($buffer)>
+
+Filter data received from the LS30 to clean up the protocol.
+
+The LS30 output is pretty unclean, with varying numbers of \r and \n
+at times. Examples:
+
+  Received: (1688181602005009)\r\n
+  Received: \nMINPIC=0a585012345600108b6173\r\n
+  Received: (1688181602005009)\r\nATE0\r\nATS0=3\r\nAT&G7\r\n
+  Received: \nMINPIC=0a14101234560000846173\r\n\r\n\n(16881814000100
+  Received: 2f)\r\n
+
+Add $buffer to our queue of data pending processing. Any complete lines
+(lines ending in CR or LF) are passed to processLine().
+
+=cut
+
+sub _addBuffer {
+	my ($self, $buffer) = @_;
+
+	$self->{pending} .= $buffer;
+	my $pending = $self->{pending};
+
+	while ($pending ne '') {
+
+		if (substr($pending, 0, 1) eq "\r") {
+
+			# Skip leading \r
+			$pending = substr($pending, 1);
+			next;
+		}
+
+		if (substr($pending, 0, 1) eq "\n") {
+
+			# Skip leading \n
+			$pending = substr($pending, 1);
+			next;
+		}
+
+		if ($pending =~ /^([^\r\n]+)[\r\n]+(.*)/s) {
+
+			# Here's a full line to process
+			my $line = $1;
+			$pending = $2;
+			$self->processLine($line);
+		} else {
+			last;
+		}
+	}
+
+	$self->{pending} = $pending;
+}
+
+
+# ---------------------------------------------------------------------------
+
 =item I<processLine($line)>
 
-Process one full line of received data. Run an appropriate handler.
+Process one full line of received data. Call an on* function.
 
 Since the LS30 can garble its output, also use some heuristics to
 determine if a line which makes no sense in total can be processed
@@ -114,13 +181,13 @@ sub processLine {
 
 	if ($line =~ /^XINPIC=([0-9a-f]+)$/) {
 		my $minpic = $1;
-		$self->runHandler('XINPIC', $minpic);
+		$self->_runonfunc('XINPIC', $minpic);
 		return;
 	}
 
 	if ($line =~ /^\(([0-9a-f]+)\)$/) {
 		my $contact_id = $1;
-		$self->runHandler('CONTACTID', $contact_id);
+		$self->_runonfunc('CONTACTID', $contact_id);
 		return;
 	}
 
@@ -137,32 +204,32 @@ sub processLine {
 		# a response to a command, but are sent at the time the device is
 		# enrolled.
 		if ($response =~ /^!i[bcefm]l[0-9a-f]{14}&$/) {
-			$self->_runonfunc('added_device', $response);
+			$self->_runonfunc('AddedDevice', $response);
 			return;
 		}
 
 		if ($response =~ /^!i[bcefm]lno&$/) {
 			# Time limit expired; no device added
 			# The time delay is a *maximum* of 60 seconds; may be less.
-			$self->_runonfunc('added_device', $response);
+			$self->_runonfunc('AddedDevice', $response);
 			return;
 		}
 
-		$self->_runonfunc('response', $response);
+		$self->_runonfunc('Response', $response);
 		return;
 	}
 
 	if ($line =~ /^(AT.+)/) {
 
 		# Ignore AT command
-		$self->runHandler('AT', $line);
+		$self->_runonfunc('AT', $line);
 		return;
 	}
 
 	if ($line =~ /^(GSM=.+)/) {
 
 		# Ignore GSM command
-		$self->runHandler('GSM', $line);
+		$self->_runonfunc('GSM', $line);
 		return;
 	}
 
@@ -240,99 +307,14 @@ sub _runonfunc {
 	}
 }
 
-# ---------------------------------------------------------------------------
+# _defineonfunc('Fred') creates a method $self->onFred(...)
 
-=item I<onMINPIC($sub)>
+sub _defineonfunc {
+	my ($self, $name) = @_;
 
-Set or clear or get sub to be called when a MINPIC line is received.
-
-=cut
-
-sub onMINPIC {
-	my $self = shift;
-
-	return $self->_onfunc('MINPIC', @_);
-}
-
-# ---------------------------------------------------------------------------
-
-=item I<onResponse($sub)>
-
-Set or clear or get sub to be called when a response line is received.
-
-=cut
-
-sub onResponse {
-	my $self = shift;
-
-	return $self->_onfunc('response', @_);
-}
-
-# ---------------------------------------------------------------------------
-
-=item I<onAddedDevice($sub)>
-
-Set or clear or get sub to be called when a specific line indicating an
-added device has been received.
-
-=cut
-
-sub onAddedDevice {
-	my $self = shift;
-
-	return $self->_onfunc('added_device', @_);
-}
-
-# ---------------------------------------------------------------------------
-
-=item I<setHandler($object)>
-
-Keep a reference to the object which will process all our emitted events.
-
-=cut
-
-sub setHandler {
-	my ($self, $object) = @_;
-
-	$self->{handler} = $object;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<runHandler($type, @args)>
-
-Run the handler function appropriate to the specified type $type.
-Further arguments depend on the value of $type.
-
-=cut
-
-sub runHandler {
-	my $self = shift;
-	my $type = shift;
-
-	my $object = $self->{handler};
-
-	if (!defined $object) {
-		LS30::Log::error("Cannot run handler for $type");
-		return;
-	}
-
-	if ($type eq 'MINPIC') {
-		die "Obsolete";
-	} elsif ($type eq 'XINPIC') {
-		$object->handleXINPIC(@_);
-	} elsif ($type eq 'CONTACTID') {
-		$object->handleCONTACTID(@_);
-	} elsif ($type eq 'Response') {
-		die "Obsolete runHandler Response";
-	} elsif ($type eq 'AT') {
-		$object->handleAT(@_);
-	} elsif ($type eq 'GSM') {
-		$object->handleGSM(@_);
-	} else {
-		LS30::Log::error("No handler function defined for $type");
-	}
+	no strict 'refs';
+	my $package = ref($self) || $self;
+	*{"${package}::on${name}"} = sub { return shift->_onfunc($name, @_); };
 }
 
 =back

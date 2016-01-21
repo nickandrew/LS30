@@ -106,7 +106,7 @@ sub _defineonfunc {
 	my ($self, $name) = @_;
 
 	no strict 'refs';
-	my $package = ref($self);
+	my $package = ref($self) || $self;
 	*{"${package}::on${name}"} = sub { return shift->_onfunc($name, @_); };
 }
 
