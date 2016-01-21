@@ -28,21 +28,23 @@ use base qw(AlarmDaemon::CommonSocket);
 
 # ---------------------------------------------------------------------------
 
-=item new($socket, $handler)
+=item new($socket)
 
 Return a new instance of AlarmDaemon::ClientSocket for the specified socket.
 
 =cut
 
 sub new {
-	my ($class, $socket, $handler) = @_;
+	my ($class, $socket) = @_;
 
 	my $self = {
 		socket   => $socket,
-		handler  => $handler,
 	};
 
 	bless $self, $class;
+
+	$self->_defineonfunc('Disconnect');
+	$self->_defineonfunc('Read');
 
 	$self->{poller} = AnyEvent->io(
 		fh   => $socket,
@@ -109,7 +111,7 @@ sub watchdogEvent {
 
 =item handleRead()
 
-Read data from the socket. Pass it to our handler object.
+Read data from the socket. Call onRead/onDisconnect functions as appropriate.
 
 =cut
 
@@ -117,7 +119,6 @@ sub handleRead {
 	my ($self) = @_;
 
 	my $buffer;
-	my $handler = $self->{handler};
 
 	my $n = $self->{socket}->recv($buffer, 128);
 
@@ -125,7 +126,7 @@ sub handleRead {
 
 		# Error on the socket
 		LS30::Log::error("Client socket error");
-		$handler->removeClient($self);
+		$self->_runonfunc('Disconnect');
 		$self->disconnect();
 		return;
 	}
@@ -135,12 +136,12 @@ sub handleRead {
 	if ($l == 0) {
 
 		# Other end closed connection
-		$handler->removeClient($self);
+		$self->_runonfunc('Disconnect');
 		$self->disconnect();
 		return;
 	}
 
-	$handler->clientRead($buffer, $self);
+	$self->_runonfunc('Read', $buffer);
 }
 
 1;

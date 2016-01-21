@@ -110,9 +110,12 @@ client connects.
 sub addClient {
 	my ($self, $socket) = @_;
 
-	my $client = AlarmDaemon::ClientSocket->new($socket, $self);
+	my $client = AlarmDaemon::ClientSocket->new($socket);
 	$self->{client_sockets}->{$socket} = $client;
 	$self->{clients}++;
+
+	$client->onRead(sub { $self->clientRead(shift, $client); });
+	$client->onDisconnect(sub { $self->removeClient($client); });
 
 	LS30::Log::timePrint("New client " . $client->peerhost());
 }

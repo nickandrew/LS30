@@ -74,6 +74,42 @@ sub peerhost {
 	return undef;
 }
 
+# ---------------------------------------------------------------------------
+# Set/Get and/or run a function
+# ---------------------------------------------------------------------------
+
+sub _onfunc {
+	my $self = shift;
+	my $name = shift;
+
+	if (scalar @_) {
+		$self->{on_func}->{$name} = shift;
+		return $self;
+	}
+
+	return $self->{on_func}->{$name};
+}
+
+sub _runonfunc {
+	my $self = shift;
+	my $name = shift;
+
+	my $sub = $self->{on_func}->{$name};
+	if (defined $sub) {
+		$sub->(@_);
+	}
+}
+
+# _defineonfunc('Fred') creates a method $self->onFred(...)
+
+sub _defineonfunc {
+	my ($self, $name) = @_;
+
+	no strict 'refs';
+	my $package = ref($self);
+	*{"${package}::on${name}"} = sub { return shift->_onfunc($name, @_); };
+}
+
 =back
 
 =cut
