@@ -27,6 +27,8 @@ use strict;
 use warnings;
 
 use Data::Dumper qw(Dumper);
+use Date::Format qw(time2str);
+use Date::Parse qw(str2time);
 use YAML qw();
 
 use AlarmDaemon::ClientSocket qw();
@@ -310,54 +312,107 @@ sub simulateCommand {
 		return undef;
 	}
 
-	if ($cmd->{action}) {
+	my $subsys = $cmd->{subsys};
+	my $action = $cmd->{action};
+
+	if ($subsys eq 'settings') {
+		if (!$cmd->{action}) {
+			# What?
+			return undef;
+		}
+
 		if ($cmd->{action} eq 'query') {
 			my $variable = $cmd->{title};
-			if (!LS30Command::isSetting($variable)) {
-				LS30::Log::error("Not a setting: $variable");
-				return $input;
+			if (LS30Command::isSetting($variable)) {
+				my $value = $self->{state}->{settings}->{$variable}->{value};
+				$value = '' if (!defined $value);
+
+				my $saved_response = $self->{state}->{settings}->{$variable}->{response};
+
+				my $args = {
+					title => $variable,
+					action => 'query',
+					value => $value,
+				};
+
+				my $string = LS30Command::formatResponse($args);
+				return $string;
 			}
-			my $value = $self->{settings}->{$variable}->{value};
-			$value = '' if (!defined $value);
 
-			my $saved_response = $self->{settings}->{$variable}->{response};
+			# Query other non-setting things
+			if ($variable eq 'Information Burglar Sensor') {
+				return '!ibno&';
+			}
 
-			my $args = {
-				title => $variable,
-				action => 'query',
-				value => $value,
-			};
+			if ($variable eq 'Information Controller') {
+				return '!icno&';
+			}
 
-			my $string = LS30Command::formatResponse($args);
-			return $string;
+			if ($variable eq 'Information Fire Sensor') {
+				return '!ifno&';
+			}
+
+			LS30::Log::error("Not a setting: $variable");
+			return $input;
 		}
 		elsif ($cmd->{action} eq 'set') {
+
 			my $variable = $cmd->{title};
-			if (!LS30Command::isSetting($variable)) {
+			if (LS30Command::isSetting($variable)) {
+				$self->{state}->{settings}->{$variable}->{value} = $cmd->{value};
+				$self->_saveState();
+			} else {
 				LS30::Log::error("Not a setting: $variable");
 				return $input;
 			}
 
-			$self->{settings}->{$variable}->{value} = $cmd->{value};
 			# Cheat a bit and make the response the same as the request
 			return $input;
 		}
 		elsif ($cmd->{action} eq 'clear') {
+
 			my $variable = $cmd->{title};
 			if (!LS30Command::canClear($variable)) {
 				LS30::Log::error("Not clearable: $variable");
 				return $input;
 			}
 
-			$self->{settings}->{$variable}->{value} = '';
+			$self->{state}->{settings}->{$variable}->{value} = '';
+			$self->_saveState();
 			# Cheat a bit and make the response the same as the request
 			return $input;
 		}
-		else {
-			# TODO what?
+	}
+	elsif ($subsys eq 'eventlog') {
+		# Pretend there's only 1 event in the log
+		return '!ev13840101030101281159001&';
+	}
+	elsif ($subsys eq 'datetime') {
+		my $now = time();
+
+		if ($action eq 'set') {
+			# Calculate an offset between current time and set time
+			my $then = str2time("$cmd->{date} $cmd->{time}");
+			$self->{state}->{datetime}->{offset} = $then - $now;
+			$self->_saveState();
+			return $input;
 		}
-	} else {
-		# TODO what?
+
+		# query
+		my $offset = $self->{state}->{datetime}->{offset} || 0;
+		my $args = {
+			title => 'Date/Time',
+			date  => time2str('%Y-%m-%d', $now + $offset),
+			time  => time2str('%T', $now + $offset),
+			dow   => time2str('%a', $now + $offset),
+		};
+
+		my $response = LS30Command::formatResponse($args);
+		return $response;
+	}
+	elsif ($subsys eq 'cms') {
+		# '!l5&' who knows what it means
+		return $input;
 	}
 
 	# No response is the best response
