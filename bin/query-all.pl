@@ -70,7 +70,7 @@ foreach my $title (sort (LS30Command::listCommands())) {
 			value    => $resp->{value},
 		};
 
-		$data->{$title} = $hr;
+		$data->{settings}->{$title} = $hr;
 	}
 }
 

@@ -7,7 +7,7 @@
 #  and connects out to remote clients. Not a proxy. Settings are emulated
 #  and stored in YAML.
 #
-#  Usage: simulator.pl --settings settings.yaml [-l listen_addr] [-c host:port] ...
+#  Usage: simulator.pl --state statefile.yaml [-l listen_addr] [-c host:port] ...
 #
 #  -c host:port  Connect to specified port
 #
@@ -31,13 +31,13 @@ use LS30::Log qw();
 
 my @listen_addrs;
 my @connect_addrs;
-my $settings_file;
+my $state_file;
 
 $| = 1;
 GetOptions(
 	'l=s' => \@listen_addrs,
 	'c=s' => \@connect_addrs,
-	'settings=s' => \$settings_file,
+	'state=s' => \$state_file,
 );
 
 if (!@listen_addrs && !@connect_addrs) {
@@ -56,8 +56,8 @@ $SIG{'PIPE'} = sub {
 
 my $as = AlarmDaemon::Simulator->new();
 
-if ($settings_file) {
-	$as->settingsFile($settings_file);
+if ($state_file) {
+	$as->stateFile($state_file);
 }
 
 # $ac->addServer($opt_h);

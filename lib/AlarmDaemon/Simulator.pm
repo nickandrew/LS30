@@ -54,8 +54,8 @@ sub new {
 		client_sockets => {},
 		condvar        => AnyEvent->condvar,
 		listeners      => {},
-		settings       => {},
-		settings_file  => undef,
+		state          => {},
+		state_file     => undef,
 	};
 
 	bless $self, $class;
@@ -63,21 +63,33 @@ sub new {
 	return $self;
 }
 
-=item I<settingsFile($filename)>
+# ---------------------------------------------------------------------------
+# Save updated state
+# ---------------------------------------------------------------------------
 
-Set (and load) YAML file containing default/initial settings
+sub _saveState {
+	my ($self) = @_;
+
+	if ($self->{state_file}) {
+		YAML::DumpFile($self->{state_file}, $self->{state});
+	}
+}
+
+=item I<stateFile($filename)>
+
+Set (and load) YAML file containing default/initial state
 
 =cut
 
-sub settingsFile {
+sub stateFile {
 	my ($self, $filename) = @_;
 
 	if (!-r $filename) {
-		die "Cannot read settings file: $filename";
+		die "Cannot read state file: $filename";
 	}
 
-	$self->{settings} = YAML::LoadFile($filename);
-	$self->{settings_file} = $filename;
+	$self->{state} = YAML::LoadFile($filename);
+	$self->{state_file} = $filename;
 }
 
 =item I<addListener($socket)>
