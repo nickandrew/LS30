@@ -1178,8 +1178,9 @@ sub parseResponse {
 		# Test if it's a single character response
 		my $hr = $single_char_responses->{$key};
 		if ($hr) {
-			return _parseFormat(substr($meat, 1), $return, $hr->{args});
+			$meat = _parseFormat(substr($meat, 1), $return, $hr->{args});
 		}
+		return $return;
 	}
 
 	if ($hr) {
@@ -1218,7 +1219,7 @@ sub parseResponse {
 		if ($return->{action} eq 'query') {
 			if ($hr->{query_args}) {
 				# Parse further arguments
-				return _parseFormat($meat, $return, $hr->{query_args});
+				$meat = _parseFormat($meat, $return, $hr->{query_args});
 			}
 			# Nothing further
 			return $return;
@@ -1233,7 +1234,8 @@ sub parseResponse {
 		}
 
 		# Use responses if defined, otherwise use argument definition
-		return _parseFormat($meat, $return, $p_hr->{response} || $p_hr->{args});
+		$meat = _parseFormat($meat, $return, $p_hr->{response} || $p_hr->{args});
+		return $return;
 	}
 
 	$return->{error} = "Unparseable response";
@@ -1341,67 +1343,106 @@ sub parseRequest {
 	}
 
 	if (!$hr) {
+		# Try 1-char key
 		$key = substr($meat, 0, 1);
 		$hr = getCommandByKey($key);
 	}
 
-	if ($hr) {
-		$return->{title} = $hr->{title};
-
-		$meat = substr($meat, length($key));
-
-		if ($hr->{is_setting}) {
-			if (substr($meat, 0, 1) eq 's') {
-
-				# It's a set request
-				$return->{action} = 'set';
-				$meat = substr($meat, 1);
-			} elsif (substr($meat, 0, 1) eq 'k') {
-
-				# It's a clear request
-				$return->{action} = 'clear';
-				$meat = substr($meat, 1);
-				# Command should finish here
-				if ($meat ne '&') {
-					LS30::Log::debug("Extra chars after clear command: <$meat>");
-				}
-			} elsif (substr($meat, 0, 1) eq '?') {
-				# It's a query request
-				$return->{action} = 'query';
-				$meat = substr($meat, 1);
-			} else {
-
-				# It's something else
-				$return->{error} = "Expected s/k/? after setting name <$key>";
-				return $return;
-			}
-		}
-
-
-		if ($return->{action} eq 'clear') {
-			# Nothing further
-			# TODO: parse password
-			return $return;
-		}
-
-		if ($return->{action} eq 'query') {
-			if ($hr->{query_args}) {
-				# Parse further arguments
-				# TODO: parse password
-				return _parseFormat($meat, $return, $hr->{query_args});
-			}
-			# Nothing further
-			# TODO: parse password
-			return $return;
-		}
-
-		my $p_hr = $hr;
-
-		# Use argument definition
-		return _parseFormat($meat, $return, $p_hr->{args});
+	if (!$hr) {
+		$return->{error} = sprintf("Unparseable request <%s>", substr($meat, 0, 3));
+		return $return;
 	}
 
-	$return->{error} = "Unparseable request";
+	# Which subsystem does this command belong to?
+	my $subsys = $return->{subsys} = $hr->{subsys} || 'settings';
+
+	$return->{title} = $hr->{title};
+
+	$meat = substr($meat, length($key));
+
+	if ($hr->{is_setting}) {
+		if (substr($meat, 0, 1) eq 's') {
+
+			# It's a set request
+			$return->{action} = 'set';
+			$meat = substr($meat, 1);
+		} elsif (substr($meat, 0, 1) eq 'k') {
+
+			# It's a clear request
+			$return->{action} = 'clear';
+			$meat = substr($meat, 1);
+			# Command should finish here
+			if ($meat ne '&') {
+				LS30::Log::debug("Extra chars after clear command: <$meat>");
+			}
+		} elsif (substr($meat, 0, 1) eq '?') {
+			# It's a query request
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
+		} else {
+
+			# It's something else
+			$return->{error} = "Expected s/k/? after setting name <$key>";
+			return $return;
+		}
+	} else {
+		if (substr($meat, 0, 1) eq '?') {
+			# It's a read-only query
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
+		}
+	}
+
+	if ($subsys eq 'datetime') {
+		# Date/Time has set and query but is not a setting
+		if (substr($meat, 0, 1) eq 's') {
+			# It's a set request
+			$return->{action} = 'set';
+			$meat = substr($meat, 1);
+		} elsif (substr($meat, 0, 1) eq '?') {
+			# It's a query request
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
+		}
+	}
+	elsif ($subsys eq 'eventlog') {
+		$return->{action} = 'query';
+	}
+	elsif ($subsys eq 'cms') {
+		$return->{action} = 'unknown';
+	}
+
+	if ($return->{error}) {
+		return $return;
+	}
+
+	if (!$return->{action}) {
+		$return->{error} = "No action has been found";
+		return $return;
+	}
+
+	if ($return->{action} eq 'clear') {
+		# Nothing further
+	}
+
+	if ($return->{action} eq 'query' or $hr->{no_query}) {
+		# no_query means no '?' appears in the input string. query_args may still follow.
+		# Parse query_args if specified
+		$meat = _parseFormat($meat, $return, $hr->{query_args});
+	}
+
+	if ($return->{action} eq 'set') {
+		# Parse query_args if specified
+		$meat = _parseFormat($meat, $return, $hr->{query_args});
+
+		# Parse args if specified
+		$meat = _parseFormat($meat, $return, $hr->{args});
+	}
+
+	my $p_hr = $hr;
+
+	# Finally, parse the optional password
+	_parsePassword($meat, $return);
 
 	return $return;
 }
@@ -1832,19 +1873,20 @@ sub parseDeviceConfig {
 
 # ---------------------------------------------------------------------------
 # Parse a response according to specified format
+# Return remainder of string (or undef if error)
 # ---------------------------------------------------------------------------
 
 sub _parseFormat {
 	my ($string, $return, $response_lr) = @_;
 
-	# Use responses if defined, otherwise use argument definition
 	if ($response_lr) {
 		foreach my $hr2 (@$response_lr) {
 			$string = _parseArg($string, $return, $hr2);
+			return undef if (!defined $string);
 		}
 	}
 
-	return $return;
+	return $string;
 }
 
 # ---------------------------------------------------------------------------
@@ -1856,7 +1898,7 @@ sub _parseArg {
 	my ($string, $return, $arg_hr) = @_;
 
 	if (!defined $string) {
-		confess "_parseArg: input string is not defined\n";
+		$return->{error} = "_parseArg: input string is not defined\n";
 		return undef;
 	}
 
@@ -1893,6 +1935,18 @@ sub _parseArg {
 	}
 
 	return $rest;
+}
+
+# ---------------------------------------------------------------------------
+# Parse an optional password
+# ---------------------------------------------------------------------------
+
+sub _parsePassword {
+	my ($string, $return) = @_;
+
+	if (defined $string && length($string) == 8) {
+		$return->{password} = $string;
+	}
 }
 
 # ---------------------------------------------------------------------------
