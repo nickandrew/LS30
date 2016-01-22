@@ -119,6 +119,9 @@ my $simple_commands = [
 	['CMS 2 Two-way Audio',          'c4', 1,  'Enablement'],
 	['CMS 2 DTMF Data Length',       'c6', 1,  'DTMF duration'],
 	['CMS 2 GSM No',                 'tq', 99, \&resp_telno],
+
+	# Unknown
+	['Undocumented 1',               'le', 99, \&resp_string],
 ];
 
 my $gsm_commands = [
@@ -195,9 +198,10 @@ my $spec_commands = [
 	},
 
 	{
-		title => 'Date/Time',
-		key   => 'dt',
-		args  => [
+		title  => 'Date/Time',
+		key    => 'dt',
+		subsys => 'datetime',
+		args   => [
 			{ 'length' => 6, func => \&resp_date1,  key => 'date' },
 			{ 'length' => 1, type => 'Day of Week', key => 'dow' },
 			{ 'length' => 4, func => \&resp_date2,  key => 'time' },
@@ -205,14 +209,74 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Information',
-		key      => 'if',
+		title    => 'Information Burglar Sensor',
+		key      => 'ib',
+		args => [
+			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
 		response => [
-			{ 'length' => 1, func => \&resp_string, key => 'unk1' },
-			{ 'length' => 2, func => \&resp_string, key => 'unk2' },
-			{ 'length' => 2, func => \&resp_string, key => 'group' },
-			{ 'length' => 2, func => \&resp_string, key => 'unit' },
-			{ 'length' => 8, func => \&resp_string, key => 'device_config' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+		],
+	},
+
+	{
+		title    => 'Information Controller',
+		key      => 'ic',
+		args => [
+			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
+		response => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+		],
+	},
+
+	{
+		title    => 'Information Fire Sensor',
+		key      => 'if',
+		args => [
+			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
+		response => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
 		],
 	},
 
@@ -365,10 +429,10 @@ my $spec_commands = [
 
 	{
 		title      => 'Partial Arm',
+		is_setting => 1,
 		key        => 'n8',
 		query_args => [{ 'length' => 2, type => 'Group 91-99', key => 'group_number' },],
-		response   => [
-			{ 'length' => 2, type => 'Group 91-99',  key => 'group_number' },
+		args      => [
 			{ 'length' => 1, func => \&resp_boolean, key => 'value' },
 		],
 	},
@@ -376,21 +440,29 @@ my $spec_commands = [
 	{
 		title      => 'Event',
 		key        => 'ev',
+		subsys     => 'eventlog',
 		no_query   => 1,
-		query_args => [{ 'length' => 3, func => \&resp_hex3, key => 'value' },],
+		query_args => [{ 'length' => 3, func => \&resp_hex3, key => 'index' },],
+		response   => [
+			{ 'length' => 4, func => \&resp_string, key => 'event_type_code' },
+			{ 'length' => 2, func => \&resp_string, key => 'group_number' },
+			{ 'length' => 2, func => \&resp_string, key => 'source' },
+			{ 'length' => 2, func => \&resp_string, key => 'unit_number' },
+			{ 'length' => 2, func => \&resp_string, key => 'junk1' },
+			{ 'length' => 8, func => \&resp_string, key => 'datetime' },
+			{ 'length' => 3, func => \&resp_string, key => 'highest_event' },
+		],
 	},
 
 	{
+		title      => 'Inner Siren Time',
 		is_setting => 1,
-		title => 'Inner Siren Time',
-		key   => 'l4',
-		args  => [{ 'length' => 2, func => \&resp_hex2, key => 'value' },],
+		key        => 'l4',
+		args       => [{ 'length' => 2, func => \&resp_hex2, key => 'value' },],
 	},
 
 	{
 		title => 'Switch/Operation Scene',
-
-		# Note 1-char key
 		is_setting => 1,
 		key        => 'u',
 		query_args => [
@@ -398,6 +470,12 @@ my $spec_commands = [
 			# Low values are the switch scenes 1-8; high values are operation scenes 1-8
 			{ 'length' => 1, type => 'Switch/Operation Scene', key => 'value' },
 		],
+	},
+
+	{
+		title => 'Undocumented 2',
+		key   => 'l5',
+		subsys => 'cms',
 	},
 
 ];
