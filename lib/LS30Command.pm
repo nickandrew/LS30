@@ -618,6 +618,15 @@ my $other_commands = [{
 
 		# Arg is 0 .. ?
 	},
+
+	{
+		title => 'Voice Record',
+		key   => 'vr',
+		type  => 'command',
+
+		# Arg is 0 .. ?
+	},
+
 ];
 
 my $single_char_responses = {
