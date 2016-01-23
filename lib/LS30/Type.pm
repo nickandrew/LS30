@@ -315,6 +315,24 @@ my $type_table = {
 		'05' => 'Z',
 	},
 
+	'X-10 Switch Command' => {
+		'All unit off'     => '0',
+		'Hail request'     => '1',
+		'Dim'              => '2',
+		'Extended data'    => '3',
+		'On'               => '4',
+		'Preset dim'       => '5',
+		'All lights off'   => '6',
+		'Status off'       => '7',
+		'All lights on'    => '8',
+		'Hail acknowledge' => '9',
+		'Bright'           => ':',
+		'Status on'        => ';',
+		'Off'              => '<',
+		'Extended code'    => '>',
+		'Status request'   => '?',
+	},
+
 };
 
 my $reverse_table = {};
