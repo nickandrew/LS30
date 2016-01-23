@@ -1229,7 +1229,7 @@ sub setPassword {
 
 =item I<parseResponse($string)>
 
-Parse the response string received from a device.
+Parse the response string received from an LS-30 server.
 
 Response strings start with '!' and end with '&'.
 
@@ -1317,6 +1317,7 @@ sub parseResponse {
 		# Test if this is an asynchronous response to a learn command
 		if ($hr->{async_response} && length($meat) == $hr->{async_response}->{length}) {
 			$p_hr = $hr->{async_response};
+			$return->{title} = $p_hr->{title};
 			# Fall through to parse it according to async_response
 		}
 

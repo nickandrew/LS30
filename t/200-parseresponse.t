@@ -17,7 +17,7 @@ my $tests = {
 	# Simple commands
 	'Switch 1' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!s64&',
 			title  => 'Switch 1',
 			value  => 4,
@@ -27,7 +27,7 @@ my $tests = {
 	'Auto Answer Ring Count' => {
 		expect => {
 			title  => 'Auto Answer Ring Count',
-			action => 'query',
+			action => 'value',
 			string => '!a00c&',
 			value  => 12,
 		},
@@ -35,7 +35,7 @@ my $tests = {
 
 	'RF Jamming Warning' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!c00&',
 			title  => 'RF Jamming Warning',
 			value  => 'Disabled',
@@ -44,7 +44,7 @@ my $tests = {
 
 	'Mode Change Chirp' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!m30&',
 			title  => 'Mode Change Chirp',
 			value  => 0,
@@ -53,7 +53,7 @@ my $tests = {
 
 	'ROM Version' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!vn05.00 09/29/09 E*F&',
 			title  => 'ROM Version',
 			value  => '05.00 09/29/09 E*F',
@@ -62,7 +62,7 @@ my $tests = {
 
 	'Telephone Burglar' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!t5no&',
 			title  => 'Telephone Burglar',
 			value  => '',
@@ -72,7 +72,7 @@ my $tests = {
 	# GSM commands
 	'GSM Phone 1' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!g00412345678&',
 			title  => 'GSM Phone 1',
 			value  => '0412345678',
@@ -82,7 +82,7 @@ my $tests = {
 	# Special commands
 	'Date/Time' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			date   => '2016-01-18',
 			dow    => 'Mon',
 			string => '!dt16011811450&',
@@ -93,7 +93,7 @@ my $tests = {
 
 	'Operation Mode' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!n00&',
 			title  => 'Operation Mode',
 			value  => 'Disarm',
@@ -102,7 +102,7 @@ my $tests = {
 
 	'Device Count' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!b307&',
 			title  => 'Device Count',
 			value  => 7,
@@ -120,7 +120,7 @@ my $tests = {
 
 	'Added Burglar Sensor' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			config => '04100000',
 			id     => '06',
 			index  => 7,
@@ -133,7 +133,7 @@ my $tests = {
 	# Delete commands
 	'Delete Burglar Sensor' => {
 		expect => {
-			action => 'query',
+			action => 'value',
 			string => '!ibk07&',
 			title  => 'Delete Burglar Sensor',
 		},
