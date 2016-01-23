@@ -1323,6 +1323,12 @@ sub parseResponse {
 
 		# Use responses if defined, otherwise use argument definition
 		$meat = _parseFormat($meat, $return, $p_hr->{response} || $p_hr->{args});
+
+		# Check for NAK on a set command
+		if (defined $meat && $meat eq 'no') {
+			$return->{error} = "Command failed";
+		}
+
 		return $return;
 	}
 

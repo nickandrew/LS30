@@ -106,6 +106,12 @@ sub get {
 	return $self->{$key};
 }
 
+sub set {
+	my ($self, $key, $value) = @_;
+
+	$self->{$key} = $value;
+}
+
 =back
 
 =cut

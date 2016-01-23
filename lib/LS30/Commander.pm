@@ -354,8 +354,11 @@ sub setSetting {
 	# Test if the supplied value is valid (works for enumerated types)
 	my $raw_value = LS30Command::testSettingValue($setting_name, $value);
 	if (!defined $raw_value) {
-		LS30::Log::error("Value <$value> is not valid for setting <$setting_name>");
-		$cv->send(undef);
+		my $err = "Value <$value> is not valid for setting <$setting_name>";
+		LS30::Log::error($err);
+		my $resp = LS30::ResponseMessage->new();
+		$resp->set('error', $err);
+		$cv->send($resp);
 		return $cv;
 	}
 
@@ -366,7 +369,7 @@ sub setSetting {
 		my $response = $cv2->recv();
 		my $resp_obj = LS30::ResponseMessage->new($response);
 		# TODO: Test the response for validity/error
-		$cv->send(1);
+		$cv->send($resp_obj);
 	});
 
 	return $cv;
