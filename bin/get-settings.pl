@@ -15,7 +15,11 @@ use LS30::Commander qw();
 
 LS30Command::addCommands();
 
-my $ls30c = LS30Connection->new();
+use vars qw($opt_h);
+
+getopts('h:');
+
+my $ls30c = LS30Connection->new($opt_h);
 
 $ls30c->connect();
 
@@ -31,7 +35,7 @@ foreach my $setting_name (@ARGV) {
 		my $value = $cv->recv;
 
 		if (defined $value) {
-			printf("%-20s | %s\n", $setting_name, $value);
+			printf("%-40s | %s\n", $setting_name, $value);
 		} else {
 			print STDERR "No value for '$setting_name'\n";
 		}

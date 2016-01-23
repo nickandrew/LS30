@@ -28,7 +28,7 @@ if (!$opt_m) {
 my $mode;
 
 foreach my $m (@mode_list) {
-	if ($opt_m =~ /$m/i) {
+	if ($opt_m =~ /^$m$/i) {
 		$mode = $m;
 		last;
 	}
@@ -52,12 +52,23 @@ my $ls30cmdr = LS30::Commander->new($ls30c, 5);
 
 my $cmd = LS30Command::setCommand($hr);
 
+if (!defined $cmd) {
+	die "Invalid command";
+}
+
 my $response = $ls30cmdr->sendCommand($cmd);
 
-if ($response) {
-	printf "%-40s | %-15s | %s\n", $hr->{title}, $cmd, $response;
-	my $resp_obj = LS30::ResponseMessage->new($response);
-	print Data::Dumper::Dumper($resp_obj) if ($resp_obj);
+if (!$response) {
+	die "No response to $mode command";
+}
+
+my $resp_obj = LS30::ResponseMessage->new($response);
+
+my $error = $resp_obj->get('error');
+if ($error) {
+	printf("%-40s | Error: %s\n", $hr->{title}, $error);
+} else {
+	printf("%-40s | %s\n", $hr->{title}, $resp_obj->value);
 }
 
 exit(0);
