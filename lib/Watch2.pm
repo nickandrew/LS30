@@ -42,6 +42,10 @@ sub new {
 
 	my $ls30c = $self->{ls30c};
 
+	$ls30c->onConnect(sub {
+		LS30::Log::timePrint("Watch2: Connected to $server_address");
+	});
+
 	$ls30c->onConnectFail(sub {
 		LS30::Log::error("Watch2: Connection to $server_address failed, retrying");
 		shift->retryConnect();
@@ -61,11 +65,20 @@ sub new {
 		$self->{devices} = $devices;
 	}
 
-	my $decoder = LS30::Decoder->new($self);
+	my $decoder = LS30::Decoder->new();
 
-	$ls30c->setHandler($decoder);
+	# Route decoder output to this class
+	$decoder->onDeviceMessage(sub { $self->handleDeviceMessage(@_); });
+	$decoder->onEventMessage(sub { $self->handleEventMessage(@_); });
+	$decoder->onResponseMessage(sub { $self->handleResponseMessage(@_); });
 
+	# Route Connection output to decoder or this class
+	$ls30c->onAT(sub { $self->handleAT(@_); });
+	$ls30c->onGSM(sub { $self->handleGSM(@_); });
 	$ls30c->onMINPIC(sub { $decoder->handleMINPIC(@_); });
+	$ls30c->onXINPIC(sub { $decoder->handleXINPIC(@_); });
+	$ls30c->onCONTACTID(sub { $decoder->handleCONTACTID(@_); });
+	# Responses won't happen, because we are not sending any requests
 	$ls30c->onResponse(sub { $decoder->handleResponse(@_); });
 
 	# Setup a disconnection retry timer, initially disabled
@@ -191,20 +204,6 @@ sub runCommands {
 			print "system($path, $message) rc is $rc\n";
 		}
 	}
-}
-
-sub handleResponse {
-	my ($self, $line) = @_;
-
-	my $resp_hr = LS30Command::parseResponse($line);
-
-	if (!$resp_hr) {
-		LS30::Log::error("Received unexpected response $line");
-		return;
-	}
-
-	my $s = sprintf("Response: %s (%s)", $resp_hr->{title}, $resp_hr->{value});
-	LS30::Log::timePrint($s);
 }
 
 sub handleResponseMessage {

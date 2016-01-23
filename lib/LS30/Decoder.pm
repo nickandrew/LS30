@@ -27,28 +27,28 @@ package LS30::Decoder;
 use strict;
 use warnings;
 
+use AlarmDaemon::Utils qw(_onfunc _runonfunc _defineonfunc);
 use LS30::DeviceMessage qw();
 use LS30::Log qw();
 use LS30::ResponseMessage qw();
 use ContactID::EventMessage qw();
 
+__PACKAGE__->_defineonfunc('DeviceMessage');
+__PACKAGE__->_defineonfunc('EventMessage');
+__PACKAGE__->_defineonfunc('ResponseMessage');
 
 # ---------------------------------------------------------------------------
 
-=item I<new($handler_obj)>
+=item I<new()>
 
 Instantiate one LS30::Decoder.
-
-$handler_obj is the object which will receive all messages from the connection
-class.
 
 =cut
 
 sub new {
-	my ($class, $handler_obj) = @_;
+	my ($class) = @_;
 
 	my $self = {
-		handler => $handler_obj,
 	};
 
 	bless $self, $class;
@@ -77,7 +77,31 @@ sub handleMINPIC {
 		return;
 	}
 
-	$self->{handler}->handleDeviceMessage($obj);
+	$self->_runonfunc('DeviceMessage', $obj);
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<handleXINPIC($string)>
+
+Process 'XINPIC' strings. Turn them into an instance of LS30::DeviceMessage.
+
+=cut
+
+sub handleXINPIC {
+	my ($self, $string) = @_;
+
+	my $obj = LS30::DeviceMessage->new($string);
+
+	my $err = $obj->getError();
+	if ($err) {
+
+		# Invalid string, do not pass to handler
+		return;
+	}
+
+	$self->_runonfunc('DeviceMessage', $obj);
 }
 
 
@@ -95,7 +119,7 @@ sub handleCONTACTID {
 
 	my $obj = ContactID::EventMessage->new($string);
 
-	$self->{handler}->handleEventMessage($obj);
+	$self->_runonfunc('EventMessage', $obj);
 }
 
 
@@ -114,41 +138,7 @@ sub handleResponse {
 	my $obj = LS30::ResponseMessage->new($string);
 
 	if ($obj) {
-		$self->{handler}->handleResponseMessage($obj);
-	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<handleAT($string)>
-
-Process the 'AT' message. Print it and ignore.
-
-=cut
-
-sub handleAT {
-	my ($self, $string) = @_;
-
-	if ($self->{handler} && $self->{handler}->can('handleAT')) {
-		$self->{handler}->handleAT($string);
-	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<handleGSM($string)>
-
-Process the 'GSM' message. Print it and ignore.
-
-=cut
-
-sub handleGSM {
-	my ($self, $string) = @_;
-
-	if ($self->{handler} && $self->{handler}->can('handleGSM')) {
-		$self->{handler}->handleGSM($string);
+		$self->_runonfunc('ResponseMessage', $obj);
 	}
 }
 

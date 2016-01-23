@@ -43,6 +43,10 @@ sub new {
 
 	my $ls30c = $self->{ls30c};
 
+	$ls30c->onConnect(sub {
+		LS30::Log::timePrint("RunScripts: Connected to $server_address");
+	});
+
 	$ls30c->onConnectFail(sub {
 		LS30::Log::error("RunScripts: Connection to $server_address failed, retrying");
 		shift->retryConnect();
@@ -64,29 +68,21 @@ sub new {
 
 	my $decoder = LS30::Decoder->new($self);
 
-	$ls30c->setHandler($decoder);
+	# Route decoder output to this class
+	$decoder->onDeviceMessage(sub { $self->handleDeviceMessage(@_); });
+	$decoder->onEventMessage(sub { $self->handleEventMessage(@_); });
+	$decoder->onResponseMessage(sub { $self->handleResponseMessage(@_); });
 
+	# Route Connection output to decoder or this class
+	$ls30c->onAT(sub { $self->handleAT(@_); });
+	$ls30c->onGSM(sub { $self->handleGSM(@_); });
 	$ls30c->onMINPIC(sub { $decoder->handleMINPIC(@_); });
+	$ls30c->onXINPIC(sub { $decoder->handleXINPIC(@_); });
+	$ls30c->onCONTACTID(sub { $decoder->handleCONTACTID(@_); });
+	# Responses won't happen, because we are not sending any requests
 	$ls30c->onResponse(sub { $decoder->handleResponse(@_); });
 
 	return $self;
-}
-
-sub addSelector {
-	my ($self, $selector) = @_;
-
-	$self->{'select'} = $selector;
-
-	my $timer2 = Timer->new(
-		func_ref  => \&disc_timer_event,
-		arg_ref   => ["timer2", $self, 0, 1],
-		next_time => undef,
-	);
-	$self->{timer2} = $timer2;
-	$selector->addTimer($timer2);
-
-	my $ls30c = $self->{ls30c};
-	$selector->addSelect([$ls30c->socket(), $ls30c]);
 }
 
 sub disc_timer_event {
@@ -219,20 +215,6 @@ sub runCommands {
 			print "system($path, $message) rc is $rc\n";
 		}
 	}
-}
-
-sub handleResponse {
-	my ($self, $line) = @_;
-
-	my $resp_hr = LS30Command::parseResponse($line);
-
-	if (!$resp_hr) {
-		LS30::Log::error("Received unexpected response $line");
-		return;
-	}
-
-	my $s = sprintf("Response: %s (%s)", $resp_hr->{title}, $resp_hr->{value});
-	LS30::Log::timePrint($s);
 }
 
 sub handleResponseMessage {
