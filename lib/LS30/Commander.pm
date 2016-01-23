@@ -54,8 +54,6 @@ sub new {
 
 	bless $self, $class;
 
-	$ls30c->setHandler($self);
-
 	$ls30c->onConnect(sub {
 
 		# Send a pending command, if any
@@ -75,6 +73,14 @@ sub new {
 
 		if ($self->{on_minpic}) {
 			$self->{on_minpic}->($string);
+		}
+	});
+
+	$ls30c->onXINPIC(sub {
+		my ($string) = @_;
+
+		if ($self->{on_xinpic}) {
+			$self->{on_xinpic}->($string);
 		}
 	});
 
@@ -212,52 +218,16 @@ sub onXINPIC {
 
 # ---------------------------------------------------------------------------
 
-=item I<handleXINPIC($string)>
-
-Call optional callback function on every XINPIC received.
-
-=cut
-
-sub handleXINPIC {
-	my ($self, $string) = @_;
-
-	if ($self->{on_xinpic}) {
-		$self->{on_xinpic}->($string);
-	}
-}
-
-
-# ---------------------------------------------------------------------------
-
 =item I<onCONTACTID($cb)>
 
-set callback $cb on every CONTACTID received.
+SetGet callback $cb on every CONTACTID received.
 
 =cut
 
 sub onCONTACTID {
-	my ($self, $cb) = @_;
+	my $self = shift;
 
-	$self->{on_contactid} = $cb;
-
-	return $self;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<handleCONTACTID($string)>
-
-Call optional callback function on every CONTACTID received.
-
-=cut
-
-sub handleCONTACTID {
-	my ($self, $string) = @_;
-
-	if ($self->{on_contactid}) {
-		$self->{on_contactid}->($string);
-	}
+	$self->{ls30c}->onCONTACTID(@_);
 }
 
 # ---------------------------------------------------------------------------
@@ -317,36 +287,6 @@ sub handleResponse {
 		my ($cmd, $cv, $timeout) = @$lr;
 		$self->_sendCommand($cmd, $timeout);
 	}
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<handleAT($string)>
-
-Store any AT string received by the poll.
-
-=cut
-
-sub handleAT {
-	my ($self, $string) = @_;
-
-	$self->{last_at} = $string;
-}
-
-
-# ---------------------------------------------------------------------------
-
-=item I<handleGSM($string)>
-
-Store any GSM string received by the poll.
-
-=cut
-
-sub handleGSM {
-	my ($self, $string) = @_;
-
-	$self->{last_gsm} = $string;
 }
 
 

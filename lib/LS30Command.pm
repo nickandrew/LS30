@@ -119,6 +119,9 @@ my $simple_commands = [
 	['CMS 2 Two-way Audio',          'c4', 1,  'Enablement'],
 	['CMS 2 DTMF Data Length',       'c6', 1,  'DTMF duration'],
 	['CMS 2 GSM No',                 'tq', 99, \&resp_telno],
+
+	# Unknown
+	['Undocumented 1',               'le', 99, \&resp_string],
 ];
 
 my $gsm_commands = [
@@ -195,9 +198,10 @@ my $spec_commands = [
 	},
 
 	{
-		title => 'Date/Time',
-		key   => 'dt',
-		args  => [
+		title  => 'Date/Time',
+		key    => 'dt',
+		subsys => 'datetime',
+		args   => [
 			{ 'length' => 6, func => \&resp_date1,  key => 'date' },
 			{ 'length' => 1, type => 'Day of Week', key => 'dow' },
 			{ 'length' => 4, func => \&resp_date2,  key => 'time' },
@@ -205,14 +209,74 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Information',
-		key      => 'if',
+		title    => 'Information Burglar Sensor',
+		key      => 'ib',
+		args => [
+			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
 		response => [
-			{ 'length' => 1, func => \&resp_string, key => 'unk1' },
-			{ 'length' => 2, func => \&resp_string, key => 'unk2' },
-			{ 'length' => 2, func => \&resp_string, key => 'group' },
-			{ 'length' => 2, func => \&resp_string, key => 'unit' },
-			{ 'length' => 8, func => \&resp_string, key => 'device_config' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+		],
+	},
+
+	{
+		title    => 'Information Controller',
+		key      => 'ic',
+		args => [
+			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
+		response => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+		],
+	},
+
+	{
+		title    => 'Information Fire Sensor',
+		key      => 'if',
+		args => [
+			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
+		response => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
+			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
 		],
 	},
 
@@ -365,10 +429,10 @@ my $spec_commands = [
 
 	{
 		title      => 'Partial Arm',
+		is_setting => 1,
 		key        => 'n8',
 		query_args => [{ 'length' => 2, type => 'Group 91-99', key => 'group_number' },],
-		response   => [
-			{ 'length' => 2, type => 'Group 91-99',  key => 'group_number' },
+		args      => [
 			{ 'length' => 1, func => \&resp_boolean, key => 'value' },
 		],
 	},
@@ -376,38 +440,42 @@ my $spec_commands = [
 	{
 		title      => 'Event',
 		key        => 'ev',
+		subsys     => 'eventlog',
 		no_query   => 1,
-		query_args => [{ 'length' => 3, func => \&resp_hex3, key => 'value' },],
-	},
-
-	{
-		title => 'Inner Siren Time',
-		key   => 'l4',
-		args  => [{ 'length' => 2, func => \&resp_hex2, key => 'value' },],
-	},
-
-	{
-		title => 'Password',
-
-		# Note 1-char key
-		key        => 'p',
-		query_args => [{ 'length' => 1, type => 'Password', key => 'password_no' },],
-		args       => [
-			{ 'length' => 1, type => 'Password',      key => 'password_no' },
-			{ 'length' => 8, func => \&resp_password, key => 'new_password' },
+		query_args => [{ 'length' => 3, func => \&resp_hex3, key => 'index' },],
+		response   => [
+			{ 'length' => 4, func => \&resp_string, key => 'event_type_code' },
+			{ 'length' => 2, func => \&resp_string, key => 'group_number' },
+			{ 'length' => 2, func => \&resp_string, key => 'source' },
+			{ 'length' => 2, func => \&resp_string, key => 'unit_number' },
+			{ 'length' => 2, func => \&resp_string, key => 'junk1' },
+			{ 'length' => 8, func => \&resp_string, key => 'datetime' },
+			{ 'length' => 3, func => \&resp_string, key => 'highest_event' },
 		],
 	},
 
 	{
-		title => 'Switch/Operation Scene',
+		title      => 'Inner Siren Time',
+		is_setting => 1,
+		key        => 'l4',
+		args       => [{ 'length' => 2, func => \&resp_hex2, key => 'value' },],
+	},
 
-		# Note 1-char key
+	{
+		title => 'Switch/Operation Scene',
+		is_setting => 1,
 		key        => 'u',
 		query_args => [
 
 			# Low values are the switch scenes 1-8; high values are operation scenes 1-8
 			{ 'length' => 1, type => 'Switch/Operation Scene', key => 'value' },
 		],
+	},
+
+	{
+		title => 'Undocumented 2',
+		key   => 'l5',
+		subsys => 'cms',
 	},
 
 ];
@@ -682,6 +750,36 @@ sub getCommand {
 
 # ---------------------------------------------------------------------------
 
+=item I<isSetting($title)>
+
+Return 1 if the given title is a setting, else zero.
+
+=cut
+
+sub isSetting {
+	my ($title) = @_;
+
+	return 1 if ($commands->{$title} && $commands->{$title}->{is_setting});
+	return 0;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<canClear($title)>
+
+Return 1 if the given title is a clearable setting, else zero.
+
+=cut
+
+sub canClear {
+	my ($title) = @_;
+
+	return 1 if ($commands->{$title} && $commands->{$title}->{can_clear});
+	return 0;
+}
+
+# ---------------------------------------------------------------------------
+
 =item I<getCommandByKey($key)>
 
 Return the title of the command which has the given (1 or 2 char) key.
@@ -737,11 +835,12 @@ sub _password {
 # ---------------------------------------------------------------------------
 
 sub _addArguments {
-	my ($cmd, $args, $lr, $title) = @_;
+	my ($cmd, $args, $lr, $title, $encoding) = @_;
 
 	foreach my $hr2 (@$lr) {
 		my $key  = $hr2->{key};
 		my $type = $hr2->{type};
+
 		if ($key) {
 			if (!exists $args->{$key}) {
 				my $s = sprintf(
@@ -756,8 +855,13 @@ sub _addArguments {
 			my $value;
 			if ($hr2->{func}) {
 				my $func = $hr2->{func};
-				$value = &$func($input, 'encode');
-			} elsif ($type) {
+				$value = &$func($input, $encoding);
+			} elsif (!$type) {
+				LS30::Log::error("No type defined in $title for <$key>");
+				return undef;
+			} elsif ($encoding eq 'decode') {
+				$value = LS30::Type::getString($type, $input);
+			} else {
 				$value = LS30::Type::getCode($type, $input);
 			}
 
@@ -814,7 +918,7 @@ sub queryCommand {
 
 	if ($cmd_spec->{query_args}) {
 		my $lr = $cmd_spec->{query_args};
-		$cmd = _addArguments($cmd, $args, $lr, $title);
+		$cmd = _addArguments($cmd, $args, $lr, $title, 'client_encode');
 		return undef if (!defined $cmd);
 	}
 
@@ -887,9 +991,12 @@ sub setCommand {
 					$value = _testValue($hr2, $input);
 				}
 
-				if (defined $value) {
-					$cmd .= $value;
+				if (!defined $value) {
+					LS30::Log::error("Illegal value <$input> for <$key>");
+					return undef;
 				}
+
+				$cmd .= $value;
 			}
 		}
 	}
@@ -1028,7 +1135,7 @@ sub formatDeleteCommand {
 	$cmd .= $cmd_spec->{key};
 
 	if ($cmd_spec->{query_args}) {
-		$cmd = _addArguments($cmd, $args, $cmd_spec->{query_args}, $args->{title});
+		$cmd = _addArguments($cmd, $args, $cmd_spec->{query_args}, $args->{title}, 'client_encode');
 		return undef if (!defined $cmd);
 	}
 
@@ -1037,6 +1144,76 @@ sub formatDeleteCommand {
 	$cmd .= '&';
 
 	return $cmd;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<setPassword($password_id, $new_password, $master_password)>
+
+Return a command string to set the specified password.
+
+    password_id is a string of type 'Password' (See LS30::Type)
+
+    new_password is 0-8 characters long
+
+    master_password is 1-8 characters long (if shorter than 8, it will be padded with ?).
+
+Any errors cause a return value of undef and a message in $@
+
+=cut
+
+sub setPassword {
+	my ($password_id, $new_password, $master_password) = @_;
+
+	my $string = '!ps';
+
+	my $id = LS30::Type::getCode('Password', $password_id);
+	if (!defined $id) {
+		$@ = "Invalid password id $password_id";
+		return undef;
+	}
+
+	$string .= $id;
+
+	if (length($new_password) > 8) {
+		$@ = "New password too long";
+		return undef;
+	}
+
+	# Acceptable chars for new_password: hex digits
+	if ($new_password !~ /^[0-9a-f]{0,8}$/) {
+		$@ = "New password contains unacceptable characters";
+		return undef;
+	}
+
+	# Acceptable chars for master_password: hex digits
+	if ($master_password !~ /^[0-9a-f]{0,8}$/) {
+		$@ = "Master password contains unacceptable characters";
+		return undef;
+	}
+
+	$new_password =~ tr/abcdef/:;<=>?/;
+	$master_password =~ tr/abcdef/:;<=>?/;
+
+	$string .= $new_password;
+
+	my $l = length($master_password);
+	if ($l == 0) {
+		# Not supplied
+	}
+	elsif ($l < 8) {
+		$string .= $master_password;
+		# Pad to 8 chars
+		$string .= '?' x (8 - $l);
+	}
+	elsif ($l > 8) {
+		$@ = "Master password too long";
+		return undef;
+	}
+
+	$string .= '&';
+
+	return $string;
 }
 
 # ---------------------------------------------------------------------------
@@ -1065,16 +1242,8 @@ sub parseResponse {
 
 	my $meat = $1;
 
-	my $skey = substr($meat, 0, 1);
-
-	# Test if it's a single character response
-	my $hr = $single_char_responses->{$skey};
-	if ($hr) {
-		return _parseFormat(substr($meat, 1), $hr, $return);
-	}
-
 	my $key = substr($meat, 0, 3);
-	$hr = getCommandByKey($key);
+	my $hr = getCommandByKey($key);
 
 	if (!$hr) {
 		# Try 2-char key
@@ -1082,7 +1251,19 @@ sub parseResponse {
 		$hr = getCommandByKey($key);
 	}
 
+	if (!$hr) {
+		$key = substr($meat, 0, 1);
+		# Test if it's a single character response
+		my $hr = $single_char_responses->{$key};
+		if ($hr) {
+			$meat = _parseFormat(substr($meat, 1), $return, $hr->{args});
+		}
+		return $return;
+	}
+
 	if ($hr) {
+		$return->{title} = $hr->{title};
+
 		$meat = substr($meat, length($key));
 		if (substr($meat, 0, 1) eq 's') {
 
@@ -1094,10 +1275,32 @@ sub parseResponse {
 			# It's a response to a clear command
 			$return->{action} = 'clear';
 			$meat = substr($meat, 1);
+			# Command should finish here
+			if ($meat ne '&') {
+				LS30::Log::debug("Extra chars after clear command: <$meat>");
+			}
+		} elsif (substr($meat, 0, 1) eq '?') {
+			# It's a query command
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
 		} else {
 
 			# It's a response to a query command
-			$return->{action} = 'query';
+			$return->{action} = 'value';
+		}
+
+		if ($return->{action} eq 'clear') {
+			# Nothing further
+			return $return;
+		}
+
+		if ($return->{action} eq 'query') {
+			if ($hr->{query_args}) {
+				# Parse further arguments
+				$meat = _parseFormat($meat, $return, $hr->{query_args});
+			}
+			# Nothing further
+			return $return;
 		}
 
 		my $p_hr = $hr;
@@ -1108,7 +1311,9 @@ sub parseResponse {
 			# Fall through to parse it according to async_response
 		}
 
-		return _parseFormat($meat, $p_hr, $return);
+		# Use responses if defined, otherwise use argument definition
+		$meat = _parseFormat($meat, $return, $p_hr->{response} || $p_hr->{args});
+		return $return;
 	}
 
 	$return->{error} = "Unparseable response";
@@ -1117,19 +1322,207 @@ sub parseResponse {
 }
 
 # ---------------------------------------------------------------------------
-# Response date: yymmddhhmm
-# Turn it into yy-mm-dd hh:mm
+# Special parsing for 'p' password request
+# Formats:
+#   Set:   'p' 's' <id> <new-password> <master-password>
+#   Query: 'p' '?' <id> <master-password>
 # ---------------------------------------------------------------------------
 
-sub resp_date {
-	my ($string) = @_;
+sub _parsePasswordRequest {
+	my ($string, $return) = @_;
 
-	if ($string =~ m/^(\d\d)(\d\d)(\d\d)(\d)(\d\d)(\d\d)$/) {
-		my $dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']->[$4];
-		return "$1-$2-$3 $5:$6 $dow";
+	if ($string !~ /^p([s?])(.)/) {
+		$return->{error} = "Password not a set or query action";
+		return $return;
 	}
 
-	return undef;
+	my($a, $id) = ($1, $2);
+	$string = substr($string, 3);
+
+	if ($a eq 's') {
+		$return->{action} = 'set-password';
+		$return->{password_id} = LS30::Type::getString('Password', $id);
+
+		my $l = length($string);
+		if ($l < 8) {
+			# Set command with no master password
+			$return->{new_password} = $string;
+		}
+		elsif ($l == 8) {
+			# Clear command
+			$return->{new_password} = '';
+			$return->{password} = $string;
+		}
+		else {
+			# Variable length new_password; fixed-length password.
+			$return->{new_password} = substr($string, 0, $l - 8);
+			$return->{password} = substr($string, -8, 8);
+		}
+	}
+	else {
+		$return->{action} = 'query-password';
+		$return->{password_id} = LS30::Type::getString('Password', $id);
+
+		if ($string eq '') {
+			return $return;
+		}
+
+		if (length($string) != 8) {
+			# This can't be a password
+			$return->{error} = "Password query isn't suffixed with valid password <$string>";
+		} else {
+			$return->{password} = $string;
+		}
+	}
+
+	return $return;
+}
+
+=item I<parseRequest($string)>
+
+Parse the request string received from a client. Requests are very similar
+to responses, but knowing a string is a request may help with the parsing.
+
+Also requests may have a trailing password, whereas responses do not.
+
+Request strings start with '!' and end with '&'.
+
+Return a detailed hashref.
+
+=cut
+
+sub parseRequest {
+	my ($request) = @_;
+
+	my $return = { string => $request, };
+
+	if ($request !~ /^!(.+)&$/) {
+
+		# Doesn't look like a request
+		$return->{error} = "Not in request format";
+		return $return;
+	}
+
+	my $meat = $1;
+
+	# Special parser handling
+	if (substr($meat, 0, 1) eq 'p') {
+		# Password set/retrieval
+		return _parsePasswordRequest($meat, $return);
+	}
+
+	my $key = substr($meat, 0, 3);
+	my $hr = getCommandByKey($key);
+
+	if (!$hr) {
+		# Try 2-char key
+		$key = substr($meat, 0, 2);
+		$hr = getCommandByKey($key);
+	}
+
+	if (!$hr) {
+		# Try 1-char key
+		$key = substr($meat, 0, 1);
+		$hr = getCommandByKey($key);
+	}
+
+	if (!$hr) {
+		$return->{error} = sprintf("Unparseable request <%s>", substr($meat, 0, 3));
+		return $return;
+	}
+
+	# Which subsystem does this command belong to?
+	my $subsys = $return->{subsys} = $hr->{subsys} || 'settings';
+
+	$return->{title} = $hr->{title};
+
+	$meat = substr($meat, length($key));
+
+	if ($hr->{is_setting}) {
+		if (substr($meat, 0, 1) eq 's') {
+
+			# It's a set request
+			$return->{action} = 'set';
+			$meat = substr($meat, 1);
+		} elsif (substr($meat, 0, 1) eq 'k') {
+
+			# It's a clear request
+			$return->{action} = 'clear';
+			$meat = substr($meat, 1);
+			# Command should finish here
+			if ($meat ne '&') {
+				LS30::Log::debug("Extra chars after clear command: <$meat>");
+			}
+		} elsif (substr($meat, 0, 1) eq '?') {
+			# It's a query request
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
+		} else {
+
+			# It's something else
+			$return->{error} = "Expected s/k/? after setting name <$key>";
+			return $return;
+		}
+	} else {
+		if (substr($meat, 0, 1) eq '?') {
+			# It's a read-only query
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
+		}
+	}
+
+	if ($subsys eq 'datetime') {
+		# Date/Time has set and query but is not a setting
+		if (substr($meat, 0, 1) eq 's') {
+			# It's a set request
+			$return->{action} = 'set';
+			$meat = substr($meat, 1);
+		} elsif (substr($meat, 0, 1) eq '?') {
+			# It's a query request
+			$return->{action} = 'query';
+			$meat = substr($meat, 1);
+		}
+	}
+	elsif ($subsys eq 'eventlog') {
+		$return->{action} = 'query';
+	}
+	elsif ($subsys eq 'cms') {
+		$return->{action} = 'unknown';
+	}
+
+	if ($return->{error}) {
+		return $return;
+	}
+
+	if (!$return->{action}) {
+		$return->{error} = "No action has been found";
+		return $return;
+	}
+
+	if ($return->{action} eq 'clear') {
+		# Nothing further
+	}
+
+	if ($return->{action} eq 'query' or $hr->{no_query}) {
+		# no_query means no '?' appears in the input string. query_args may still follow.
+		# Parse query_args if specified
+		$meat = _parseFormat($meat, $return, $hr->{query_args});
+	}
+
+	if ($return->{action} eq 'set') {
+		# Parse query_args if specified
+		$meat = _parseFormat($meat, $return, $hr->{query_args});
+
+		# Parse args if specified
+		$meat = _parseFormat($meat, $return, $hr->{args});
+	}
+
+	my $p_hr = $hr;
+
+	# Finally, parse the optional password
+	_parsePassword($meat, $return);
+
+	return $return;
 }
 
 # ---------------------------------------------------------------------------
@@ -1145,13 +1538,65 @@ sub hexn {
 }
 
 # ---------------------------------------------------------------------------
+# Response date: yymmddWhhmm
+# Turn it into yy-mm-dd hh:mm
+# ---------------------------------------------------------------------------
+
+sub resp_date {
+	my ($string, $op) = @_;
+
+	if ($op eq 'decode') {
+		if ($string =~ m/^(\d\d)(\d\d)(\d\d)(\d)(\d\d)(\d\d)$/) {
+			my $dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']->[$4];
+			return "$1-$2-$3 $5:$6 $dow";
+		}
+
+		return undef;
+	}
+
+	# Client and server encoding are the same
+	if (defined $string && $string =~ /^(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d) (\S+)$/) {
+		my $dows = {
+			'Sun' => 0,
+			'Mon' => 1,
+			'Tue' => 2,
+			'Wed' => 3,
+			'Thu' => 4,
+			'Fri' => 5,
+			'Sat' => 6,
+		};
+		my $dow_int = $dows->{$6} || 0;
+		return "$1$2$3$dow_int$4$5";
+	}
+
+	# Fallthrough; return the current date/time
+	my $now = time();
+	return Date::Format::time2str('%y%m%d%w%H%M', $now);
+}
+
+# ---------------------------------------------------------------------------
 # Turn 1 hex digit into decimal
 # ---------------------------------------------------------------------------
 
 sub resp_hex1 {
-	my ($string) = @_;
+	my ($string, $op) = @_;
 
-	return hexn($string, 1);
+	if ($op eq 'decode') {
+		return hexn($string, 1);
+	}
+
+	if (!defined $string) {
+		carp "Missing string in resp_hex1";
+		return undef;
+	}
+
+	my $hex = sprintf("%1x", $string);
+
+	if ($op eq 'client_encode') {
+		$hex =~ tr/abcdef/:;<=>?/;
+	}
+
+	return $hex;
 }
 
 # ---------------------------------------------------------------------------
@@ -1161,7 +1606,11 @@ sub resp_hex1 {
 sub resp_boolean {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op eq 'decode') {
+		return ($string eq '0' ? 0 : 1);
+	}
+
+	if ($op eq 'client_encode') {
 		if ($string =~ /^(on|true|yes)$/i) {
 			return 1;
 		} elsif ($string =~ /^(off|false|no)$/i) {
@@ -1178,7 +1627,9 @@ sub resp_boolean {
 		}
 	}
 
-	return ($string eq '0' ? 0 : 1);
+	# This doesn't seem exactly the opposite of client_encode due to
+	# all the synonyms
+	return ($string ? 1 : 0);
 }
 
 # ---------------------------------------------------------------------------
@@ -1188,7 +1639,11 @@ sub resp_boolean {
 sub resp_hex2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op eq 'decode') {
+		return hexn($string, 2);
+	}
+
+	if ($op eq 'client_encode') {
 		if (!defined $string) {
 			carp "Missing string in resp_hex2";
 			return undef;
@@ -1199,7 +1654,7 @@ sub resp_hex2 {
 		return $hex;
 	}
 
-	return hexn($string, 2);
+	return sprintf("%02x", $string);
 }
 
 # ---------------------------------------------------------------------------
@@ -1209,13 +1664,17 @@ sub resp_hex2 {
 sub resp_hex3 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op eq 'decode') {
+		return hexn($string, 3);
+	}
+
+	if ($op eq 'client_encode') {
 		my $hex = sprintf("%03x", $string);
 		$hex =~ tr/abcdef/:;<=>?/;
 		return $hex;
 	}
 
-	return hexn($string, 3);
+	return sprintf("%03x", $string);
 }
 
 # ---------------------------------------------------------------------------
@@ -1223,14 +1682,18 @@ sub resp_hex3 {
 # ---------------------------------------------------------------------------
 
 sub resp_telno {
-	my ($string) = @_;
+	my ($string, $op) = @_;
 
-	if ($string eq 'no') {
+	if ($op eq 'decode') {
+		if ($string eq 'no') {
 
-		# Can mean no number, or permission denied
-		return '';
+			# Can mean no number, or permission denied
+			return '';
+		}
+		return $string;
 	}
 
+	return 'no' if (!defined $string || $string eq '');
 	return $string;
 }
 
@@ -1239,15 +1702,33 @@ sub resp_telno {
 # ---------------------------------------------------------------------------
 
 sub resp_delay {
-	my ($string) = @_;
+	my ($string, $op) = @_;
 
-	my $value = hex($string);
+	if ($op eq 'decode') {
+		my $value = hex($string);
 
-	if ($value > 128) {
-		return sprintf("%d minutes", $value - 128);
+		if ($value > 128) {
+			return sprintf("%d minutes", $value - 128);
+		}
+
+		return sprintf("%d seconds", $value);
 	}
 
-	return sprintf("%d seconds", $value);
+	my $hex;
+
+	if ($string =~ /(\d+) minutes/) {
+		$hex = sprintf("%02x", $1 + 128);
+	}
+
+	if ($string =~ /(\d+) seconds/) {
+		$hex = sprintf("%02x", $1);
+	}
+
+	if ($op eq 'client_encode') {
+		$hex =~ tr/abcdef/:;<=>?/;
+	}
+
+	return $hex;
 }
 
 # ---------------------------------------------------------------------------
@@ -1257,37 +1738,41 @@ sub resp_delay {
 sub resp_interval2 {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
-		my $duration;
+	if ($op eq 'decode') {
+		my $value = hex($string);
 
-		if ($string =~ /^(\d+) minutes/) {
-			$duration = $1 * 60;
-		} elsif ($string =~ /^(\d+) seconds/) {
-			$duration = $1;
-		} elsif ($string =~ /^(\d+)$/) {
-			$duration = $1;
+		if ($value > 64) {
+			return sprintf("%d minutes", $value - 64);
 		}
 
-		my $value;
+		return sprintf("%d seconds", $value);
+	}
 
-		if ($duration < 60) {
-			$value = $duration;
-		} else {
-			$value = 64 + int($duration / 60);
-		}
+	my $duration;
 
-		my $hex = sprintf("%02x", $value);
+	if ($string =~ /^(\d+) minutes/) {
+		$duration = $1 * 60;
+	} elsif ($string =~ /^(\d+) seconds/) {
+		$duration = $1;
+	} elsif ($string =~ /^(\d+)$/) {
+		$duration = $1;
+	}
+
+	my $value;
+
+	if ($duration < 60) {
+		$value = $duration;
+	} else {
+		$value = 64 + int($duration / 60);
+	}
+
+	my $hex = sprintf("%02x", $value);
+
+	if ($op eq 'client_encode') {
 		$hex =~ tr/abcdef/:;<=>?/;
-		return $hex;
 	}
 
-	my $value = hex($string);
-
-	if ($value > 64) {
-		return sprintf("%d minutes", $value - 64);
-	}
-
-	return sprintf("%d seconds", $value);
+	return $hex;
 }
 
 # ---------------------------------------------------------------------------
@@ -1297,22 +1782,22 @@ sub resp_interval2 {
 sub resp_decimal_time {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
-		if (!$string) {
-			return '????';
-		} elsif ($string =~ /^(\d\d):(\d\d)$/) {
-			return "$1$2";
-		} else {
-			LS30::Log::error("Incorrect decimal_time $string");
-			return '????';
+	if ($op eq 'decode') {
+		if ($string !~ /^(\d\d)(\d\d)$/) {
+			return undef;
 		}
+
+		return "$1:$2";
 	}
 
-	if ($string !~ /^(\d\d)(\d\d)$/) {
-		return undef;
+	if (!$string) {
+		return '????';
+	} elsif ($string =~ /^(\d\d):(\d\d)$/) {
+		return "$1$2";
+	} else {
+		LS30::Log::error("Incorrect decimal_time $string");
+		return '????';
 	}
-
-	return "$1:$2";
 }
 
 # ---------------------------------------------------------------------------
@@ -1332,20 +1817,82 @@ sub resp_string {
 sub resp_password {
 	my ($string, $op) = @_;
 
-	if ($op && $op eq 'encode') {
+	if ($op eq 'decode') {
 
-		# No change or padding required
+		if ($string eq 'no') {
+			return '';
+		}
+
+		# Remove padding
+		$string =~ s/\?+$//;
+
 		return $string;
 	}
 
-	if ($string eq 'no') {
-		return '';
+	# Client and server encoding are identical
+	if ($string eq '') {
+		$string = 'no';
 	}
 
-	# Remove padding
-	$string =~ s/\?+$//;
-
+	# No change or padding required
 	return $string;
+}
+
+# ---------------------------------------------------------------------------
+# Parse/encode a date: yyyy-mm-dd <-> yymmdd
+# ---------------------------------------------------------------------------
+
+sub resp_date1 {
+	my ($string, $op) = @_;
+
+	if ($op eq 'decode') {
+		if ($string =~ /^(\d\d)(\d\d)(\d\d)$/) {
+			my $now = time();
+			my $year = Date::Format::time2str('%Y', $now);
+
+			if ($1 > ($year % 100)) {
+
+				# It's a date from last century
+				$year = $1 + $year - $year % 100 - 100;
+			} else {
+				$year = $1 + $year - $year % 100;
+			}
+
+			return sprintf("%04d-%02d-%02d", $year, $2, $3);
+		}
+
+		die "Invalid format date string: $string";
+	}
+
+	if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
+		return "$2$3$4";
+	}
+
+	warn "Invalid format date string: $string";
+	return undef;
+}
+
+# ---------------------------------------------------------------------------
+# Parse/create a time string: hh:mm:ss <-> hhm
+# ---------------------------------------------------------------------------
+
+sub resp_date2 {
+	my ($string, $op) = @_;
+
+	if ($op eq 'decode') {
+		if ($string =~ /^(\d\d)(\d\d)$/) {
+			return "$1:$2:00";
+		}
+
+		die "Invalid format time string: $string";
+	}
+
+	if ($string =~ /^(\d\d):(\d\d)/) {
+		return "$1$2";
+	}
+
+	warn "Invalid format time string: $string";
+	return undef;
 }
 
 # ---------------------------------------------------------------------------
@@ -1404,23 +1951,20 @@ sub parseDeviceConfig {
 
 # ---------------------------------------------------------------------------
 # Parse a response according to specified format
+# Return remainder of string (or undef if error)
 # ---------------------------------------------------------------------------
 
 sub _parseFormat {
-	my ($string, $hr, $return) = @_;
-
-	$return->{title} = $hr->{title};
-
-	# Use responses if defined, otherwise use argument definition
-	my $response_lr = $hr->{response} || $hr->{args};
+	my ($string, $return, $response_lr) = @_;
 
 	if ($response_lr) {
 		foreach my $hr2 (@$response_lr) {
 			$string = _parseArg($string, $return, $hr2);
+			return undef if (!defined $string);
 		}
 	}
 
-	return $return;
+	return $string;
 }
 
 # ---------------------------------------------------------------------------
@@ -1432,7 +1976,7 @@ sub _parseArg {
 	my ($string, $return, $arg_hr) = @_;
 
 	if (!defined $string) {
-		confess "_parseArg: input string is not defined\n";
+		$return->{error} = "_parseArg: input string is not defined\n";
 		return undef;
 	}
 
@@ -1451,69 +1995,36 @@ sub _parseArg {
 
 	if ($arg_hr->{func}) {
 		my $func_ref = $arg_hr->{func};
-		$return->{$key} = &$func_ref($input, 'decode');
+		my $value = &$func_ref($input, 'decode');
+		if (!defined $value) {
+			$return->{error} = "Unable to decode argument <$key>: <$input>";
+		} else {
+			$return->{$key} = $value;
+		}
 	} elsif ($arg_hr->{type}) {
 		my $type = $arg_hr->{type};
 		my $value = LS30::Type::getString($type, $input);
 		$return->{$key} = $value;
+		if (!defined $value) {
+			$return->{error} = "Invalid value of type <$type>: <$input>";
+		} else {
+			$return->{$key} = $value;
+		}
 	}
 
 	return $rest;
 }
 
 # ---------------------------------------------------------------------------
-# Parse/encode a date: yyyy-mm-dd <-> yymmdd
+# Parse an optional password
 # ---------------------------------------------------------------------------
 
-sub resp_date1 {
-	my ($string, $op) = @_;
+sub _parsePassword {
+	my ($string, $return) = @_;
 
-	if ($op && $op eq 'encode') {
-		if ($string =~ /^(\d\d)(\d\d)-(\d\d)-(\d\d)$/) {
-			return "$2$3$4";
-		}
-
-		die "Invalid format date string: $string";
+	if (defined $string && length($string) == 8) {
+		$return->{password} = $string;
 	}
-
-	if ($string =~ /^(\d\d)(\d\d)(\d\d)$/) {
-		my $now = time();
-		my $year = Date::Format::time2str('%Y', $now);
-
-		if ($1 > ($year % 100)) {
-
-			# It's a date from last century
-			$year = $1 + $year - $year % 100 - 100;
-		} else {
-			$year = $1 + $year - $year % 100;
-		}
-
-		return sprintf("%04d-%02d-%02d", $year, $2, $3);
-	}
-
-	die "Invalid format date string: $string";
-}
-
-# ---------------------------------------------------------------------------
-# Parse/create a time string: hh:mm:ss <-> hhm
-# ---------------------------------------------------------------------------
-
-sub resp_date2 {
-	my ($string, $op) = @_;
-
-	if ($op && $op eq 'encode') {
-		if ($string =~ /^(\d\d):(\d\d)/) {
-			return "$1$2";
-		}
-
-		die "Invalid format time string: $string";
-	}
-
-	if ($string =~ /^(\d\d)(\d\d)$/) {
-		return "$1:$2:00";
-	}
-
-	die "Invalid format time string: $string";
 }
 
 # ---------------------------------------------------------------------------
@@ -1529,7 +2040,7 @@ sub _testValue {
 
 	if ($func) {
 		# Input is defined in terms of a function
-		my $ok = &$func($input, 'encode');
+		my $ok = &$func($input, 'client_encode');
 		if (!defined $ok) {
 			# Assume it's bad
 			return undef;
@@ -1606,6 +2117,48 @@ sub getDeviceStatus {
 	my $cmd = queryCommand($query) or die "Invalid query command <$title>";
 
 	return $cmd;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<formatResponse($args)>
+
+Format a response message from the server to a client. Return it as a string,
+or undef if there was some error.
+
+=cut
+
+sub formatResponse {
+	my ($args) = @_;
+
+	if (!defined $args || ref($args) ne 'HASH') {
+		die "formatResponse: args must be a hashref";
+	}
+
+	my $title = $args->{title};
+
+	if (!$title) {
+		die "formatResponse: args requires a title";
+	}
+
+	my $cmd_spec = getCommand($title);
+	if (!$cmd_spec) {
+
+		# Unknown title
+		return undef;
+	}
+
+	my $string = '!';
+
+	$string .= $cmd_spec->{key};
+
+	my $lr = $cmd_spec->{response} || $cmd_spec->{args};
+	$string = _addArguments($string, $args, $lr, $title, 'server_encode');
+	return undef if (!defined $string);
+
+	$string .= '&';
+
+	return $string;
 }
 
 =back
