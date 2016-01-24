@@ -104,11 +104,13 @@ can listen on several sockets.
 sub addListener {
 	my ($self, $socket) = @_;
 
-	my $listener = AlarmDaemon::ListenSocket->new($socket, $self);
+	my $listener = AlarmDaemon::ListenSocket->new($socket);
 	if (!$listener) {
 		LS30::Log::error("Unable to add listener");
 		return;
 	}
+
+	$listener->onAccept(sub { $self->addClient(@_); });
 
 	$self->{listeners}->{$socket} = $listener;
 	return $self;

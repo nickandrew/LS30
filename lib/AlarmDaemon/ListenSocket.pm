@@ -27,17 +27,18 @@ use AlarmDaemon::CommonSocket qw();
 
 use base qw(AlarmDaemon::CommonSocket);
 
+__PACKAGE__->_defineonfunc('Accept');
 
 # ---------------------------------------------------------------------------
 
-=item new($socket, $handler)
+=item I<new($socket)>
 
 Create a new listening socket.
 
 =cut
 
 sub new {
-	my ($class, $socket, $handler) = @_;
+	my ($class, $socket) = @_;
 
 	if (!$socket) {
 		return undef;
@@ -45,7 +46,6 @@ sub new {
 
 	my $self = {
 		socket  => $socket,
-		handler => $handler,
 	};
 
 	bless $self, $class;
@@ -64,7 +64,7 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item send($buffer)
+=item I<send($buffer)>
 
 Send the data to the socket.
 
@@ -79,7 +79,7 @@ sub send {
 
 # ---------------------------------------------------------------------------
 
-=item disconnect()
+=item I<disconnect()>
 
 If the socket is currently open, then close it and forget it.
 
@@ -98,7 +98,7 @@ sub disconnect {
 
 # ------------------------------------------------------------------------
 
-=item handleRead()
+=item I<handleRead()>
 
 This socket has 'data available for read'. That means a new connection
 to accept.
@@ -108,7 +108,6 @@ to accept.
 sub handleRead {
 	my ($self) = @_;
 
-	my $handler = $self->{handler};
 	my $socket  = $self->{socket};
 	my ($new_sock, $address) = $socket->accept();
 
@@ -117,8 +116,7 @@ sub handleRead {
 		return;
 	}
 
-	# How to setup the new socket?
-	$handler->addClient($new_sock);
+	$self->_runonfunc('Accept', $new_sock);
 }
 
 =back
