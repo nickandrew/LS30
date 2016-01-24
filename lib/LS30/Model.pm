@@ -159,7 +159,7 @@ a new value for $setting_name (which is defined in LS30Command).
 
 If an upstream is set, the value is always first propagated to upstream.
 
-Return (through the condvar) undef if there was some problem, 1 otherwise.
+Return (through the condvar) undef if ok, an error message otherwise.
 
 =cut
 
@@ -170,15 +170,15 @@ sub setSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		warn "Is not a setting: <$setting_name>\n";
-		$cv->send(undef);
+		my $err = "Is not a setting: <$setting_name>";
+		$cv->send($err);
 		return $cv;
 	}
 
 	my $raw_value = LS30Command::testSettingValue($setting_name, $value);
 	if (!defined $raw_value) {
-		warn "Value <$value> is not valid for setting <$setting_name>\n";
-		$cv->send(undef);
+		my $err = "Value <$value> is not valid for setting <$setting_name>";
+		$cv->send($err);
 		return $cv;
 	}
 
@@ -188,7 +188,7 @@ sub setSetting {
 		my $cv2 = $upstream->setSetting($setting_name, $value);
 		$cv2->cb(sub {
 			my $rc = $cv2->recv;
-			if ($rc) {
+			if (!defined $rc) {
 				# Ok, so cache the saved value
 				$self->_setting($setting_name, $value);
 			}
@@ -198,7 +198,7 @@ sub setSetting {
 	}
 
 	$self->_setting($setting_name, $value);
-	$cv->send(1);
+	$cv->send(undef);
 	return $cv;
 }
 
@@ -211,7 +211,7 @@ Presumably this means returning the setting to a default value.
 
 If an upstream is set, the request is always first propagated to upstream.
 
-Return (through the condvar) undef if there was some problem, 1 otherwise.
+Return (through the condvar) undef if ok, or an error message otherwise.
 
 =cut
 
@@ -222,8 +222,8 @@ sub clearSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		warn "Is not a setting: <$setting_name>\n";
-		$cv->send(undef);
+		my $err = "Is not a setting: <$setting_name>\n";
+		$cv->send($err);
 		return $cv;
 	}
 
@@ -235,7 +235,7 @@ sub clearSetting {
 		my $cv2 = $upstream->clearSetting($setting_name);
 		$cv2->cb(sub {
 			my $rc = $cv2->recv;
-			if ($rc) {
+			if (!defined $rc) {
 				$self->_setting($setting_name, undef);
 			}
 			$cv->send($rc);
@@ -244,7 +244,7 @@ sub clearSetting {
 	}
 
 	$self->_setting($setting_name, undef);
-	$cv->send(1);
+	$cv->send(undef);
 	return $cv;
 }
 

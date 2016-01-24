@@ -335,7 +335,7 @@ sub getSetting {
 Return a condvar associated with setting
 a new value for $setting_name (which is defined in LS30Command).
 
-Return (through the condvar) undef if there was some problem, 1 otherwise.
+Return (through the condvar) undef if successful, otherwise an error message.
 
 =cut
 
@@ -346,8 +346,9 @@ sub setSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		LS30::Log::error("Is not a setting: <$setting_name>");
-		$cv->send(undef);
+		my $err = "Is not a setting: <$setting_name>";
+		LS30::Log::error($err);
+		$cv->send($err);
 		return $cv;
 	}
 
@@ -356,9 +357,7 @@ sub setSetting {
 	if (!defined $raw_value) {
 		my $err = "Value <$value> is not valid for setting <$setting_name>";
 		LS30::Log::error($err);
-		my $resp = LS30::ResponseMessage->new();
-		$resp->set('error', $err);
-		$cv->send($resp);
+		$cv->send($err);
 		return $cv;
 	}
 
@@ -367,9 +366,19 @@ sub setSetting {
 	my $cv2 = $self->queueCommand($cmd);
 	$cv2->cb(sub {
 		my $response = $cv2->recv();
-		my $resp_obj = LS30::ResponseMessage->new($response);
-		# TODO: Test the response for validity/error
-		$cv->send($resp_obj);
+		if (!defined $response) {
+			$cv->send("Timeout");
+		} else {
+			my $resp_obj = LS30::ResponseMessage->new($response);
+			if (!$resp_obj) {
+				$cv->send("Unparseable response <$response>");
+			} elsif ($resp_obj->get('error')) {
+				$cv->send($resp_obj->get('error'));
+			} else {
+				# Success
+				$cv->send(undef);
+			}
+		}
 	});
 
 	return $cv;
@@ -383,7 +392,7 @@ sub setSetting {
 Return a condvar associated with clearing
 the value for $setting_name (which is defined in LS30Command).
 
-Return (through the condvar) undef if there was some problem, 1 otherwise.
+Return (through the condvar) undef if OK, otherwise an error message.
 
 =cut
 
@@ -394,8 +403,9 @@ sub clearSetting {
 
 	my $hr = LS30Command::getCommand($setting_name);
 	if (!defined $hr || !$hr->{is_setting}) {
-		LS30::Log::error("Is not a setting: <$setting_name>");
-		$cv->send(undef);
+		my $err = "Is not a setting: <$setting_name>";
+		LS30::Log::error($err);
+		$cv->send($err);
 		return $cv;
 	}
 
@@ -404,9 +414,19 @@ sub clearSetting {
 	my $cv2 = $self->queueCommand($cmd);
 	$cv2->cb(sub {
 		my $response = $cv2->recv();
-		my $resp_obj = LS30::ResponseMessage->new($response);
-		# TODO: Test the response for validity/error
-		$cv->send(1);
+		if (!defined $response) {
+			$cv->send("Timeout");
+		} else {
+			my $resp_obj = LS30::ResponseMessage->new($response);
+			if (!$resp_obj) {
+				$cv->send("Unparseable response <$response>");
+			} elsif ($resp_obj->get('error')) {
+				$cv->send($resp_obj->get('error'));
+			} else {
+				# Success
+				$cv->send(undef);
+			}
+		}
 	});
 
 	return $cv;
@@ -420,6 +440,8 @@ sub clearSetting {
 Return a condvar which will return the count of how many devices of the
 specified type are registered.
 
+Condvar receives undef on an error.
+
 =cut
 
 sub getDeviceCount {
@@ -429,6 +451,7 @@ sub getDeviceCount {
 
 	my $query = {title => 'Device Count', device_type => $device_type};
 	my $cmd = LS30Command::queryCommand($query);
+
 	if (!$cmd) {
 		# Possibly the device_type is invalid.
 		LS30::Log::error("Unable to query device count for type <$device_type>");

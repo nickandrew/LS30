@@ -39,21 +39,19 @@ foreach my $instruction (@ARGV) {
 
 	my ($setting_name, $value) = ($1, $2);
 
+	my $original = $ls30cmdr->getSetting($setting_name)->recv;
+
 	$guard->begin();
 	my $cv = $ls30cmdr->setSetting($setting_name, $value);
 	$cv->cb(sub {
-		my $resp_obj = $cv->recv;
+		my $error = $cv->recv;
 
-		if (!defined $resp_obj) {
-			printf("%-40s | FAILED\n", $setting_name);
+		if ($error) {
+			printf("%-40s | Error: %s\n", $setting_name, $error);
 		} else {
-			my $error = $resp_obj->get('error');
-			if ($error) {
-				printf("%-40s | Error: %s\n", $setting_name, $error);
-			} else {
-				printf("%-40s | %s\n", $setting_name, $resp_obj->value);
-			}
+			printf("%-40s | %s -> %s\n", $setting_name, $original, $value);
 		}
+
 		$guard->end();
 	});
 }
