@@ -211,8 +211,12 @@ my $spec_commands = [
 	{
 		title    => 'Information Burglar Sensor',
 		key      => 'ib',
+		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
-			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_string, key => 'zone' },
@@ -222,8 +226,9 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
@@ -235,8 +240,12 @@ my $spec_commands = [
 	{
 		title    => 'Information Controller',
 		key      => 'ic',
+		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
-			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_string, key => 'zone' },
@@ -246,8 +255,9 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
@@ -257,10 +267,14 @@ my $spec_commands = [
 	},
 
 	{
-		title    => 'Information Fire Sensor',
-		key      => 'if',
+		title    => 'Information Special Sensor',
+		key      => 'ie',
+		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
-			{ 'length' => 1, type => 'Device Code', key => 'device_type' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_string, key => 'zone' },
@@ -270,8 +284,71 @@ my $spec_commands = [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cd' }, # current data
+			{ 'length' => 2, func => \&resp_string,          key => 'hl' }, # high limit
+			{ 'length' => 2, func => \&resp_string,          key => 'll' }, # low limit
+			{ 'length' => 2, func => \&resp_string,          key => 'ss' }, # special sensor status
+		],
+	},
+
+	{
+		title    => 'Information Fire Sensor',
+		key      => 'if',
+		# On a 'set' command, 'query_args' are not used, only 'args'
+		args => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
+		response => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+		],
+	},
+
+	{
+		title    => 'Information Medical Button',
+		key      => 'im',
+		# On a 'set' command, 'query_args' are not used, only 'args'
+		args => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
+			{ 'length' => 2, func => \&resp_string,          key => 'id' },
+			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		query_args => [
+			{ 'length' => 2, func => \&resp_string, key => 'zone' },
+			{ 'length' => 2, func => \&resp_string, key => 'id' },
+		],
+		response => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
+			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
@@ -313,13 +390,18 @@ my $spec_commands = [
 		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
 			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
 			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cd' }, # current data
+			{ 'length' => 2, func => \&resp_string,          key => 'hl' }, # high limit
+			{ 'length' => 2, func => \&resp_string,          key => 'll' }, # low limit
+			{ 'length' => 2, func => \&resp_string,          key => 'ss' }, # special sensor status
 		],
 	},
 
@@ -333,8 +415,9 @@ my $spec_commands = [
 		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
@@ -353,8 +436,9 @@ my $spec_commands = [
 		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
@@ -373,8 +457,9 @@ my $spec_commands = [
 		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
@@ -393,8 +478,9 @@ my $spec_commands = [
 		response   => [
 			{ 'length' => 2, type => 'Device Specific Type', key => 'type' },
 			{ 'length' => 6, func => \&resp_string,          key => 'device_id' },
-			{ 'length' => 4, func => \&resp_string,          key => 'junk2' },
-			{ 'length' => 2, func => \&resp_string,          key => 'junk3' },
+			{ 'length' => 2, func => \&resp_string,          key => 'module_address' },
+			{ 'length' => 2, func => \&resp_string,          key => 'dc' },
+			{ 'length' => 2, func => \&resp_string,          key => 'checksum' },
 			{ 'length' => 2, func => \&resp_string,          key => 'zone' },
 			{ 'length' => 2, func => \&resp_string,          key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
