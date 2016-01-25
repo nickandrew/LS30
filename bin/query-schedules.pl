@@ -73,10 +73,10 @@ foreach my $hr (@data) {
 		if ($resp) {
 			my $op_code = $resp->{op_code} || 'no change';
 
-			$response_string = sprintf("%s %s Zone %s",
+			$response_string = sprintf("%s %s Zone %2s",
 				$resp->{start_time} || '?????',
 				$op_code,
-				$resp->{zone} || '??' ,
+				(defined $resp->{zone}) ? sprintf("%02x", $resp->{zone}) : '??',
 			);
 		}
 

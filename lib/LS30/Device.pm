@@ -69,8 +69,8 @@ sub newFromResponse {
 	my ($class, $resp_obj) = @_;
 
 	my $self = $class->new();
-	my $zone = $resp_obj->get('zone');
-	return undef if ($zone !~ /^[0-9a-f][0-9a-f]$/);
+	my $device_id = $resp_obj->get('device_id');
+	return undef if ($device_id eq '000000');
 
 	foreach my $key (qw(type zone id device_id)) {
 		$self->{$key} = $resp_obj->get($key);

@@ -78,7 +78,7 @@ $ls30c->onAddedDevice(sub {
 		my $err = (defined $resp) ? $resp->{error} : "Undefined response";
 		LS30::Log::error("Error parsing added_device response: $err $string");
 	} else {
-		my $s = sprintf("%s index %d zone %s-%s",
+		my $s = sprintf("%s index %d zone %02x-%02x",
 			$resp->{title},
 			$resp->{index},
 			$resp->{zone},
