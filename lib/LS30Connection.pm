@@ -61,21 +61,21 @@ sub new {
 		}
 	}
 
-	if ($args{reconnect}) {
-
-		$args{on_connect_fail} = sub {
-			LS30::Log::error("LS30Connection: Connection to $server_address failed, retrying");
-			shift->retryConnect();
-		};
-
-		$args{on_disconnect} = sub {
-			LS30::Log::error("LS30Connection: Disconnected from $server_address, retrying");
-			shift->retryConnect();
-		};
-	}
-
 	my $self = $class->SUPER::new($server_address, %args);
 	bless $self, $class;
+
+	if ($args{reconnect}) {
+
+		$self->onConnectFail(sub {
+			LS30::Log::error("LS30Connection: Connection to $server_address failed, retrying");
+			$self->retryConnect();
+		});
+
+		$self->onDisconnect(sub {
+			LS30::Log::error("LS30Connection: Disconnected from $server_address, retrying");
+			$self->retryConnect();
+		});
+	}
 
 	$self->onRead(sub { $self->_addBuffer(shift); });
 
