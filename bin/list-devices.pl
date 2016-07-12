@@ -25,7 +25,12 @@ use vars qw($opt_h $opt_v $opt_y);
 
 getopts('h:vy');
 
-my $devices_file = "etc/devices.yaml";
+my $devices_file = $ENV{'LS30_DEVICES'};
+
+if(!$devices_file)
+{
+ 	$devices_file = "etc/devices.yaml";
+}
 
 my $ls30c = LS30Connection->new($opt_h);
 
