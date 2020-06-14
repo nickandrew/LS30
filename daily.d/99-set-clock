@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bin/set-clock.pl -h ::1681 -p

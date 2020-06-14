@@ -1,0 +1,20 @@
+This is what happens when a sensor loses power (not low battery, just turned off):
+
+watch-20100428.out:2010-04-30 23:41:22 168818138101003b Preferred New Event/Opening Loss of supervision - RF group 01 zone 003
+watch-20100428.out:2010-05-01 00:02:48 1688183381010039 Preferred New Restore/Closing Loss of supervision - RF group 01 zone 003
+watch-20100428.out:2010-05-01 03:56:33 168818138101003b Preferred New Event/Opening Loss of supervision - RF group 01 zone 003
+watch-20100428.out:2010-05-01 06:21:09 1688183381010039 Preferred New Restore/Closing Loss of supervision - RF group 01 zone 003
+
+
+This is what happens when a PIR sensor is turned on:
+
+2010-05-03 21:43:54 0a2a508322840010676673 Unknown PIR 832284 01-03 Nicks Office signal 71  UnknownType(0a2a) unk2(102)
+2010-05-03 21:43:54 168818130501103e Preferred New Event/Opening System reset group 01 zone 103
+2010-05-03 21:44:06 Ignoring GSM: GSM=--OK
+
+Soon followed by this:
+
+2010-05-03 21:44:38 0a58508322840010616673 Trigger PIR 832284 01-03 Nicks Office signal 65  unk2(102)
+2010-05-03 21:44:46 0a20508322840010566673 Test PIR 832284 01-03 Nicks Office signal 54  unk2(102)
+2010-05-03 21:44:46 1688183381011033 Preferred New Restore/Closing Loss of supervision - RF group 01 zone 103
+
