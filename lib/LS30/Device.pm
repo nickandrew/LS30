@@ -175,6 +175,7 @@ sub setZoneId {
 		};
 
 		my $cmd = LS30Command::queryCommand($args);
+		print "Query command: $cmd\n";
 		my $cv1 = $cmdr->queueCommand($cmd);
 
 		$cv1->cb(sub {
@@ -182,9 +183,12 @@ sub setZoneId {
 			my $resp = LS30Command::parseResponse($response);
 
 			if ($resp->{'device_id'}) {
+				print "Zone $zone id $id is already in use.\n";
 				$cv->send(undef);
 				return;
 			}
+
+			print "Zone $zone id $id is free.\n";
 
 			my $args2 = {
 				type  => $self->{device_class},
@@ -194,15 +198,18 @@ sub setZoneId {
 			};
 
 			my $cmd2 = LS30Command::formatDeviceModifyCommand($args2);
+			print "Modify command: <$cmd2>\n";
 			my $cv2 = $cmdr->queueCommand($cmd2);
 
 			$cv2->cb(sub {
 				my $response = $cv1->recv();
+				printf("Response was: %s\n", $response);
 				$cv->send(1);
 			})
 		});
 
 	} else {
+		print "Nothing to do.\n";
 		$cv->send(1);
 	}
 

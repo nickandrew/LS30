@@ -279,7 +279,11 @@ sub clientRead {
 
 		my $resp = $self->simulateCommand($line);
 		if ($resp) {
+			print "About to send back: <$resp>\n";
 			$client->send($resp . "\r\n");
+		} else {
+			print "No response.\n";
+			sleep(2);
 		}
 
 		$buffer = $rest;
@@ -306,6 +310,8 @@ sub simulateCommand {
 		LS30::Log::error("Unparseable command: <$input>");
 		return undef;
 	}
+
+	print "Cmd: ", Dumper($cmd);
 
 	if ($cmd->{error}) {
 		# Oops
@@ -337,6 +343,7 @@ sub simulateCommand {
 					value => $value,
 				};
 
+				print "Query Response: ", Dumper($args);
 				my $string = LS30Command::formatResponse($args);
 				return $string;
 			}
@@ -345,6 +352,7 @@ sub simulateCommand {
 			return $input;
 		}
 		elsif ($cmd->{action} eq 'set') {
+			print "Set command received:\n", Dumper($cmd);
 
 			my $variable = $cmd->{title};
 			if (LS30Command::isSetting($variable)) {
@@ -359,6 +367,7 @@ sub simulateCommand {
 			return $input;
 		}
 		elsif ($cmd->{action} eq 'clear') {
+			print "Clear command received:\n", Dumper($cmd);
 
 			my $variable = $cmd->{title};
 			if (!LS30Command::canClear($variable)) {
@@ -382,6 +391,7 @@ sub simulateCommand {
 		if ($action eq 'set') {
 			# Calculate an offset between current time and set time
 			my $then = str2time("$cmd->{date} $cmd->{time}");
+			printf("Time offset: %d seconds\n", $then - $now);
 			$self->{state}->{datetime}->{offset} = $then - $now;
 			$self->_saveState();
 			return $input;
@@ -389,6 +399,7 @@ sub simulateCommand {
 
 		# query
 		my $offset = $self->{state}->{datetime}->{offset} || 0;
+		printf("Time offset: %d seconds\n", $offset);
 		my $args = {
 			title => 'Date/Time',
 			date  => time2str('%Y-%m-%d', $now + $offset),
