@@ -80,23 +80,25 @@ foreach my $device_name (@device_code_list) {
 				# Add a template to the device list
 				my $hr = {
 					name => 'Sample',
-					number => $device_number,
-					type => $dev_type_string,
-					zone => sprintf("%s-%s", $z, $c),
 				};
-				bless $hr, 'LS30::Device';
 
 				$devs->{$dev_id} = $hr;
-				printf("Added device number %s id %s type %s\n", $device_number, $dev_id, $dev_type_string);
-			} else {
-				$devs->{$dev_id}->{number} = $device_number;
+				printf("Discovered device number %s id %s type %s\n", $device_number, $dev_id, $dev_type_string);
 			}
+
+			my $d_hr = $devs->{$dev_id};
+			$d_hr->{number} = $device_number;
+			$d_hr->{type}   = $dev_type_string;
+			$d_hr->{zone}   = sprintf("%s-%s", $z, $c);
 
 			$dev_seen->{$dev_id} = 1;
 
 			my $hr = LS30Command::parseDeviceConfig($config);
-			if ($hr && $opt_v) {
-				$s .= Data::Dumper::Dumper($hr);
+			if ($hr) {
+				$d_hr->{config} = $hr;
+				if ($opt_v) {
+					$s .= Data::Dumper::Dumper($hr);
+				}
 			}
 		}
 	}
