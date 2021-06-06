@@ -462,8 +462,12 @@ sub getDeviceCount {
 	my $cv2 = $self->queueCommand($cmd);
 	$cv2->cb(sub {
 		my $response = $cv2->recv();
-		my $resp_obj = LS30::ResponseMessage->new($response);
-		$cv->send($resp_obj->value());
+		if (!$response) {
+			$cv->send(undef);
+		} else {
+			my $resp_obj = LS30::ResponseMessage->new($response);
+			$cv->send($resp_obj->value());
+		}
 	});
 
 	return $cv;
@@ -472,27 +476,64 @@ sub getDeviceCount {
 
 # ---------------------------------------------------------------------------
 
-=item I<getDeviceStatus($device_type, $device_number)>
+=item I<getDeviceStatus($device_type, $device_index)>
 
-Get the status of the specified device (specified by device_type and device_number)
+Get the status of the specified device (specified by device_type and device_index)
 
 Return (through a condvar) an instance of LS30::Device, or undef if error.
 
 =cut
 
 sub getDeviceStatus {
-	my ($self, $device_type, $device_number) = @_;
+	my ($self, $device_type, $device_index) = @_;
 
 	my $cv = AnyEvent->condvar;
 
-	my $cmd = LS30Command::getDeviceStatus($device_type, $device_number);
+	my $cmd = LS30Command::getDeviceStatus($device_type, $device_index);
 
 	my $cv2 = $self->queueCommand($cmd);
 	$cv2->cb(sub {
 		my $resp2 = $cv2->recv();
-		my $resp2_obj = LS30::ResponseMessage->new($resp2);
-		my $device = LS30::Device->newFromResponse($resp2_obj);
-		$cv->send($device);
+		if (!$resp2) {
+			$cv->send(undef);
+		} else {
+			my $resp2_obj = LS30::ResponseMessage->new($resp2);
+			my $device = LS30::Device->newFromResponse($resp2_obj, $device_type, $device_index);
+			$cv->send($device);
+		}
+	});
+
+	return $cv;
+}
+
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeviceByZoneId($device_type, $zone, $id)>
+
+Retrieve the specified device (specified by device_type and zone and id)
+
+Return (through a condvar) an instance of LS30::Device, or undef if error.
+
+=cut
+
+sub getDeviceByZoneId {
+	my ($self, $device_type, $zone, $id) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $cmd = LS30Command::getDeviceByZoneId($device_type, $zone, $id);
+
+	my $cv2 = $self->queueCommand($cmd);
+	$cv2->cb(sub {
+		my $resp = $cv2->recv();
+		if (!$resp) {
+			$cv->send(undef);
+		} else {
+			my $resp_obj = LS30::ResponseMessage->new($resp);
+			my $device = LS30::Device->newFromResponse($resp_obj, $device_type, $resp_obj->get('index'));
+			$cv->send($device);
+		}
 	});
 
 	return $cv;

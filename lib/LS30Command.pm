@@ -122,6 +122,13 @@ my $simple_commands = [
 
 	# Unknown
 	['Undocumented 1',               'le', 99, \&resp_string],
+	['Undocumented 3',              'w00', 99, \&resp_string],
+	['Undocumented 4',              'w01', 99, \&resp_string],
+	['Undocumented 5',              'w02', 99, \&resp_string],
+	['Undocumented 6',              'w03', 99, \&resp_string],
+	['Undocumented 7',              'w04', 99, \&resp_string],
+	['Undocumented 8',              'w05', 99, \&resp_string],
+	['Undocumented 9',               'aa', 99, \&resp_string],
 ];
 
 my $gsm_commands = [
@@ -211,12 +218,19 @@ my $spec_commands = [
 	{
 		title    => 'Information Burglar Sensor',
 		key      => 'ib',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		subsys   => 'status',
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -240,12 +254,19 @@ my $spec_commands = [
 	{
 		title    => 'Information Controller',
 		key      => 'ic',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		subsys   => 'status',
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -269,12 +290,19 @@ my $spec_commands = [
 	{
 		title    => 'Information Special Sensor',
 		key      => 'ie',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		subsys   => 'status',
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -302,12 +330,19 @@ my $spec_commands = [
 	{
 		title    => 'Information Fire Sensor',
 		key      => 'if',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		subsys   => 'status',
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -331,12 +366,19 @@ my $spec_commands = [
 	{
 		title    => 'Information Medical Button',
 		key      => 'im',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		subsys   => 'status',
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -383,6 +425,7 @@ my $spec_commands = [
 	{
 		title      => 'Burglar Sensor Status',
 		key        => 'kb',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -408,6 +451,7 @@ my $spec_commands = [
 	{
 		title      => 'Controller Status',
 		key        => 'kc',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -429,6 +473,7 @@ my $spec_commands = [
 	{
 		title      => 'Fire Sensor Status',
 		key        => 'kf',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -450,6 +495,7 @@ my $spec_commands = [
 	{
 		title      => 'Medical Button Status',
 		key        => 'km',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -471,6 +517,7 @@ my $spec_commands = [
 	{
 		title      => 'Special Sensor Status',
 		key        => 'ke',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -486,6 +533,10 @@ my $spec_commands = [
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
 			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
 			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cd' }, # current data
+			{ 'length' => 2, func => \&resp_string,          key => 'hl' }, # high limit
+			{ 'length' => 2, func => \&resp_string,          key => 'll' }, # low limit
+			{ 'length' => 2, func => \&resp_string,          key => 'ss' }, # special sensor status
 		],
 	},
 
@@ -564,6 +615,12 @@ my $spec_commands = [
 		subsys => 'cms',
 	},
 
+	{
+		title => 'Undocumented 10',
+		key   => 'lc',
+		subsys => 'cms',
+	},
+
 ];
 
 my $learn_commands = [
@@ -571,6 +628,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Burglar Sensor',
 		key   => 'ibl',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Burglar Sensor',
 			length   => 14,
@@ -586,6 +644,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Fire Sensor',
 		key   => 'ifl',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Fire Sensor',
 			length   => 14,
@@ -601,6 +660,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Controller',
 		key   => 'icl',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Controller',
 			length   => 14,
@@ -616,6 +676,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Medical Button',
 		key   => 'iml',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Medical Button',
 			length   => 14,
@@ -631,6 +692,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Special Sensor',
 		key   => 'iel',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Special Sensor',
 			length   => 14,
@@ -652,6 +714,7 @@ my $delete_commands = [
 		key        => 'ibk',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -660,6 +723,7 @@ my $delete_commands = [
 		key        => 'ick',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -668,6 +732,7 @@ my $delete_commands = [
 		key        => 'ifk',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -676,6 +741,7 @@ my $delete_commands = [
 		key        => 'imk',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -684,6 +750,7 @@ my $delete_commands = [
 		key        => 'iek',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -739,6 +806,16 @@ my $get_device_status_commands = {
 	'Fire Sensor'    => 'Fire Sensor Status',
 	'Medical Button' => 'Medical Button Status',
 	'Special Sensor' => 'Special Sensor Status',
+};
+
+# Map device type to the title of a command (specified above) to retrieve
+# the current device information.
+my $get_device_info_commands = {
+	'Burglar Sensor' => 'Information Burglar Sensor',
+	'Controller'     => 'Information Controller',
+	'Fire Sensor'    => 'Information Fire Sensor',
+	'Medical Button' => 'Information Medical Button',
+	'Special Sensor' => 'Information Special Sensor',
 };
 
 # ---------------------------------------------------------------------------
@@ -957,6 +1034,7 @@ sub _addArguments {
 			} elsif ($encoding eq 'decode') {
 				$value = LS30::Type::getString($type, $input);
 			} else {
+				# client_encode or server_encode are the same?
 				$value = LS30::Type::getCode($type, $input);
 			}
 
@@ -1000,6 +1078,7 @@ sub queryCommand {
 	if (!$cmd_spec) {
 
 		# Unknown title
+		LS30::Log::error("Unknown title <$title>");
 		return undef;
 	}
 
@@ -1243,6 +1322,48 @@ sub formatDeleteCommand {
 
 # ---------------------------------------------------------------------------
 
+=item I<formatDeviceModifyCommand($args)>
+
+Create a command string to modify a device's zone+id or config,
+specified by the supplied $args hashref.
+
+=cut
+
+sub formatDeviceModifyCommand {
+	my ($args) = @_;
+
+	my $type = $args->{type};
+	my $device_code = LS30::Type::getCode('Device Code', $type);
+	my $title = "Information $type";
+	my $cmd_spec = getCommand($title);
+	if (!$cmd_spec) {
+		LS30::Log::error("Invalid command $title");
+		return undef;
+	}
+
+	my $cmd      = '!';
+	$cmd .= $cmd_spec->{key};
+	$cmd .= 's';
+
+	# 'config' is an optional argument to this command. So we need two argument
+	# specifications, and to choose between them.
+	if (defined $args->{config}) {
+		$cmd = _addArguments($cmd, $args, $cmd_spec->{args1}, $args->{title}, 'client_encode');
+	} else {
+		$cmd = _addArguments($cmd, $args, $cmd_spec->{args2}, $args->{title}, 'client_encode');
+	}
+
+	return undef if (!defined $cmd);
+
+	$cmd .= _password($cmd_spec, $args);
+
+	$cmd .= '&';
+
+	return $cmd;
+}
+
+# ---------------------------------------------------------------------------
+
 =item I<setPassword($password_id, $new_password, $master_password)>
 
 Return a command string to set the specified password.
@@ -1326,7 +1447,14 @@ Return a detailed hashref.
 sub parseResponse {
 	my ($response) = @_;
 
-	my $return = { string => $response, };
+	my $return = {};
+
+	if (!defined $response) {
+		$return->{error} = "Timeout";
+		return $return;
+	}
+
+	$return->{string} = $response;
 
 	if ($response !~ /^!(.+)&$/) {
 
@@ -1360,6 +1488,7 @@ sub parseResponse {
 		$return->{title} = $hr->{title};
 
 		$meat = substr($meat, length($key));
+
 		if (substr($meat, 0, 1) eq 's') {
 
 			# It's a response to a set command
@@ -1382,6 +1511,12 @@ sub parseResponse {
 
 			# It's a response to a query command
 			$return->{action} = 'value';
+		}
+
+		# Check for NAK on a command
+		if ($meat eq 'no') {
+			$return->{error} = "Command failed";
+			return $return;
 		}
 
 		if ($return->{action} eq 'clear') {
@@ -1437,6 +1572,8 @@ sub _parsePasswordRequest {
 		$return->{error} = "Password not a set or query action";
 		return $return;
 	}
+
+	$return->{subsys} = 'password';
 
 	my($a, $id) = ($1, $2);
 	$string = substr($string, 3);
@@ -1589,6 +1726,12 @@ sub parseRequest {
 		$return->{action} = 'query';
 	}
 	elsif ($subsys eq 'cms') {
+		$return->{action} = 'unknown';
+	}
+	elsif ($subsys eq 'status') {
+		# Nothing to do
+	}
+	elsif ($subsys eq 'device') {
 		$return->{action} = 'unknown';
 	}
 
@@ -2261,6 +2404,27 @@ sub formatResponse {
 	$string .= '&';
 
 	return $string;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeviceByZoneId($device_type, $zone, $id)>
+
+Return a command string to retrieve information about a device specified
+by type of device, zone and id.
+
+Example: getDeviceByZoneId('Burglar Sensor', '01', '01');
+
+=cut
+
+sub getDeviceByZoneId {
+	my ($device_type, $zone, $id) = @_;
+
+	my $title = $get_device_info_commands->{$device_type} or die "Invalid device type <$device_type";
+	my $query = {title => $title, zone => $zone, id => $id};
+	my $cmd = queryCommand($query) or die "Invalid query command <$title>";
+
+	return $cmd;
 }
 
 =back

@@ -1,0 +1,65 @@
+From HyperSecureLink help:
+
+DC: Device Char
+  b7 = Repeater
+  b6 = Base Unit
+  b5 = Two-way
+  b4 = Supervisory
+
+  b3 = RF Voice
+  b2 = Reserved
+  b1 = Reserved
+  b0 = Reserved
+
+ES: Enable Status
+  Byte 1
+    b7 = Bypass
+    b6 = Delay
+    b5 = 24 hour
+    b4 = Home Guard
+    b3 = Voice (Pre-warning / Warning)
+    b2 = Siren Alarm
+    b1 = Bell
+    b0 = Latchkey (Controller) or Inactivity (Burglar)
+
+  Byte 2
+    b7 = Reserved
+    b6 = Reserved
+    b5 = Two-way
+    b4 = Supervised
+    b3 = RF Voice
+    b2 = Reserved
+    b1 = Reserved
+    b0 = Reserved
+
+SW: Switches under control of this sensor
+
+CS: Current Status with RSSI reading
+  Subtract 0x20 for dB reading (max 99 if value is >= 100)
+  For door magnet sensor: b0 = 0 (Open), = 1 (Closed)
+
+DT: Supervisory Down Count Time
+
+  b4 = Supervisory down count time
+  b3 = Supervisory down count time
+  b2 = Supervisory down count time
+  b1 = Supervisory down count time
+  b0 = Supervisory down count time
+
+CD = Current Data (for special sensors)
+
+HL = High Limit
+
+LL = Low Limit
+
+SS = Special Sensor Status
+  b7 = Control/Alarm
+  b6 = High/Low operation
+  b5 = High triggered
+  b4 = Low triggered
+  b3 = Reserved
+  b2 = Reserved
+  b1 = Reserved
+  b0 = Reserved
+
+
