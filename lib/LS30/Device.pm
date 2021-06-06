@@ -42,6 +42,7 @@ sub new {
 
 	my $self = {
 		device_class => $device_class,
+		index     => undef,
 		type      => undef,
 		zone      => undef,
 		id        => undef,
@@ -67,21 +68,27 @@ response or an 'ib' ('if', 'ic', etc) response.
 =cut
 
 sub newFromResponse {
-	my ($class, $resp_obj, $device_class) = @_;
+	my ($class, $resp_obj, $device_class, $device_index) = @_;
 
 	my $self = $class->new($device_class);
+	$self->{index} = $device_index;
 
 	my $device_id = $resp_obj->get('device_id');
 	return undef if ($device_id eq '000000');
 
 	foreach my $key (qw(type zone id device_id)) {
-		$self->{$key} = $resp_obj->get($key);
+		my $v = $resp_obj->get($key);
+		if (defined $v) {
+			$self->{$key} = $v;
+		}
 	}
 
 	# Config is a hex-encoded bitmap
 	my $config = $resp_obj->get('config');
-	
-	$self->{config} = LS30Command::parseDeviceConfig($config);
+
+	if ($config) {
+		$self->{config} = LS30Command::parseDeviceConfig($config);
+	}
 
 	return $self;
 }
