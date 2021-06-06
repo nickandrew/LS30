@@ -114,6 +114,24 @@ sub commander {
 
 # ---------------------------------------------------------------------------
 
+=item I<configDelay($enable)>
+
+Get/Set the 'delay' bit in the device configuration.
+
+=cut
+
+sub configDelay {
+	my $self = shift;
+
+	if (scalar @_) {
+		$self->{config}->{delay} = shift;
+	}
+
+	return $self->{config}->{delay};
+}
+
+# ---------------------------------------------------------------------------
+
 =item I<device_id($device_id)>
 
 Get/Set 6-char device id (hex).
@@ -129,6 +147,66 @@ sub device_id {
 	}
 
 	return $self->{device_id};
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<setZoneId($zone, $id)>
+
+Modifies the device's zone and/or id fields. Duplicate (zone,id) tuples are
+not permitted, so the new values are checked before applying them.
+
+Returns a condvar.
+
+=cut
+
+sub setZoneId {
+	my ($self, $zone, $id) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	if ($self->{commander}) {
+		my $cmdr = $self->{commander};
+
+		my $args = {
+			title => 'Information ' . $self->{device_class},
+			zone  => $zone,
+			id    => $id,
+		};
+
+		my $cmd = LS30Command::queryCommand($args);
+		my $cv1 = $cmdr->queueCommand($cmd);
+
+		$cv1->cb(sub {
+			my $response = $cv1->recv();
+			my $resp = LS30Command::parseResponse($response);
+
+			if ($resp->{'device_id'}) {
+				$cv->send(undef);
+				return;
+			}
+
+			my $args2 = {
+				type  => $self->{device_class},
+				index => $self->{index},
+				zone  => $zone,
+				id    => $id,
+			};
+
+			my $cmd2 = LS30Command::formatDeviceModifyCommand($args2);
+			my $cv2 = $cmdr->queueCommand($cmd2);
+
+			$cv2->cb(sub {
+				my $response = $cv1->recv();
+				$cv->send(1);
+			})
+		});
+
+	} else {
+		$cv->send(1);
+	}
+
+	return $cv;
 }
 
 =back
