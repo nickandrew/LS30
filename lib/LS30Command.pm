@@ -212,12 +212,18 @@ my $spec_commands = [
 		title    => 'Information Burglar Sensor',
 		key      => 'ib',
 		subsys   => 'status',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -242,12 +248,18 @@ my $spec_commands = [
 		title    => 'Information Controller',
 		key      => 'ic',
 		subsys   => 'status',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -272,12 +284,18 @@ my $spec_commands = [
 		title    => 'Information Special Sensor',
 		key      => 'ie',
 		subsys   => 'status',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -306,12 +324,18 @@ my $spec_commands = [
 		title    => 'Information Fire Sensor',
 		key      => 'if',
 		subsys   => 'status',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -336,12 +360,18 @@ my $spec_commands = [
 		title    => 'Information Medical Button',
 		key      => 'im',
 		subsys   => 'status',
-		# On a 'set' command, 'query_args' are not used, only 'args'
-		args => [
+		# Arguments if 'config' is provided (query_args are not used here)
+		args1 => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
 			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
+		],
+		# Arguments if 'config' is not provided (query_args are not used here)
+		args2 => [
+			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'zone' },
+			{ 'length' => 2, func => \&resp_hex2,            key => 'id' },
 		],
 		query_args => [
 			{ 'length' => 2, func => \&resp_hex2,   key => 'zone' },
@@ -1263,6 +1293,48 @@ sub formatDeleteCommand {
 		$cmd = _addArguments($cmd, $args, $cmd_spec->{query_args}, $args->{title}, 'client_encode');
 		return undef if (!defined $cmd);
 	}
+
+	$cmd .= _password($cmd_spec, $args);
+
+	$cmd .= '&';
+
+	return $cmd;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<formatDeviceModifyCommand($args)>
+
+Create a command string to modify a device's zone+id or config,
+specified by the supplied $args hashref.
+
+=cut
+
+sub formatDeviceModifyCommand {
+	my ($args) = @_;
+
+	my $type = $args->{type};
+	my $device_code = LS30::Type::getCode('Device Code', $type);
+	my $title = "Information $type";
+	my $cmd_spec = getCommand($title);
+	if (!$cmd_spec) {
+		LS30::Log::error("Invalid command $title");
+		return undef;
+	}
+
+	my $cmd      = '!';
+	$cmd .= $cmd_spec->{key};
+	$cmd .= 's';
+
+	# 'config' is an optional argument to this command. So we need two argument
+	# specifications, and to choose between them.
+	if (defined $args->{config}) {
+		$cmd = _addArguments($cmd, $args, $cmd_spec->{args1}, $args->{title}, 'client_encode');
+	} else {
+		$cmd = _addArguments($cmd, $args, $cmd_spec->{args2}, $args->{title}, 'client_encode');
+	}
+
+	return undef if (!defined $cmd);
 
 	$cmd .= _password($cmd_spec, $args);
 
