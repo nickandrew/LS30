@@ -122,6 +122,13 @@ my $simple_commands = [
 
 	# Unknown
 	['Undocumented 1',               'le', 99, \&resp_string],
+	['Undocumented 3',              'w00', 99, \&resp_string],
+	['Undocumented 4',              'w01', 99, \&resp_string],
+	['Undocumented 5',              'w02', 99, \&resp_string],
+	['Undocumented 6',              'w03', 99, \&resp_string],
+	['Undocumented 7',              'w04', 99, \&resp_string],
+	['Undocumented 8',              'w05', 99, \&resp_string],
+	['Undocumented 9',               'aa', 99, \&resp_string],
 ];
 
 my $gsm_commands = [
@@ -526,6 +533,10 @@ my $spec_commands = [
 			{ 'length' => 8, func => \&resp_string,          key => 'config' },
 			{ 'length' => 2, func => \&resp_string,          key => 'cs' },
 			{ 'length' => 2, func => \&resp_string,          key => 'dt' },
+			{ 'length' => 2, func => \&resp_string,          key => 'cd' }, # current data
+			{ 'length' => 2, func => \&resp_string,          key => 'hl' }, # high limit
+			{ 'length' => 2, func => \&resp_string,          key => 'll' }, # low limit
+			{ 'length' => 2, func => \&resp_string,          key => 'ss' }, # special sensor status
 		],
 	},
 
@@ -601,6 +612,12 @@ my $spec_commands = [
 	{
 		title => 'Undocumented 2',
 		key   => 'l5',
+		subsys => 'cms',
+	},
+
+	{
+		title => 'Undocumented 10',
+		key   => 'lc',
 		subsys => 'cms',
 	},
 
@@ -1017,6 +1034,7 @@ sub _addArguments {
 			} elsif ($encoding eq 'decode') {
 				$value = LS30::Type::getString($type, $input);
 			} else {
+				# client_encode or server_encode are the same?
 				$value = LS30::Type::getCode($type, $input);
 			}
 
@@ -1060,6 +1078,7 @@ sub queryCommand {
 	if (!$cmd_spec) {
 
 		# Unknown title
+		LS30::Log::error("Unknown title <$title>");
 		return undef;
 	}
 
@@ -1428,7 +1447,14 @@ Return a detailed hashref.
 sub parseResponse {
 	my ($response) = @_;
 
-	my $return = { string => $response, };
+	my $return = {};
+
+	if (!defined $response) {
+		$return->{error} = "Timeout";
+		return $return;
+	}
+
+	$return->{string} = $response;
 
 	if ($response !~ /^!(.+)&$/) {
 
@@ -1462,6 +1488,7 @@ sub parseResponse {
 		$return->{title} = $hr->{title};
 
 		$meat = substr($meat, length($key));
+
 		if (substr($meat, 0, 1) eq 's') {
 
 			# It's a response to a set command
@@ -1484,6 +1511,12 @@ sub parseResponse {
 
 			# It's a response to a query command
 			$return->{action} = 'value';
+		}
+
+		# Check for NAK on a command
+		if ($meat eq 'no') {
+			$return->{error} = "Command failed";
+			return $return;
 		}
 
 		if ($return->{action} eq 'clear') {
