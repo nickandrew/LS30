@@ -341,19 +341,6 @@ sub simulateCommand {
 				return $string;
 			}
 
-			# Query other non-setting things
-			if ($variable eq 'Information Burglar Sensor') {
-				return '!ibno&';
-			}
-
-			if ($variable eq 'Information Controller') {
-				return '!icno&';
-			}
-
-			if ($variable eq 'Information Fire Sensor') {
-				return '!ifno&';
-			}
-
 			LS30::Log::error("Not a setting: $variable");
 			return $input;
 		}
@@ -414,6 +401,44 @@ sub simulateCommand {
 	}
 	elsif ($subsys eq 'cms') {
 		# '!l5&' who knows what it means
+		return $input;
+	}
+	elsif ($subsys eq 'status') {
+		my $index = $cmd->{index} || 0;
+		if ($cmd->{title} eq 'Burglar Sensor Status') {
+			return '!kb000000000000000000000000000000&' if ($index > 0);
+			return '!kb508322a10010a60102041000008910&';
+		}
+		elsif ($cmd->{title} eq 'Controller Status') {
+			return '!kc000000000000000000000000000000&' if ($index > 0);
+			return '!kc109a29060000d9010140008000460f&';
+		}
+		elsif ($cmd->{title} eq 'Fire Sensor Status') {
+			return '!kf000000000000000000000000000000&' if ($index > 0);
+			return '!kf208095df00102401010c100000600f&';
+		}
+		elsif ($cmd->{title} eq 'Medical Button Status') {
+			return '!km000000000000000000000000000000&';
+		}
+		elsif ($cmd->{title} eq 'Special Sensor Status') {
+			return '!ke00000000000000000000000000000600000000&';
+		}
+		elsif ($cmd->{title} eq 'Information Burglar Sensor') {
+			return '!ibno&' if ($index > 0);
+			return '!ib00508322a10010a60102041000008910&';
+		}
+		elsif ($cmd->{title} eq 'Information Controller') {
+			return '!icno&' if ($index > 0);
+			return '!ic00109a29060000d9010140008000460f&';
+		}
+		elsif ($cmd->{title} eq 'Information Fire Sensor') {
+			return '!ifno&' if ($index > 0);
+			return '!if00208095df00102401010c100000600f&';
+		}
+		return undef;
+	}
+	elsif ($subsys eq 'device') {
+		# Learn/Delete commands
 		return $input;
 	}
 
