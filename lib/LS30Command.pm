@@ -211,6 +211,7 @@ my $spec_commands = [
 	{
 		title    => 'Information Burglar Sensor',
 		key      => 'ib',
+		subsys   => 'status',
 		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
@@ -240,6 +241,7 @@ my $spec_commands = [
 	{
 		title    => 'Information Controller',
 		key      => 'ic',
+		subsys   => 'status',
 		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
@@ -269,6 +271,7 @@ my $spec_commands = [
 	{
 		title    => 'Information Special Sensor',
 		key      => 'ie',
+		subsys   => 'status',
 		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
@@ -302,6 +305,7 @@ my $spec_commands = [
 	{
 		title    => 'Information Fire Sensor',
 		key      => 'if',
+		subsys   => 'status',
 		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
@@ -331,6 +335,7 @@ my $spec_commands = [
 	{
 		title    => 'Information Medical Button',
 		key      => 'im',
+		subsys   => 'status',
 		# On a 'set' command, 'query_args' are not used, only 'args'
 		args => [
 			{ 'length' => 2, func => \&resp_hex2,            key => 'index' },
@@ -383,6 +388,7 @@ my $spec_commands = [
 	{
 		title      => 'Burglar Sensor Status',
 		key        => 'kb',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -408,6 +414,7 @@ my $spec_commands = [
 	{
 		title      => 'Controller Status',
 		key        => 'kc',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -429,6 +436,7 @@ my $spec_commands = [
 	{
 		title      => 'Fire Sensor Status',
 		key        => 'kf',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -450,6 +458,7 @@ my $spec_commands = [
 	{
 		title      => 'Medical Button Status',
 		key        => 'km',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -471,6 +480,7 @@ my $spec_commands = [
 	{
 		title      => 'Special Sensor Status',
 		key        => 'ke',
+		subsys     => 'status',
 		query_args => [
 			# devices array index starts at 00
 			{ 'length' => 2, func => \&resp_hex2, key => 'index' },
@@ -571,6 +581,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Burglar Sensor',
 		key   => 'ibl',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Burglar Sensor',
 			length   => 14,
@@ -586,6 +597,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Fire Sensor',
 		key   => 'ifl',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Fire Sensor',
 			length   => 14,
@@ -601,6 +613,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Controller',
 		key   => 'icl',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Controller',
 			length   => 14,
@@ -616,6 +629,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Medical Button',
 		key   => 'iml',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Medical Button',
 			length   => 14,
@@ -631,6 +645,7 @@ my $learn_commands = [
 	{
 		title => 'Learn Special Sensor',
 		key   => 'iel',
+		subsys => 'device',
 		async_response => {
 			title    => 'Added Special Sensor',
 			length   => 14,
@@ -652,6 +667,7 @@ my $delete_commands = [
 		key        => 'ibk',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -660,6 +676,7 @@ my $delete_commands = [
 		key        => 'ick',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -668,6 +685,7 @@ my $delete_commands = [
 		key        => 'ifk',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -676,6 +694,7 @@ my $delete_commands = [
 		key        => 'imk',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -684,6 +703,7 @@ my $delete_commands = [
 		key        => 'iek',
 		no_query   => 1,
 		no_set     => 1,
+		subsys => 'device',
 		query_args => [{ 'length' => 2, func => \&resp_hex2, key => 'device_id' },],
 	},
 
@@ -1448,6 +1468,8 @@ sub _parsePasswordRequest {
 		return $return;
 	}
 
+	$return->{subsys} = 'password';
+
 	my($a, $id) = ($1, $2);
 	$string = substr($string, 3);
 
@@ -1599,6 +1621,12 @@ sub parseRequest {
 		$return->{action} = 'query';
 	}
 	elsif ($subsys eq 'cms') {
+		$return->{action} = 'unknown';
+	}
+	elsif ($subsys eq 'status') {
+		# Nothing to do
+	}
+	elsif ($subsys eq 'device') {
 		$return->{action} = 'unknown';
 	}
 
