@@ -472,20 +472,20 @@ sub getDeviceCount {
 
 # ---------------------------------------------------------------------------
 
-=item I<getDeviceStatus($device_type, $device_number)>
+=item I<getDeviceStatus($device_type, $device_index)>
 
-Get the status of the specified device (specified by device_type and device_number)
+Get the status of the specified device (specified by device_type and device_index)
 
 Return (through a condvar) an instance of LS30::Device, or undef if error.
 
 =cut
 
 sub getDeviceStatus {
-	my ($self, $device_type, $device_number) = @_;
+	my ($self, $device_type, $device_index) = @_;
 
 	my $cv = AnyEvent->condvar;
 
-	my $cmd = LS30Command::getDeviceStatus($device_type, $device_number);
+	my $cmd = LS30Command::getDeviceStatus($device_type, $device_index);
 
 	my $cv2 = $self->queueCommand($cmd);
 	$cv2->cb(sub {
