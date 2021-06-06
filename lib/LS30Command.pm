@@ -741,6 +741,16 @@ my $get_device_status_commands = {
 	'Special Sensor' => 'Special Sensor Status',
 };
 
+# Map device type to the title of a command (specified above) to retrieve
+# the current device information.
+my $get_device_info_commands = {
+	'Burglar Sensor' => 'Information Burglar Sensor',
+	'Controller'     => 'Information Controller',
+	'Fire Sensor'    => 'Information Fire Sensor',
+	'Medical Button' => 'Information Medical Button',
+	'Special Sensor' => 'Information Special Sensor',
+};
+
 # ---------------------------------------------------------------------------
 
 =item I<addCommand($hr)>
@@ -2261,6 +2271,27 @@ sub formatResponse {
 	$string .= '&';
 
 	return $string;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeviceByZoneId($device_type, $zone, $id)>
+
+Return a command string to retrieve information about a device specified
+by type of device, zone and id.
+
+Example: getDeviceByZoneId('Burglar Sensor', '01', '01');
+
+=cut
+
+sub getDeviceByZoneId {
+	my ($device_type, $zone, $id) = @_;
+
+	my $title = $get_device_info_commands->{$device_type} or die "Invalid device type <$device_type";
+	my $query = {title => $title, zone => $zone, id => $id};
+	my $cmd = queryCommand($query) or die "Invalid query command <$title>";
+
+	return $cmd;
 }
 
 =back
