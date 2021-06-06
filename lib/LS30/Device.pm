@@ -38,9 +38,10 @@ Return a new, blank instance of this class.
 =cut
 
 sub new {
-	my ($class) = @_;
+	my ($class, $device_class) = @_;
 
 	my $self = {
+		device_class => $device_class,
 		type      => undef,
 		zone      => undef,
 		id        => undef,
@@ -66,9 +67,10 @@ response or an 'ib' ('if', 'ic', etc) response.
 =cut
 
 sub newFromResponse {
-	my ($class, $resp_obj) = @_;
+	my ($class, $resp_obj, $device_class) = @_;
 
-	my $self = $class->new();
+	my $self = $class->new($device_class);
+
 	my $device_id = $resp_obj->get('device_id');
 	return undef if ($device_id eq '000000');
 

@@ -491,7 +491,7 @@ sub getDeviceStatus {
 	$cv2->cb(sub {
 		my $resp2 = $cv2->recv();
 		my $resp2_obj = LS30::ResponseMessage->new($resp2);
-		my $device = LS30::Device->newFromResponse($resp2_obj);
+		my $device = LS30::Device->newFromResponse($resp2_obj, $device_type);
 		$cv->send($device);
 	});
 
