@@ -51,6 +51,7 @@ sub new {
 		config    => {},
 		events    => [],
 		state     => {},
+		commander => undef,
 	};
 
 	bless $self, $class;
@@ -91,6 +92,24 @@ sub newFromResponse {
 	}
 
 	return $self;
+}
+
+# ---------------------------------------------------------------------------
+
+=item I<commander($commander)>
+
+Get/Set the 'commander' (an instance of LS30::Commander)
+
+=cut
+
+sub commander {
+	my $self = shift;
+
+	if (scalar @_) {
+		$self->{commander} = shift;
+	}
+
+	return $self->{commander};
 }
 
 # ---------------------------------------------------------------------------
