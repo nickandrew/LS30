@@ -64,7 +64,7 @@ the environment:
 
 There is a rudimentary REST server now to provide access to the device.
 
-To start it, run `bin/webserver`. It listens by default on `localhost:3000`
+To start it, run `bin/webserver daemon`. It listens by default on `localhost:3000`
 
 ## REST Endpoints
 
