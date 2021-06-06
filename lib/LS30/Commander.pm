@@ -462,8 +462,12 @@ sub getDeviceCount {
 	my $cv2 = $self->queueCommand($cmd);
 	$cv2->cb(sub {
 		my $response = $cv2->recv();
-		my $resp_obj = LS30::ResponseMessage->new($response);
-		$cv->send($resp_obj->value());
+		if (!$response) {
+			$cv->send(undef);
+		} else {
+			my $resp_obj = LS30::ResponseMessage->new($response);
+			$cv->send($resp_obj->value());
+		}
 	});
 
 	return $cv;
@@ -490,9 +494,13 @@ sub getDeviceStatus {
 	my $cv2 = $self->queueCommand($cmd);
 	$cv2->cb(sub {
 		my $resp2 = $cv2->recv();
-		my $resp2_obj = LS30::ResponseMessage->new($resp2);
-		my $device = LS30::Device->newFromResponse($resp2_obj, $device_type);
-		$cv->send($device);
+		if (!$resp2) {
+			$cv->send(undef);
+		} else {
+			my $resp2_obj = LS30::ResponseMessage->new($resp2);
+			my $device = LS30::Device->newFromResponse($resp2_obj, $device_type);
+			$cv->send($device);
+		}
 	});
 
 	return $cv;
