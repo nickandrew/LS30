@@ -506,6 +506,39 @@ sub getDeviceStatus {
 	return $cv;
 }
 
+
+# ---------------------------------------------------------------------------
+
+=item I<getDeviceByZoneId($device_type, $zone, $id)>
+
+Retrieve the specified device (specified by device_type and zone and id)
+
+Return (through a condvar) an instance of LS30::Device, or undef if error.
+
+=cut
+
+sub getDeviceByZoneId {
+	my ($self, $device_type, $zone, $id) = @_;
+
+	my $cv = AnyEvent->condvar;
+
+	my $cmd = LS30Command::getDeviceByZoneId($device_type, $zone, $id);
+
+	my $cv2 = $self->queueCommand($cmd);
+	$cv2->cb(sub {
+		my $resp = $cv2->recv();
+		if (!$resp) {
+			$cv->send(undef);
+		} else {
+			my $resp_obj = LS30::ResponseMessage->new($resp);
+			my $device = LS30::Device->newFromResponse($resp_obj, $device_type, $resp_obj->get('index'));
+			$cv->send($device);
+		}
+	});
+
+	return $cv;
+}
+
 =back
 
 =cut
